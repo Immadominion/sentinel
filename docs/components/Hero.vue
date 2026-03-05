@@ -9,68 +9,69 @@
       :style="{ transform: `translate(${mouseX * 0.05}px, ${mouseY * 0.05}px)` }"
     ></div>
 
-    <div class="content-wrapper">
-      <div class="badge-wrapper" ref="badgeRef">
-        <span class="badge">v0.1.0-alpha • Deployed on Devnet</span>
+    <div class="hero-inner">
+      <!-- Left: Text content -->
+      <div class="content-wrapper">
+        <div class="badge-wrapper" ref="badgeRef">
+          <span class="badge">v0.1.0-alpha • Deployed on Devnet</span>
+        </div>
+
+        <h1 class="hero-title" ref="titleRef">
+          Autonomous wallet<br />
+          <span class="text-highlight">infrastructure</span> for Solana.
+        </h1>
+
+        <p class="hero-tagline" ref="taglineRef">
+          On-chain session keys, spending limits, and guardian recovery — so your AI agents trade autonomously without ever holding your private key.
+        </p>
+
+        <div class="hero-actions" ref="actionsRef">
+          <a href="/guide/getting-started" class="action-btn primary-btn">
+            Get Started
+            <svg class="arrow-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M5 12h14M12 5l7 7-7 7" stroke-linecap="round" stroke-linejoin="round"/></svg>
+          </a>
+          <a href="https://github.com/immadominion/sentinel" class="action-btn secondary-btn" target="_blank" rel="noopener">
+            View on GitHub
+          </a>
+        </div>
       </div>
 
-      <h1 class="hero-title" ref="titleRef">
-        Autonomous wallet<br />
-        <span class="text-highlight">infrastructure</span> for Solana.
-      </h1>
-
-      <p class="hero-tagline" ref="taglineRef">
-        On-chain session keys, spending limits, and guardian recovery — so your AI agents trade autonomously without ever holding your private key.
-      </p>
-
-      <div class="hero-actions" ref="actionsRef">
-        <a href="/guide/getting-started" class="action-btn primary-btn">
-          Get Started
-          <svg class="arrow-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M5 12h14M12 5l7 7-7 7" stroke-linecap="round" stroke-linejoin="round"/></svg>
-        </a>
-        <a href="https://github.com/immadominion/sentinel" class="action-btn secondary-btn" target="_blank" rel="noopener">
-          View on GitHub
-        </a>
+      <!-- Right: Rive Robot -->
+      <div class="robot-container" ref="robotContainerRef">
+        <RiveRobot />
       </div>
-    </div>
-    
-    <!-- Real 3D Canvas via Spline -->
-    <div class="spline-container" ref="splineContainerRef">
-      <canvas ref="canvasRef"></canvas>
     </div>
   </div>
 </template>
 
 <script setup>
 import { ref, onMounted } from 'vue'
-import { Application } from '@splinetool/runtime'
 import gsap from 'gsap'
+import RiveRobot from './RiveRobot.vue'
 
 const titleRef = ref(null)
 const taglineRef = ref(null)
 const actionsRef = ref(null)
 const badgeRef = ref(null)
-
-const canvasRef = ref(null)
-const splineContainerRef = ref(null)
+const robotContainerRef = ref(null)
 
 const mouseX = ref(0)
 const mouseY = ref(0)
 
 const handleMouseMove = (e) => {
-  const { clientX, clientY, innerWidth, innerHeight } = window
-  // Calculate relative to center
-  mouseX.value = clientX - innerWidth / 2
-  mouseY.value = clientY - innerHeight / 2
+  mouseX.value = e.clientX - window.innerWidth / 2
+  mouseY.value = e.clientY - window.innerHeight / 2
 }
 
-onMounted(async () => {
-  // Initialize GSAP Timeline
+onMounted(() => {
   const tl = gsap.timeline()
   
-  // Set initial states
-  gsap.set([badgeRef.value, titleRef.value, taglineRef.value, actionsRef.value, splineContainerRef.value], { 
+  gsap.set([badgeRef.value, titleRef.value, taglineRef.value, actionsRef.value], { 
     y: 30, 
+    autoAlpha: 0 
+  })
+  gsap.set(robotContainerRef.value, { 
+    x: 60, 
     autoAlpha: 0 
   })
 
@@ -78,15 +79,7 @@ onMounted(async () => {
     .to(titleRef.value, { y: 0, autoAlpha: 1, duration: 0.8, ease: 'power3.out' }, '-=0.6')
     .to(taglineRef.value, { y: 0, autoAlpha: 1, duration: 0.8, ease: 'power3.out' }, '-=0.6')
     .to(actionsRef.value, { y: 0, autoAlpha: 1, duration: 0.8, ease: 'power3.out' }, '-=0.6')
-    .to(splineContainerRef.value, { y: 0, autoAlpha: 1, duration: 1.5, ease: 'power2.out' }, '-=0.4')
-
-  // Initialize Spline Application
-  if (canvasRef.value) {
-    const app = new Application(canvasRef.value)
-    // Using a sample technical/abstract Spline design
-    // The link below is a public Spline URL showing an abstract glass/metal shape suitable for "Web3 Infrastructure"
-    await app.load('https://prod.spline.design/Q7k7y5uE7J273V4p/scene.splinecode')
-  }
+    .to(robotContainerRef.value, { x: 0, autoAlpha: 1, duration: 1.2, ease: 'power2.out' }, '-=0.8')
 })
 </script>
 
@@ -97,9 +90,9 @@ onMounted(async () => {
   display: flex;
   align-items: center;
   justify-content: center;
-  overflow: hidden;
+  overflow: clip;
+  overflow-clip-margin: 80px;
   padding: 4rem 2rem;
-  perspective: 1000px;
   color: var(--vp-c-text-1);
 }
 
@@ -109,7 +102,7 @@ onMounted(async () => {
   background-size: 50px 50px;
   background-image: linear-gradient(to right, var(--vp-c-divider) 1px, transparent 1px),
                     linear-gradient(to bottom, var(--vp-c-divider) 1px, transparent 1px);
-  mask-image: linear-gradient(to bottom, black 0%, transparent 80%);
+  mask-image: radial-gradient(circle at center, black 0%, transparent 70%);
   -webkit-mask-image: radial-gradient(circle at center, black 0%, transparent 70%);
   z-index: 0;
   opacity: 0.3;
@@ -128,20 +121,31 @@ onMounted(async () => {
   transition: transform 0.1s ease-out;
 }
 
-.content-wrapper {
+.hero-inner {
   position: relative;
   z-index: 10;
-  max-width: 900px;
-  text-align: center;
   display: flex;
-  flex-direction: column;
   align-items: center;
-  pointer-events: none; /* Let clicks pass through to 3D canvas where there's no text */
+  justify-content: space-between;
+  max-width: 1200px;
+  width: 100%;
+  gap: 2rem;
 }
 
-/* Re-enable pointer events for actual interactive text/buttons */
-.content-wrapper > * {
-  pointer-events: auto;
+.content-wrapper {
+  flex: 1;
+  max-width: 640px;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+}
+
+.robot-container {
+  flex-shrink: 0;
+  width: 500px;
+  height: 600px;
+  position: relative;
+  overflow: visible;
 }
 
 .badge-wrapper {
@@ -161,7 +165,7 @@ onMounted(async () => {
 }
 
 .hero-title {
-  font-size: clamp(3rem, 6vw, 5.5rem);
+  font-size: clamp(2.8rem, 5vw, 5rem);
   font-weight: 800;
   line-height: 1.05;
   letter-spacing: -0.04em;
@@ -190,17 +194,16 @@ html.dark .text-highlight {
 
 .hero-tagline {
   margin-top: 1.5rem;
-  font-size: clamp(1.1rem, 2vw, 1.4rem);
+  font-size: clamp(1.05rem, 1.8vw, 1.3rem);
   color: var(--vp-c-text-2);
-  max-width: 700px;
+  max-width: 560px;
   line-height: 1.6;
 }
 
 .hero-actions {
-  margin-top: 3rem;
+  margin-top: 2.5rem;
   display: flex;
   gap: 1rem;
-  justify-content: center;
 }
 
 .action-btn {
@@ -249,28 +252,22 @@ html.dark .text-highlight {
   transform: translateX(4px);
 }
 
-/* 3D Spline Canvas Container */
-.spline-container {
-  position: absolute;
-  top: 0;
-  left: 0;
-  width: 100vw;
-  height: 100vh;
-  z-index: 1; /* Behind text, above grid */
-  pointer-events: auto; /* Allow interacting with 3D model */
-  opacity: 0.8;
-  mix-blend-mode: color-dodge;
-}
-
-html.dark .spline-container {
-  opacity: 0.5;
-  mix-blend-mode: screen;
-}
-
-.spline-container canvas {
-  width: 100% !important;
-  height: 100% !important;
-  outline: none;
+/* Responsive: stack on mobile */
+@media (max-width: 860px) {
+  .hero-inner {
+    flex-direction: column;
+    align-items: center;
+    text-align: center;
+  }
+  .content-wrapper {
+    align-items: center;
+    max-width: 100%;
+  }
+  .robot-container {
+    width: 360px;
+    height: 440px;
+    margin-top: 2rem;
+  }
 }
 
 @media (max-width: 640px) {
@@ -280,6 +277,10 @@ html.dark .spline-container {
   }
   .action-btn {
     width: 100%;
+  }
+  .robot-container {
+    width: 300px;
+    height: 380px;
   }
 }
 </style>

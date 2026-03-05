@@ -14,7 +14,7 @@
         "vitepress-plugin-mermaid": "^2.0.17"
     },
     "dependencies": {
-        "@splinetool/runtime": "^1.12.67",
+        "@rive-app/canvas": "^2.35.0",
         "@types/node": "^25.3.3",
         "@vueuse/motion": "^3.0.3",
         "framer-motion": "^12.35.0",
