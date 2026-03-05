@@ -82,7 +82,7 @@ export default withMermaid(
                 },
                 {
                     text: "Integrations",
-                    items: [{ text: "MCP Server", link: "/integrations/mcp" }],
+                    items: [{ text: "MCP Integration", link: "/integrations/mcp" }],
                 },
             ],
 

@@ -90,14 +90,24 @@ dependencies:
 
 ## MCP Integration
 
-Sentinel can be exposed as an MCP (Model Context Protocol) server, enabling AI agents to interact via tool calls:
+### Documentation MCP (Available)
 
-- `sentinel_create_wallet` — Create a smart wallet
-- `sentinel_register_agent` — Register an agent with scoped permissions
-- `sentinel_create_session` — Create a time-bounded session key
-- `sentinel_execute` — Execute a CPI through the wallet
-- `sentinel_get_wallet` — Fetch wallet state
-- `sentinel_revoke_session` — Revoke a session key
+Sentinel provides docs as an MCP server, so AI agents can search and retrieve Sentinel documentation to generate correct integration code:
+
+- `sentinel_search_docs` — Full-text search across all Sentinel documentation
+- `sentinel_get_doc` — Retrieve a specific documentation page
+- `sentinel_list_docs` — List all available documentation pages
+
+### Wallet MCP (Planned)
+
+A wallet MCP server is on our roadmap — it will let AI agents operate Sentinel wallets via tool calls, with all spending limits enforced on-chain:
+
+- `sentinel_create_wallet` — Create a sub-wallet with spending limits
+- `sentinel_execute` — Execute a CPI through the wallet via session key
+- `sentinel_get_balance` — Check wallet SOL balance
+- `sentinel_revoke_session` — Emergency session revoke
+
+Combined with the upcoming mobile app, users will create sub-wallets from their phone, pass them to AI agents via MCP, and maintain full control over spending limits and program access — all enforced on-chain.
 
 ## How to Interact with Me
 

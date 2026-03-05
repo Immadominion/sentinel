@@ -33,6 +33,7 @@ In v1, ANY single registered guardian can unilaterally:
 **Code**: [`instructions/recover_wallet.rs`](programs/sentinel-wallet/src/instructions/recover_wallet.rs)
 
 **Mitigation until v2:**
+
 - **Do NOT add guardians** for wallets holding significant value
 - If guardians are necessary, only add keys you control on separate hardware
 - Treat guardians as "backup keys" not "trusted third parties"
@@ -53,6 +54,7 @@ This means an agent can declare `amount_lamports = 0` while the inner CPI transf
 **Code**: [`instructions/execute_via_session.rs`](programs/sentinel-wallet/src/instructions/execute_via_session.rs)
 
 **Mitigation:**
+
 - Register agents with strict `allowed_programs` lists (non-empty) to limit what programs can be called
 - Use agents with the minimum possible `allowed_instructions` to restrict to known-safe operations
 - Client-side balance monitoring before/after each execution
@@ -145,6 +147,7 @@ Spending limits are enforced at three independent levels:
 ## Session Key Security
 
 ### Properties
+
 - **Time-bounded**: Sessions expire based on `Clock` sysvar timestamp
 - **Amount-bounded**: Per-tx and cumulative caps (subject to Finding #2)
 - **Program-scoped**: Can be restricted via agent's allowlist (subject to Findings #3, #4)
@@ -193,7 +196,7 @@ Spending limits are enforced at three independent levels:
 If you discover a security vulnerability:
 
 1. **DO NOT** create a public GitHub issue
-2. Email: **immadominion@gmail.com**
+2. Email: **<immadominion@gmail.com>**
 3. Include: description, reproduction steps, impact assessment
 4. Expected response: 48 hours
 
