@@ -1,0 +1,43 @@
+[package]
+name = "sentinel-core"
+version = "0.1.0"
+edition.workspace = true
+description = "Cryptographic core for Sentinel Wallet — key management, signing, policy engine"
+license = "Apache-2.0"
+
+[dependencies]
+# Ed25519 signing
+ed25519-dalek = { version = "2.1", features = ["rand_core", "serde"] }
+
+# AES-256-GCM encryption (key-at-rest)
+aes-gcm = "0.10"
+
+# Key derivation
+pbkdf2 = { version = "0.12", features = ["hmac"] }
+sha2 = "0.10"
+
+# Randomness
+rand = "0.8"
+rand_core = "0.6"
+
+# Serialisation
+serde = { version = "1", features = ["derive"] }
+serde_json = "1"
+borsh = "1.6"
+
+# Solana (client-side only — NOT on-chain)
+solana-sdk = "2.2"
+
+# Error handling
+thiserror = "2"
+
+# Flutter Rust Bridge (auto-generates Dart FFI bindings)
+flutter_rust_bridge = "=2.11.0"
+
+[features]
+default = []
+# Enable mobile-specific features (biometric key storage, etc.)
+mobile = []
+
+[lib]
+crate-type = ["cdylib", "staticlib", "lib"]

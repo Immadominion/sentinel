@@ -1,0 +1,51 @@
+[workspace]
+resolver = "2"
+members = [
+    "programs/sentinel-wallet",
+    "crates/sentinel-core",
+    # "sdk/sentinel-ts/native", # Uncomment when native TS bindings are added
+]
+
+[workspace.package]
+version = "0.1.0"
+edition = "2021"
+license = "Apache-2.0"
+repository = "https://github.com/sentinel-wallet/sentinel"
+
+[workspace.dependencies]
+# Pinocchio ecosystem (latest)
+pinocchio = { version = "0.10.2", features = ["cpi"] }
+pinocchio-system = "0.5.0"
+pinocchio-token = "0.5.0"
+pinocchio-associated-token-account = "0.4.0"
+
+# Serialization
+borsh = { version = "1.6", features = ["derive"] }
+bytemuck = { version = "1.21", features = ["derive"] }
+
+# Cryptography
+ed25519-dalek = { version = "2.1", features = ["rand_core"] }
+aes-gcm = "0.10"
+pbkdf2 = "0.12"
+sha2 = "0.10"
+rand = "0.8"
+
+# Solana client-side
+solana-sdk = "2.2"
+solana-client = "2.2"
+
+# Logging
+solana-program-log = "1.0"
+
+# FFI
+flutter_rust_bridge = "2.11"
+
+[profile.release]
+overflow-checks = true
+lto = "fat"
+codegen-units = 1
+opt-level = "z"        # Optimize for size — critical for Pinocchio deploy cost
+strip = true
+
+[profile.release.build-override]
+opt-level = 3

@@ -1,0 +1,47 @@
+# Sensitive / context files
+SOUL.md
+ROADMAP.md
+*.pem
+*.json.bak
+
+# Keypairs — never commit wallet files
+*-keypair.json
+*-wallet.json
+
+# Env files (all sub-packages)
+.env
+.env.local
+.env.production
+
+# Build outputs
+target/
+*.so
+dist/
+docs/.vitepress/dist/
+docs/.vitepress/cache/
+
+# Dependencies (all sub-packages)
+node_modules/
+
+# Rust
+Cargo.lock
+
+# Logs
+*.log
+npm-debug.log*
+
+# OS
+.DS_Store
+Thumbs.db
+
+# IDE
+.idea/
+.vscode/
+*.swp
+*.swo
+*~
+
+# Dart / Flutter (sentinel-dart SDK)
+.dart_tool/
+build/
+pubspec.lock

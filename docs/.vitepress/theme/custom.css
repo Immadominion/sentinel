@@ -1,0 +1,59 @@
+/* Sentinel Docs — Custom Theme */
+
+:root {
+    --vp-c-brand-1: #5b8def;
+    --vp-c-brand-2: #4a7de0;
+    --vp-c-brand-3: #3a6dd0;
+    --vp-c-brand-soft: rgba(91, 141, 239, 0.14);
+
+    --vp-home-hero-name-color: transparent;
+    --vp-home-hero-name-background: linear-gradient(135deg,
+            #5b8def 0%,
+            #9333ea 100%);
+    --vp-home-hero-image-background-image: linear-gradient(135deg,
+            rgba(91, 141, 239, 0.2) 0%,
+            rgba(147, 51, 234, 0.2) 100%);
+    --vp-home-hero-image-filter: blur(44px);
+}
+
+.dark {
+    --vp-c-brand-1: #7da8f5;
+    --vp-c-brand-2: #5b8def;
+    --vp-c-brand-3: #4a7de0;
+}
+
+/* Logo sizing */
+.VPNavBarTitle .logo {
+    width: 28px;
+    height: 28px;
+}
+
+/* Hero image on landing page */
+.VPHero .image-src {
+    max-width: 240px;
+    border-radius: 16px;
+}
+
+/* Code group polish */
+.vp-code-group .tabs label {
+    font-weight: 500;
+}
+
+/* Cleaner info/warning/danger boxes */
+.custom-block {
+    border-radius: 8px;
+}
+
+/* Footer links */
+.VPFooter .message a,
+.VPFooter .copyright a {
+    color: var(--vp-c-brand-1);
+    text-decoration: underline;
+    text-underline-offset: 2px;
+}
+
+/* Sidebar active state */
+.VPSidebarItem.is-active>.item .link>.text {
+    color: var(--vp-c-brand-1);
+    font-weight: 600;
+}

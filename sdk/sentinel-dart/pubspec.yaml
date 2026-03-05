@@ -1,0 +1,40 @@
+name: sentinel_dart
+description: >
+  Dart/Flutter SDK for the Sentinel smart wallet on Solana.
+  Provides agent registration, session key management, encrypted
+  key storage, and policy-enforced transaction execution.
+version: 0.1.0
+publish_to: none
+
+environment:
+  sdk: ">=3.5.0 <4.0.0"
+  flutter: ">=3.24.0"
+
+dependencies:
+  flutter:
+    sdk: flutter
+  # Mobile Wallet Adapter (local path — espresso-cash fork)
+  solana_mobile_client:
+    path: ../../../espresso-cash-public/packages/solana_mobile_client
+
+  # ── Future dependencies (uncomment when implementing) ──
+  # flutter_rust_bridge: ^2.11.0   # Rust FFI bridge
+  # solana_web3: ^0.5.0            # Solana JSON-RPC client
+  # bs58: ^1.0.0                   # Base58 encoding
+  # flutter_secure_storage: ^9.2.0 # Secure storage (OS keychain)
+  # riverpod: ^2.6.0               # State management
+  # freezed_annotation: ^2.4.0
+  # json_annotation: ^4.9.0
+  # cryptography: ^2.7.0           # Cryptographic primitives
+
+dev_dependencies:
+  flutter_test:
+    sdk: flutter
+  flutter_lints: ^5.0.0
+
+  # ── Future dev dependencies (uncomment when implementing) ──
+  # build_runner: ^2.4.0
+  # freezed: ^2.5.0
+  # json_serializable: ^6.8.0
+  # flutter_rust_bridge_codegen: ^2.11.0
+  # mockito: ^5.4.0
