@@ -155,6 +155,7 @@ export default withMermaid(
         ],
 
         cleanUrls: true,
+        ignoreDeadLinks: true,
 
         themeConfig: {
             logo: "/sentinel-logo.png",
