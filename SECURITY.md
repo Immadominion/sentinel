@@ -1,142 +1,163 @@
-# Sentinel Smart Wallet - Security Considerations
+# Sentinel Smart Wallet — Security Considerations
 
 ## Overview
 
 This document outlines known security considerations, limitations, and best practices for the Sentinel smart wallet program. **This is a financial system dealing with REAL MONEY.** Users and integrators should carefully review these notes before deploying to production.
 
+> **Status**: Sentinel is deployed on **devnet only** and has not undergone a formal third-party audit. Do not use on mainnet for significant value without an independent audit.
+
 ---
 
-## ⚠️ CRITICAL: Single Guardian Recovery (v1 Limitation)
+## Critical Findings
 
-### The Risk
+### 1. Single Guardian Recovery (1-of-n Takeover)
 
-**In the current v1 implementation, ANY single registered guardian can unilaterally:**
+**Severity: CRITICAL**
 
-1. Rotate the wallet owner to ANY address (including their own)
-2. Bypass wallet lock status (recovery auto-unlocks)
-3. No time delay, no approval threshold, no notification
+In v1, ANY single registered guardian can unilaterally:
 
-### Attack Scenario
+1. Rotate the wallet owner to **any** address (including their own)
+2. Bypass the wallet lock flag (recovery auto-sets `is_locked = false`)
+3. Execute immediately — no time delay, no approval threshold, no notification
+
+**Attack scenario:**
 
 ```
-1. Alice sets Bob (her friend) as a guardian
-2. Bob's keys are compromised (phishing, malware, etc.)
-3. Attacker calls RecoverWallet to rotate owner to their address
+1. Alice adds Bob as a guardian
+2. Bob's key is compromised (phishing, malware, social engineering)
+3. Attacker calls RecoverWallet → rotates owner to attacker's address
 4. Attacker now controls all wallet assets
-5. Alice has NO recourse - the change is immediate and irreversible
+5. No recourse — the change is immediate and on-chain
 ```
 
-### Code Location
+**Code**: [`instructions/recover_wallet.rs`](programs/sentinel-wallet/src/instructions/recover_wallet.rs)
 
-[sentinel/programs/sentinel-wallet/src/instructions/recover_wallet.rs](programs/sentinel-wallet/src/instructions/recover_wallet.rs)
+**Mitigation until v2:**
+- **Do NOT add guardians** for wallets holding significant value
+- If guardians are necessary, only add keys you control on separate hardware
+- Treat guardians as "backup keys" not "trusted third parties"
+- Monitor for `RecoverWallet` instructions via on-chain event monitoring
+
+**Planned v2 fix:** m-of-n threshold, time-locked recovery (24–48h delay), cancellation window, per-guardian attestation nonces.
+
+---
+
+### 2. Self-Declared Spending Amounts (Limit Bypass)
+
+**Severity: CRITICAL**
+
+The `ExecuteViaSession` instruction accepts `amount_lamports` as a **caller-declared value** in the instruction data. The program tracks spending against this declared amount, but **never verifies it against the actual CPI transfer**.
+
+This means an agent can declare `amount_lamports = 0` while the inner CPI transfers the wallet's entire SOL balance. All three spending limit tiers (session, agent, wallet) are bypassable.
+
+**Code**: [`instructions/execute_via_session.rs`](programs/sentinel-wallet/src/instructions/execute_via_session.rs)
+
+**Mitigation:**
+- Register agents with strict `allowed_programs` lists (non-empty) to limit what programs can be called
+- Use agents with the minimum possible `allowed_instructions` to restrict to known-safe operations
+- Client-side balance monitoring before/after each execution
+
+**Planned fix:** On-chain pre/post balance diff verification.
+
+---
+
+## High Severity
+
+### 3. Default-Open Allowlists
+
+**Severity: HIGH**
+
+When an agent is registered with `allowed_programs_count = 0`, the agent can CPI into **any program** on Solana. Similarly, `allowed_instructions_count = 0` allows **any instruction**.
+
+This is a "default open" design — an agent without explicit restrictions has no restrictions.
+
+**Code**: [`state/agent_config.rs`](programs/sentinel-wallet/src/state/agent_config.rs) — `is_program_allowed()` and `is_instruction_allowed()`
 
 ```rust
-// v1: Simplified — any single registered guardian can rotate the owner.
-// Future versions will support m-of-n threshold approval.
+pub fn is_program_allowed(&self, program_id: &[u8; 32]) -> bool {
+    if self.allowed_programs_count == 0 { return true; } // ← allow ALL
+    // else linear search in allowlist...
+}
 ```
 
-### Mitigation Until v2
-
-Until m-of-n threshold recovery is implemented:
-
-1. **Do NOT add guardians for wallets holding significant value**
-2. If guardians are necessary, only add addresses you directly control on separate hardware
-3. Consider guardian-0 as a "backup key" rather than "trusted third party"
-4. Monitor for `RecoverWallet` instructions via on-chain monitoring
-
-### Planned v2 Fix
-
-Future versions will implement:
-
-- **m-of-n threshold**: e.g., 2-of-3 guardians must approve
-- **Time-locked recovery**: 24-48 hour delay before rotation executes
-- **Cancellation window**: Owner can cancel pending recovery during timelock
-- **Guardian attestations**: Each guardian signs a unique recovery nonce
+**Mitigation:** Always register agents with explicit `allowed_programs` and `allowed_instructions` lists. Never leave both at 0 for agents that handle real value.
 
 ---
 
-## Spending Limit Security Model
+### 4. Instruction Discriminator Check Bypass
 
-### How Limits Work
+**Severity: MEDIUM**
 
-Spending limits are enforced at THREE levels:
+If the inner instruction data is less than 8 bytes, the instruction discriminator check is **skipped entirely**. An attacker could craft a CPI with <8 bytes of data to bypass instruction allowlisting.
 
-1. **Wallet-level**: Global daily/per-tx caps set by owner
-2. **Agent-level**: Per-agent daily/per-tx caps set by owner
-3. **Session-level**: Per-session total/per-tx caps set by agent
+**Code**: [`instructions/execute_via_session.rs`](programs/sentinel-wallet/src/instructions/execute_via_session.rs) — conditional check `if inner_instruction_data.len() >= 8`
 
-The **most restrictive** limit at each level applies.
+**Mitigation:** Target programs that require ≥8 bytes of instruction data are unaffected. For programs accepting short instructions, rely on the program allowlist instead.
 
-### Limit Modification Rules
+---
 
-| Level | Who Can Modify | How |
-|-------|---------------|-----|
-| Wallet | Owner only | `UpdateSpendingLimit` instruction |
-| Agent | Owner only | `RegisterAgent` or `UpdateSpendingLimit` |
-| Session | Owner or Agent | `CreateSession` instruction |
+## Medium Severity
 
-### Key Invariant
+### 5. No Guardian Removal
 
-**Per-transaction limit can NEVER exceed daily limit.** Enforced at:
+There is no `RemoveGuardian` instruction. Once a guardian is added, it **cannot be removed** without closing the entire wallet (which requires deregistering all agents first). Combined with Finding #1, this means a guardian added by mistake is a permanent attack surface.
 
-- [instructions/update_spending_limit.rs](programs/sentinel-wallet/src/instructions/update_spending_limit.rs)
-- [instructions/register_agent.rs](programs/sentinel-wallet/src/instructions/register_agent.rs)
-- [instructions/create_session.rs](programs/sentinel-wallet/src/instructions/create_session.rs)
+### 6. No Session Cleanup
+
+There is no `CloseSession` instruction. Expired or revoked session PDAs remain on-chain with rent locked permanently. While these sessions cannot be used (execution checks will fail), the ~0.002 SOL rent per session is unrecoverable.
+
+The `MaxSessionsReached` error variant (307) exists in the error enum but is **never enforced** — agents can create unlimited sessions.
+
+### 7. Spending Limit Updates Have No Timelock
+
+The owner can instantly raise spending limits to `u64::MAX` via `UpdateSpendingLimit`. If the owner key is compromised, the attacker can raise limits then drain via an agent session in a single block.
+
+---
+
+## Spending Limit Model
+
+Spending limits are enforced at three independent levels:
+
+| Level | Set By | Modified By | Enforced At |
+|-------|--------|-------------|-------------|
+| **Wallet** | Owner | `UpdateSpendingLimit` | `ExecuteViaSession` |
+| **Agent** | Owner | `RegisterAgent` only (immutable after) | `ExecuteViaSession` |
+| **Session** | Agent | `CreateSession` only (immutable after) | `ExecuteViaSession` |
+
+> **Note:** Agent-level limits are set at registration time and **cannot be modified**. There is no `UpdateAgentLimit` instruction. To change an agent's limits, deregister and re-register it.
+
+### Invariant
+
+**Per-transaction limit can never exceed daily limit.** Enforced at wallet creation, agent registration, and session creation.
+
+---
+
+## Account Sizes
+
+| Account | Size | Layout |
+|---------|------|--------|
+| SmartWallet | **245 bytes** | `8 disc + 32 owner + 1 bump + 8 nonce + 1 agent_count + 1 guardian_count + 160 guardians(5×32) + 8 daily_limit + 8 per_tx_limit + 8 spent_today + 8 day_start + 1 is_locked + 1 is_closed` |
+| AgentConfig | **540 bytes** | `8 disc + 32 wallet + 32 agent + 32 name + 1 bump + 1 is_active + 1 programs_count + 256 programs(8×32) + 1 instructions_count + 128 instructions(16×8) + 8 daily_limit + 8 per_tx_limit + 8 default_dur + 8 max_dur + 8 total_spent + 8 tx_count` |
+| SessionKey | **154 bytes** | `8 disc + 32 wallet + 32 agent + 32 session_pubkey + 1 bump + 8 created_at + 8 expires_at + 8 max_amount + 8 amount_spent + 8 max_per_tx + 1 is_revoked + 8 nonce` |
 
 ---
 
 ## Session Key Security
 
-### Session Properties
+### Properties
+- **Time-bounded**: Sessions expire based on `Clock` sysvar timestamp
+- **Amount-bounded**: Per-tx and cumulative caps (subject to Finding #2)
+- **Program-scoped**: Can be restricted via agent's allowlist (subject to Findings #3, #4)
+- **Revocable**: Owner or parent agent can revoke at any time (irreversible)
 
-- **Time-bounded**: Sessions have an expiry timestamp
-- **Amount-bounded**: Sessions have total and per-tx spending caps
-- **Program-scoped**: Sessions can be restricted to specific programs
-- **Revocable**: Owner or agent can revoke at any time
+### Attack Vectors
 
-### Session Attack Vectors
-
-1. **Ephemeral key leak**: Session keypair stored insecurely
-   - Mitigation: Sessions have limited spend amounts
-2. **Clock manipulation**: Validator returns fake timestamps
-   - Mitigation: Use cluster-verified `Clock` sysvar
-3. **Replay attacks**: Same instruction replayed multiple times
-   - Mitigation: Spending counters track cumulative spend
-
----
-
-## Account Size Calculations
-
-**Verified account sizes (as of audit 2025-01-XX):**
-
-| Account | Calculated Size | Notes |
-|---------|-----------------|-------|
-| SmartWallet | 245 bytes | 8 disc + 32 owner + 1 bump + 1 locked + 1 closed + 2*8 limits + 7*(32+8) guardians + 1 count |
-| AgentConfig | 540 bytes | 8 disc + 32 wallet + 32 agent + 1 bump + 1 active + 2*8 limits + 8 tx_count + 8 total_spent + 8 created + 16*32 programs + 1 prog_count + 1 block_all + 64*5 ix + 1 ix_count |
-| SessionKey | 154 bytes | 8 disc + 32 wallet + 32 agent + 32 session + 1 bump + 1 revoked + 8 expiry + 2*8 limits + 8 spent |
-
-If TypeScript SDK deserialization fails with "unexpected data length", verify sizes match.
-
----
-
-## CPI Security (ExecuteViaSession)
-
-### What It Does
-
-`ExecuteViaSession` allows agents to execute arbitrary CPIs with the wallet PDA as signer.
-
-### Security Checks
-
-1. Session key must be signer
-2. Session must be valid (not expired, not revoked)
-3. Amount must be within session limits
-4. Target program must be in agent's allowed program list (unless `block_all_except_allowed = false`)
-
-### Risks
-
-- **Program allowlist bypass**: If `block_all_except_allowed = false`, agent can CPI to ANY program
-- **Amount tracking inaccuracy**: Declared `amount_lamports` is trusted, not verified against actual transfer
-  - Future: On-chain balance diff verification
+| Vector | Risk | Mitigation |
+|--------|------|-----------|
+| Ephemeral key leak | Session budget exposed | Short durations + tight caps |
+| Clock manipulation | Fake timestamps extend sessions | Uses cluster-verified `Clock` sysvar |
+| Replay | Same instruction replayed | Spending counters track cumulative; wallet nonce increments |
+| Declared amount = 0 | Bypasses spending limits | See Finding #2 |
 
 ---
 
@@ -144,40 +165,43 @@ If TypeScript SDK deserialization fails with "unexpected data length", verify si
 
 ### For Wallet Owners
 
-1. Start with conservative spending limits
-2. Do NOT add guardians until v2 m-of-n is implemented
-3. Register agents with minimal required permissions
-4. Monitor agent activity via on-chain logs
+1. **Do NOT add guardians** until m-of-n threshold is implemented (v2)
+2. Start with conservative spending limits
+3. **Always set `allowed_programs`** when registering agents — never leave at 0
+4. Monitor agent activity via on-chain logs or Helius webhooks
+5. Use short session durations (1–4 hours, not 24h)
 
-### For Agents/Integrators
+### For Agent Developers
 
-1. Use short session durations (hours, not days)
-2. Request minimal spending limits
-3. Implement client-side monitoring for anomalies
-4. Always verify transaction success after CPI
+1. Request the minimum permissions your agent needs
+2. Rotate sessions frequently — rent cost (~0.002 SOL) is negligible vs. security benefit
+3. Implement client-side pre/post balance checks to detect unexpected transfers
+4. Revoke sessions immediately on error or unexpected conditions
 
 ### For Auditors
 
-1. [programs/sentinel-wallet/](programs/sentinel-wallet/) - On-chain program
-2. [sdk/sentinel-ts/](sdk/sentinel-ts/) - TypeScript SDK
-3. [tests/](tests/) - Integration tests via LiteSVM
-4. 37 Rust unit tests + 19 TypeScript integration tests
+| Directory | Contents |
+|-----------|----------|
+| [`programs/sentinel-wallet/`](programs/sentinel-wallet/) | On-chain program (Pinocchio, ~100KB binary) |
+| [`sdk/sentinel-ts/`](sdk/sentinel-ts/) | TypeScript SDK |
+| [`tests/`](tests/) | Integration tests (LiteSVM + Vitest) |
 
 ---
 
 ## Reporting Vulnerabilities
 
-If you discover a security vulnerability, please:
+If you discover a security vulnerability:
 
 1. **DO NOT** create a public GitHub issue
-2. Email: [TBD - add security email]
-3. Include: Description, reproduction steps, impact assessment
+2. Email: **immadominion@gmail.com**
+3. Include: description, reproduction steps, impact assessment
 4. Expected response: 48 hours
 
 ---
 
 ## Changelog
 
-- **2025-01-XX**: Initial security documentation
-- **2025-01-XX**: Fixed TypeScript SDK account size mismatches
-- **2025-01-XX**: Removed unused @solana/spl-token (CVE-2024-XXXX vulnerability)
+| Date | Change |
+|------|--------|
+| 2026-03-05 | Full security audit — corrected account size breakdowns, removed references to nonexistent `block_all_except_allowed` field, documented self-declared amount bypass, added findings #3–#7 |
+| 2025-01-XX | Initial security documentation |
