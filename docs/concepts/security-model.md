@@ -33,11 +33,11 @@ graph TD
     S -->|0.3 ≤ max_per_tx?| A
     A -->|agent daily spent + 0.3 ≤ agent daily_limit?| W{Wallet Check}
     A -->|0.3 ≤ agent per_tx_limit?| W
-    W -->|wallet spent_today + 0.3 ≤ wallet daily_limit?| CPI[✅ Execute CPI]
+    W -->|wallet spent_today + 0.3 ≤ wallet daily_limit?| CPI[☑ Execute CPI]
     W -->|0.3 ≤ wallet per_tx_limit?| CPI
-    S -->|❌ Exceeded| FAIL[Transaction Reverts]
-    A -->|❌ Exceeded| FAIL
-    W -->|❌ Exceeded| FAIL
+    S -->|☒ Exceeded| FAIL[Transaction Reverts]
+    A -->|☒ Exceeded| FAIL
+    W -->|☒ Exceeded| FAIL
 
     style TX fill:#5b8def,color:#fff
     style CPI fill:#2f855a,color:#fff
@@ -56,14 +56,14 @@ Session: max_amount = 2 SOL,   max_per_tx = 0.5 SOL
 
 An `ExecuteViaSession` call for **0.5 SOL** would:
 
-1. ✅ Session: 0.5 ≤ 0.5 (per_tx), 0 + 0.5 ≤ 2 (total)
-2. ✅ Agent: 0.5 ≤ 1 (per_tx), 0 + 0.5 ≤ 5 (daily)
-3. ✅ Wallet: 0.5 ≤ 2 (per_tx), 0 + 0.5 ≤ 10 (daily)
-4. ✅ CPI executes
+1. ☑ Session: 0.5 ≤ 0.5 (per_tx), 0 + 0.5 ≤ 2 (total)
+2. ☑ Agent: 0.5 ≤ 1 (per_tx), 0 + 0.5 ≤ 5 (daily)
+3. ☑ Wallet: 0.5 ≤ 2 (per_tx), 0 + 0.5 ≤ 10 (daily)
+4. ☑ CPI executes
 
 A call for **1.5 SOL** would:
 
-1. ❌ Session: 1.5 > 0.5 (per_tx limit exceeded)
+1. ☒ Session: 1.5 > 0.5 (per_tx limit exceeded)
 2. Transaction reverts. No funds move.
 
 ## Program Scope Enforcement

@@ -12,5 +12,13 @@
         "mermaid": "^11.12.3",
         "vitepress": "^1.6.3",
         "vitepress-plugin-mermaid": "^2.0.17"
+    },
+    "dependencies": {
+        "@splinetool/runtime": "^1.12.67",
+        "@types/node": "^25.3.3",
+        "@vueuse/motion": "^3.0.3",
+        "framer-motion": "^12.35.0",
+        "gsap": "^3.14.2",
+        "vue": "^3.5.29"
     }
 }

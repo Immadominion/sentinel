@@ -59,10 +59,10 @@ stateDiagram-v2
 
 | State | Condition | Can Execute? |
 |-------|-----------|-------------|
-| **Active** | Not expired, not exhausted, not revoked | ✅ Yes |
-| **Expired** | `current_time > expires_at` | ❌ No |
-| **Exhausted** | `amount_spent + requested ≥ max_amount` | ❌ No |
-| **Revoked** | `is_revoked == true` | ❌ No |
+| **Active** | Not expired, not exhausted, not revoked | ☑ Yes |
+| **Expired** | `current_time > expires_at` | ☒ No |
+| **Exhausted** | `amount_spent + requested ≥ max_amount` | ☒ No |
+| **Revoked** | `is_revoked == true` | ☒ No |
 
 The program checks **all three conditions** on every `ExecuteViaSession` call. Any failing check reverts the transaction atomically.
 
@@ -170,12 +170,12 @@ Revocation is **irreversible**. Once revoked, the session cannot be reactivated.
 Session keypairs should **never** be written to disk or logged. They exist only in memory for the duration of their use:
 
 ```typescript
-// ✅ Good — keypair lives in memory
+// ☑ Good — keypair lives in memory
 const session = Keypair.generate();
 await executeWithSession(session);
 // session goes out of scope, garbage collected
 
-// ❌ Bad — never do this
+// ☒ Bad — never do this
 fs.writeFileSync("session.json", JSON.stringify(Array.from(session.secretKey)));
 ```
 

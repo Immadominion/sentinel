@@ -27,9 +27,9 @@ Deploy a new SmartWallet PDA. Supports sponsored creation where a separate funde
 
 | # | Account | Signer | Writable | Description |
 |---|---------|--------|----------|-------------|
-| 0 | Funder | ✅ | ✅ | Pays rent for PDA creation |
-| 1 | Owner | ✅ | | Becomes the wallet owner |
-| 2 | SmartWallet PDA | | ✅ | The new wallet account |
+| 0 | Funder | ☑ | ☑ | Pays rent for PDA creation |
+| 1 | Owner | ☑ | | Becomes the wallet owner |
+| 2 | SmartWallet PDA | | ☑ | The new wallet account |
 | 3 | System Program | | | Required for CPI account creation |
 
 ### Data Layout (17 bytes)
@@ -71,9 +71,9 @@ Register an agent with scoped permissions on the wallet.
 
 | # | Account | Signer | Writable | Description |
 |---|---------|--------|----------|-------------|
-| 0 | Owner | ✅ | ✅ | Must be wallet owner, pays for agent account |
-| 1 | SmartWallet PDA | | ✅ | Parent wallet |
-| 2 | AgentConfig PDA | | ✅ | The new agent config account |
+| 0 | Owner | ☑ | ☑ | Must be wallet owner, pays for agent account |
+| 1 | SmartWallet PDA | | ☑ | Parent wallet |
+| 2 | AgentConfig PDA | | ☑ | The new agent config account |
 | 3 | System Program | | | Required for CPI account creation |
 
 ### Data Layout (variable, min 99 bytes)
@@ -126,10 +126,10 @@ Create an ephemeral session key for an agent.
 
 | # | Account | Signer | Writable | Description |
 |---|---------|--------|----------|-------------|
-| 0 | Agent | ✅ | ✅ | Must match registered agent, pays rent |
+| 0 | Agent | ☑ | ☑ | Must match registered agent, pays rent |
 | 1 | SmartWallet PDA | | | Parent wallet |
 | 2 | AgentConfig PDA | | | Agent's configuration |
-| 3 | SessionKey PDA | | ✅ | The new session account |
+| 3 | SessionKey PDA | | ☑ | The new session account |
 | 4 | System Program | | | Required for CPI account creation |
 
 ### Data Layout (57 bytes)
@@ -161,10 +161,10 @@ Execute a CPI through the wallet using a session key. This is the **core instruc
 
 | # | Account | Signer | Writable | Description |
 |---|---------|--------|----------|-------------|
-| 0 | Session Key | ✅ | | The ephemeral key that signed |
-| 1 | SmartWallet PDA | | ✅ | Spending state updates |
-| 2 | AgentConfig PDA | | ✅ | tx_count / total_spent updates |
-| 3 | SessionKey PDA | | ✅ | amount_spent updates |
+| 0 | Session Key | ☑ | | The ephemeral key that signed |
+| 1 | SmartWallet PDA | | ☑ | Spending state updates |
+| 2 | AgentConfig PDA | | ☑ | tx_count / total_spent updates |
+| 3 | SessionKey PDA | | ☑ | amount_spent updates |
 | 4 | Target Program | | | The program being CPI'd into |
 | 5..N | Remaining | varies | varies | Passed through to target CPI |
 
@@ -202,10 +202,10 @@ Revoke a session key immediately. Both the owner and the parent agent can revoke
 
 | # | Account | Signer | Writable | Description |
 |---|---------|--------|----------|-------------|
-| 0 | Authority | ✅ | | Owner or agent keypair |
+| 0 | Authority | ☑ | | Owner or agent keypair |
 | 1 | SmartWallet PDA | | | Parent wallet |
 | 2 | AgentConfig PDA | | | Agent's configuration |
-| 3 | SessionKey PDA | | ✅ | Session to revoke |
+| 3 | SessionKey PDA | | ☑ | Session to revoke |
 
 Sets `is_revoked = true`. Irreversible.
 
@@ -219,8 +219,8 @@ Modify the wallet's daily and per-transaction limits.
 
 | # | Account | Signer | Writable | Description |
 |---|---------|--------|----------|-------------|
-| 0 | Owner | ✅ | | Must be wallet owner |
-| 1 | SmartWallet PDA | | ✅ | Wallet to update |
+| 0 | Owner | ☑ | | Must be wallet owner |
+| 1 | SmartWallet PDA | | ☑ | Wallet to update |
 
 ### Data Layout (16 bytes)
 
@@ -239,8 +239,8 @@ Add a guardian pubkey for wallet recovery.
 
 | # | Account | Signer | Writable | Description |
 |---|---------|--------|----------|-------------|
-| 0 | Owner | ✅ | | Must be wallet owner |
-| 1 | SmartWallet PDA | | ✅ | Wallet to update |
+| 0 | Owner | ☑ | | Must be wallet owner |
+| 1 | SmartWallet PDA | | ☑ | Wallet to update |
 
 ### Data Layout (32 bytes)
 
@@ -260,8 +260,8 @@ Rotate the wallet owner via guardian consensus.
 
 | # | Account | Signer | Writable | Description |
 |---|---------|--------|----------|-------------|
-| 0 | Guardian | ✅ | | Must be a registered guardian |
-| 1 | SmartWallet PDA | | ✅ | Wallet to recover |
+| 0 | Guardian | ☑ | | Must be a registered guardian |
+| 1 | SmartWallet PDA | | ☑ | Wallet to recover |
 
 ### Data Layout (32 bytes)
 
@@ -279,9 +279,9 @@ Remove an agent from the wallet.
 
 | # | Account | Signer | Writable | Description |
 |---|---------|--------|----------|-------------|
-| 0 | Owner | ✅ | ✅ | Must be wallet owner, receives rent |
-| 1 | SmartWallet PDA | | ✅ | Parent wallet |
-| 2 | AgentConfig PDA | | ✅ | Agent to remove |
+| 0 | Owner | ☑ | ☑ | Must be wallet owner, receives rent |
+| 1 | SmartWallet PDA | | ☑ | Parent wallet |
+| 2 | AgentConfig PDA | | ☑ | Agent to remove |
 
 Decrements `agent_count` on the wallet and closes the AgentConfig account (rent returned to owner).
 
@@ -295,5 +295,5 @@ Permanently close the wallet. Sets `is_closed = true`. This is **irreversible**.
 
 | # | Account | Signer | Writable | Description |
 |---|---------|--------|----------|-------------|
-| 0 | Owner | ✅ | | Must be wallet owner |
-| 1 | SmartWallet PDA | | ✅ | Wallet to close |
+| 0 | Owner | ☑ | | Must be wallet owner |
+| 1 | SmartWallet PDA | | ☑ | Wallet to close |

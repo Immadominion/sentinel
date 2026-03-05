@@ -14,16 +14,6 @@ graph TD
     Agent2 --> |createSession| Session3[⏱️ SessionKey PDA<br/>4h / 1 SOL]
     Session1 --> |executeViaSession| Target1[📄 Target Program<br/>Jupiter Swap]
     Session3 --> |executeViaSession| Target2[📄 Target Program<br/>Meteora DLMM]
-
-    style Owner fill:#5b8def,color:#fff
-    style Wallet fill:#2d3748,color:#fff
-    style Agent1 fill:#4a5568,color:#fff
-    style Agent2 fill:#4a5568,color:#fff
-    style Session1 fill:#553c9a,color:#fff
-    style Session2 fill:#553c9a,color:#fff
-    style Session3 fill:#553c9a,color:#fff
-    style Target1 fill:#2f855a,color:#fff
-    style Target2 fill:#2f855a,color:#fff
 ```
 
 ### Layers
@@ -132,13 +122,6 @@ graph LR
     A1 --> S1
     A1 --> S2
     A2 --> S3
-
-    style W fill:#5b8def,color:#fff
-    style A1 fill:#4a5568,color:#fff
-    style A2 fill:#4a5568,color:#fff
-    style S1 fill:#553c9a,color:#fff
-    style S2 fill:#553c9a,color:#fff
-    style S3 fill:#553c9a,color:#fff
 ```
 
 **Key invariant**: permissions only narrow as you move down the hierarchy. A session key cannot grant broader access than its parent agent, and an agent cannot exceed the wallet's global limits. This is enforced at the program level — there's no way to bypass it, even with a malicious client.
@@ -149,9 +132,9 @@ graph LR
 |---------|----------|-----------|-------|-----------|
 | Enforcement | On-chain program | On-chain multisig | Server-side | Server-side |
 | Per-sig cost | $0 (tx fee only) | $0 (tx fee only) | $0.01/sig | $0.05/MAW |
-| Session keys | ✅ Time + amount bounded | ❌ | ❌ (MPC based) | ❌ |
-| Agent isolation | ✅ Per-agent PDA | ❌ | ❌ | ❌ |
-| Self-custodial | ✅ PDA from owner key | ✅ | ❌ | ❌ |
-| Guardian recovery | ✅ | ✅ (multisig) | ❌ | ❌ |
-| Open source | ✅ Apache-2.0 | ✅ | ❌ | Partial |
+| Session keys | ☑ Time + amount bounded | ☒ | ☒ (MPC based) | ☒ |
+| Agent isolation | ☑ Per-agent PDA | ☒ | ☒ | ☒ |
+| Self-custodial | ☑ PDA from owner key | ☑ | ☒ | ☒ |
+| Guardian recovery | ☑ | ☑ (multisig) | ☒ | ☒ |
+| Open source | ☑ Apache-2.0 | ☑ | ☒ | Partial |
 | Binary size | ~100 KB | ~300 KB | N/A | N/A |

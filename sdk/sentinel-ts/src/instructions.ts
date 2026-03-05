@@ -263,8 +263,8 @@ export interface RevokeSessionParams {
  *
  * Accounts:
  * 0. `[signer]` Authority (owner or agent)
- * 1. `[]` SmartWallet PDA (to verify ownership)
- * 2. `[writable]` SessionKey PDA
+ * 1. `[writable]` SessionKey PDA
+ * 2. `[]` SmartWallet PDA (to verify ownership)
  */
 export function revokeSessionInstruction(
   params: RevokeSessionParams
@@ -284,8 +284,8 @@ export function revokeSessionInstruction(
     programId,
     keys: [
       { pubkey: params.authority, isSigner: true, isWritable: false },
-      { pubkey: walletPda, isSigner: false, isWritable: false },
       { pubkey: sessionPda, isSigner: false, isWritable: true },
+      { pubkey: walletPda, isSigner: false, isWritable: false },
     ],
     data,
   });

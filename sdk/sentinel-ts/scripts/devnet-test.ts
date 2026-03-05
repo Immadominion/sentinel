@@ -75,7 +75,7 @@ async function main() {
     const existingAccount = await connection.getAccountInfo(walletPda);
     if (existingAccount) {
         console.log();
-        console.log("✅ Wallet already exists! Reading state...");
+        console.log("☑ Wallet already exists! Reading state...");
         console.log("Account size:", existingAccount.data.length, "bytes");
 
         try {
@@ -97,7 +97,7 @@ async function main() {
             console.log("  Is locked:", wallet.isLocked);
             console.log("  Is closed:", wallet.isClosed);
             console.log();
-            console.log("✅ Devnet test PASSED - Wallet state readable");
+            console.log("☑ Devnet test PASSED - Wallet state readable");
         } catch (err) {
             console.error("Failed to deserialize wallet:", err);
             process.exit(1);
@@ -132,7 +132,7 @@ async function main() {
         });
 
         console.log();
-        console.log("✅ Wallet created successfully!");
+        console.log("☑ Wallet created successfully!");
         console.log("Signature:", signature);
         console.log(
             "Explorer:",
@@ -168,10 +168,10 @@ async function main() {
         }
 
         console.log();
-        console.log("✅ Devnet integration test PASSED!");
+        console.log("☑ Devnet integration test PASSED!");
     } catch (err) {
         console.error();
-        console.error("❌ Transaction failed:", err);
+        console.error("☒ Transaction failed:", err);
         process.exit(1);
     }
 }
