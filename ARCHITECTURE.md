@@ -1,4 +1,4 @@
-# Sentinel Wallet — Technical Architecture
+# Seal Wallet — Technical Architecture
 
 > **Version**: 0.1.0-draft  
 > **Last Updated**: 2025-01  
@@ -28,7 +28,7 @@
 
 ## Executive Summary
 
-Sentinel is a **smart wallet program for Solana** that enables AI agents to autonomously execute transactions within owner-defined security boundaries. It solves the fundamental tension in agentic crypto: agents need signing access, but users must retain control.
+Seal is a **smart wallet program for Solana** that enables AI agents to autonomously execute transactions within owner-defined security boundaries. It solves the fundamental tension in agentic crypto: agents need signing access, but users must retain control.
 
 **Core innovation**: On-chain policy enforcement via session keys with hierarchical scoping — agents never hold the wallet's signing authority. Instead, they use time-bounded, amount-capped session keys that can only call pre-approved programs and instructions.
 
@@ -56,17 +56,17 @@ graph TB
     end
 
     subgraph "SDK Layer"
-        DS[sentinel-dart<br/>Flutter SDK]
-        TS[sentinel-ts<br/>TypeScript SDK]
+        DS[seal-dart<br/>Flutter SDK]
+        TS[seal-ts<br/>TypeScript SDK]
     end
 
     subgraph "Core Layer"
-        RC[sentinel-core<br/>Rust Crypto Core]
+        RC[seal-core<br/>Rust Crypto Core]
         FRB[flutter_rust_bridge<br/>Dart ↔ Rust FFI]
     end
 
     subgraph "Solana Blockchain"
-        SP[Sentinel Program<br/>Pinocchio / BPF]
+        SP[Seal Program<br/>Pinocchio / BPF]
         subgraph "PDAs"
             SW[SmartWallet]
             AC[AgentConfig]
@@ -92,11 +92,11 @@ graph TB
 
 | Layer | Component | Language | Purpose |
 |-------|-----------|----------|---------|
-| On-Chain | `sentinel-wallet` | Rust (Pinocchio) | Smart wallet program — all policy enforcement |
-| Core | `sentinel-core` | Rust | Key management, signing, encryption, policy checks |
+| On-Chain | `seal-wallet` | Rust (Pinocchio) | Smart wallet program — all policy enforcement |
+| Core | `seal-core` | Rust | Key management, signing, encryption, policy checks |
 | Bridge | `flutter_rust_bridge` | Rust → Dart | Auto-generated FFI bindings |
-| SDK | `sentinel-dart` | Dart | Flutter client SDK |
-| SDK | `sentinel-ts` | TypeScript | Web/Node.js client SDK |
+| SDK | `seal-dart` | Dart | Flutter client SDK |
+| SDK | `seal-ts` | TypeScript | Web/Node.js client SDK |
 | Client | Sage / agents | Dart/TS | End-user applications |
 
 ---
@@ -120,7 +120,7 @@ graph TB
 ### Program Structure
 
 ```
-programs/sentinel-wallet/
+programs/seal-wallet/
 ├── Cargo.toml
 └── src/
     ├── lib.rs              # Module declarations, program ID
@@ -169,9 +169,9 @@ pub fn process_instruction(
         .split_first()
         .ok_or(ProgramError::InvalidInstructionData)?;
 
-    match SentinelInstruction::try_from(*discriminator)? {
-        SentinelInstruction::CreateWallet => instructions::create_wallet::process(program_id, accounts, data),
-        SentinelInstruction::RegisterAgent => instructions::register_agent::process(program_id, accounts, data),
+    match SealInstruction::try_from(*discriminator)? {
+        SealInstruction::CreateWallet => instructions::create_wallet::process(program_id, accounts, data),
+        SealInstruction::RegisterAgent => instructions::register_agent::process(program_id, accounts, data),
         // ... etc
     }
 }
@@ -242,7 +242,7 @@ All accounts are **Program Derived Addresses** (PDAs) — no external keypairs n
 
 | Account | Seeds | Reasoning |
 |---------|-------|-----------|
-| SmartWallet | `["sentinel", owner_pubkey]` | One wallet per owner |
+| SmartWallet | `["seal", owner_pubkey]` | One wallet per owner |
 | AgentConfig | `["agent", wallet_pubkey, agent_pubkey]` | Unique per wallet-agent pair |
 | SessionKey | `["session", wallet_pubkey, agent_pubkey, session_pubkey]` | Unique per session |
 
@@ -288,10 +288,10 @@ This is the most critical instruction — it's how agents autonomously transact:
 ```mermaid
 sequenceDiagram
     participant Agent as AI Agent
-    participant SDK as Sentinel SDK
-    participant Core as sentinel-core
+    participant SDK as Seal SDK
+    participant Core as seal-core
     participant RPC as Solana RPC
-    participant Program as Sentinel Program
+    participant Program as Seal Program
     participant Target as Target Program
 
     Agent->>SDK: executeViaSession(params)
@@ -425,15 +425,15 @@ graph LR
 
 ## SDK Architecture
 
-### sentinel-dart (Flutter SDK)
+### seal-dart (Flutter SDK)
 
 ```
-sdk/sentinel-dart/
+sdk/seal-dart/
 ├── pubspec.yaml
 ├── lib/
-│   ├── sentinel_dart.dart       # Library exports
+│   ├── seal_dart.dart       # Library exports
 │   └── src/
-│       ├── client.dart           # SentinelClient (main entry)
+│       ├── client.dart           # SealClient (main entry)
 │       ├── models/               # Dart mirrors of on-chain state
 │       │   ├── wallet_state.dart
 │       │   ├── agent_config.dart
@@ -445,22 +445,22 @@ sdk/sentinel-dart/
 │           └── rust_bridge.dart  # flutter_rust_bridge FFI
 ```
 
-**Key integration**: `flutter_rust_bridge` v2.11 auto-generates Dart bindings from `sentinel-core` Rust code. This means:
+**Key integration**: `flutter_rust_bridge` v2.11 auto-generates Dart bindings from `seal-core` Rust code. This means:
 
 - Ed25519 signing happens in Rust (fast, auditable)
 - Key encryption happens in Rust (no Dart crypto needed)
 - Policy checks run natively (Rust speed)
 - Dart handles UI + RPC communication
 
-### sentinel-ts (TypeScript SDK)
+### seal-ts (TypeScript SDK)
 
 ```
-sdk/sentinel-ts/
+sdk/seal-ts/
 ├── package.json
 ├── tsconfig.json
 └── src/
     ├── index.ts           # Exports
-    ├── client.ts          # SentinelClient
+    ├── client.ts          # SealClient
     ├── types.ts           # Type definitions
     └── instructions.ts    # Instruction builders
 ```
@@ -471,7 +471,7 @@ Uses `@solana/web3.js` v2 (the new Solana Kit). Instruction builders will be aut
 
 ## Cryptographic Core
 
-### sentinel-core
+### seal-core
 
 The Rust core handles all cryptographic operations. It's compiled:
 
@@ -480,7 +480,7 @@ The Rust core handles all cryptographic operations. It's compiled:
 3. **As a library** → For Rust-native consumers
 
 ```
-crates/sentinel-core/
+crates/seal-core/
 ├── Cargo.toml
 └── src/
     ├── lib.rs        # Module declarations
@@ -531,8 +531,8 @@ stateDiagram-v2
 sequenceDiagram
     participant User as User (Mobile)
     participant Agent as AI Agent
-    participant Dart as sentinel-dart
-    participant Core as sentinel-core (Rust)
+    participant Dart as seal-dart
+    participant Core as seal-core (Rust)
     participant Chain as Solana
 
     Note over User: One-time setup
@@ -572,8 +572,8 @@ sequenceDiagram
 ```mermaid
 sequenceDiagram
     participant Agent as AI Agent
-    participant SDK as sentinel-dart
-    participant Core as sentinel-core
+    participant SDK as seal-dart
+    participant Core as seal-core
     participant Chain as Solana
 
     Agent->>SDK: executeViaSession(big_swap)
@@ -632,7 +632,7 @@ With Pinocchio's binary size optimization:
 
 | Component | Estimated Size | Deploy Cost |
 |-----------|---------------|-------------|
-| sentinel-wallet | ~10-20 KB | ~0.05-0.1 SOL |
+| seal-wallet | ~10-20 KB | ~0.05-0.1 SOL |
 | Buffer account rent | minimal | ~0.01 SOL |
 | **Total** | | **~0.1 SOL** |
 
@@ -665,14 +665,14 @@ Configuration in `codama.json`:
 ```json
 {
   "program": {
-    "name": "sentinel_wallet",
+    "name": "seal_wallet",
     "version": "0.1.0",
     "publicKey": "SentWaL1et111111111111111111111111111111111"
   },
   "renderers": {
-    "js":   { "output": "sdk/sentinel-ts/src/generated" },
-    "dart": { "output": "sdk/sentinel-dart/lib/src/generated" },
-    "rust": { "output": "crates/sentinel-generated" }
+    "js":   { "output": "sdk/seal-ts/src/generated" },
+    "dart": { "output": "sdk/seal-dart/lib/src/generated" },
+    "rust": { "output": "crates/seal-generated" }
   }
 }
 ```
@@ -705,7 +705,7 @@ Configuration in `codama.json`:
 
 ## Comparison with Existing Solutions
 
-| Feature | Sentinel | Squads v4 | Phantom Embedded | Turnkey |
+| Feature | Seal | Squads v4 | Phantom Embedded | Turnkey |
 |---------|----------|-----------|-----------------|---------|
 | Framework | Pinocchio | Anchor | Off-chain | Off-chain |
 | Deploy size | ~15 KB | ~200 KB | N/A | N/A |

@@ -1,11 +1,11 @@
 # Constants & Sizes
 
-All constants, account sizes, discriminators, and limits used by the Sentinel program and SDK.
+All constants, account sizes, discriminators, and limits used by the Seal program and SDK.
 
 ## Program ID
 
 ```typescript
-import { SENTINEL_PROGRAM_ID } from "@sentinel-wallet/sdk";
+import { SEAL_PROGRAM_ID } from "@seal-wallet/sdk";
 // EV3TKRVz7pTHpAqBTjP8jmwuvoRBRCpjmVSPHhcMnXqb
 ```
 
@@ -15,12 +15,12 @@ Deployed on **Solana devnet**. [View on Explorer →](https://explorer.solana.co
 
 | Constant | Value | Used For |
 |----------|-------|----------|
-| `WALLET_SEED` | `"sentinel"` | SmartWallet PDA derivation |
+| `WALLET_SEED` | `"seal"` | SmartWallet PDA derivation |
 | `AGENT_SEED` | `"agent"` | AgentConfig PDA derivation |
 | `SESSION_SEED` | `"session"` | SessionKey PDA derivation |
 
 ```typescript
-import { WALLET_SEED, AGENT_SEED, SESSION_SEED } from "@sentinel-wallet/sdk";
+import { WALLET_SEED, AGENT_SEED, SESSION_SEED } from "@seal-wallet/sdk";
 ```
 
 ## Account Discriminators
@@ -38,7 +38,7 @@ import {
   SMART_WALLET_DISCRIMINATOR,
   AGENT_CONFIG_DISCRIMINATOR,
   SESSION_KEY_DISCRIMINATOR,
-} from "@sentinel-wallet/sdk";
+} from "@seal-wallet/sdk";
 ```
 
 ## Instruction Discriminants
@@ -46,7 +46,7 @@ import {
 Single-byte discriminants at position 0 of instruction data:
 
 ```typescript
-import { InstructionDiscriminant } from "@sentinel-wallet/sdk";
+import { InstructionDiscriminant } from "@seal-wallet/sdk";
 ```
 
 | Discriminant | Value | Instruction |
@@ -77,7 +77,7 @@ import {
   MAX_ALLOWED_PROGRAMS,
   MAX_ALLOWED_INSTRUCTIONS,
   MAX_AGENT_NAME_LENGTH,
-} from "@sentinel-wallet/sdk";
+} from "@seal-wallet/sdk";
 ```
 
 ## Default Values

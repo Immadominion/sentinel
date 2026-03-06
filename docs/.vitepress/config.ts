@@ -6,7 +6,7 @@ const sharedSidebar = [
     {
         text: "Getting Started",
         items: [
-            { text: "What is Sentinel?", link: "/guide/getting-started" },
+            { text: "What is Seal?", link: "/guide/getting-started" },
             { text: "Installation", link: "/guide/installation" },
             { text: "Quick Start", link: "/guide/quick-start" },
         ],
@@ -42,7 +42,7 @@ const sharedSidebar = [
 
 export default withMermaid(
     defineConfig({
-        title: "Sentinel",
+        title: "Seal",
         description:
             "On-chain smart wallet infrastructure for autonomous AI agents on Solana",
 
@@ -55,7 +55,7 @@ export default withMermaid(
                 lang: "es",
                 label: "Español",
                 link: "/es/",
-                title: "Sentinel",
+                title: "Seal",
                 description: "Infraestructura de billetera inteligente en cadena para agentes AI autónomos en Solana",
                 themeConfig: {
                     nav: [
@@ -69,7 +69,7 @@ export default withMermaid(
                 lang: "zh-CN",
                 label: "中文",
                 link: "/zh-CN/",
-                title: "Sentinel",
+                title: "Seal",
                 description: "为 Solana 上自主 AI 代理打造的链上智能钱包基础设施",
                 themeConfig: {
                     nav: [
@@ -83,7 +83,7 @@ export default withMermaid(
                 lang: "pt-BR",
                 label: "Português",
                 link: "/pt-BR/",
-                title: "Sentinel",
+                title: "Seal",
                 description: "Infraestrutura de carteira inteligente on-chain para agentes AI autônomos na Solana",
                 themeConfig: {
                     nav: [
@@ -97,7 +97,7 @@ export default withMermaid(
                 lang: "ja",
                 label: "日本語",
                 link: "/ja/",
-                title: "Sentinel",
+                title: "Seal",
                 description: "Solana上の自律型AIエージェントのためのオンチェーンスマートウォレットインフラ",
                 themeConfig: {
                     nav: [
@@ -111,28 +111,28 @@ export default withMermaid(
                 lang: "ru",
                 label: "Русский",
                 link: "/ru/",
-                title: "Sentinel",
+                title: "Seal",
                 description: "Онлайн-инфраструктура умного кошелька для автономных AI-агентов на Solana",
             },
             ko: {
                 lang: "ko",
                 label: "한국어",
                 link: "/ko/",
-                title: "Sentinel",
+                title: "Seal",
                 description: "Solana의 자율 AI 에이전트를 위한 온체인 스마트 지갑 인프라",
             },
             fr: {
                 lang: "fr",
                 label: "Français",
                 link: "/fr/",
-                title: "Sentinel",
+                title: "Seal",
                 description: "Infrastructure de portefeuille intelligent on-chain pour les agents IA autonomes sur Solana",
             },
             de: {
                 lang: "de",
                 label: "Deutsch",
                 link: "/de/",
-                title: "Sentinel",
+                title: "Seal",
                 description: "On-Chain Smart-Wallet-Infrastruktur für autonome KI-Agenten auf Solana",
             },
         },
@@ -158,8 +158,8 @@ export default withMermaid(
         ignoreDeadLinks: true,
 
         themeConfig: {
-            logo: "/sentinel-logo.png",
-            siteTitle: "Sentinel",
+            logo: "/seal-logo.png",
+            siteTitle: "Seal",
 
             nav: [
                 { text: "Guide", link: "/guide/getting-started" },
@@ -170,7 +170,7 @@ export default withMermaid(
                     items: [
                         {
                             text: "GitHub",
-                            link: "https://github.com/immadominion/sentinel",
+                            link: "https://github.com/immadominion/seal",
                         },
                         {
                             text: "Devnet Explorer",
@@ -178,7 +178,7 @@ export default withMermaid(
                         },
                         {
                             text: "npm Package",
-                            link: "https://www.npmjs.com/package/@sentinel/sdk",
+                            link: "https://www.npmjs.com/package/@seal-wallet/sdk",
                         },
                     ],
                 },
@@ -189,7 +189,7 @@ export default withMermaid(
             socialLinks: [
                 {
                     icon: "github",
-                    link: "https://github.com/immadominion/sentinel",
+                    link: "https://github.com/immadominion/seal",
                 },
             ],
 
@@ -199,7 +199,7 @@ export default withMermaid(
 
             editLink: {
                 pattern:
-                    "https://github.com/immadominion/sentinel/edit/main/docs/:path",
+                    "https://github.com/immadominion/seal/edit/main/docs/:path",
                 text: "Edit this page on GitHub",
             },
 
@@ -209,7 +209,7 @@ export default withMermaid(
 
             footer: {
                 message:
-                    'Open-source under <a href="https://github.com/immadominion/sentinel/blob/main/LICENSE">Apache-2.0</a>',
+                    'Open-source under <a href="https://github.com/immadominion/seal/blob/main/LICENSE">Apache-2.0</a>',
                 copyright:
                     'Built on <a href="https://solana.com">Solana</a> with <a href="https://github.com/anza-xyz/pinocchio">Pinocchio</a>',
             },

@@ -1,22 +1,22 @@
 {
   "$schema": "https://codama.dev/schema.json",
   "program": {
-    "name": "sentinel_wallet",
+    "name": "seal_wallet",
     "version": "0.1.0",
     "publicKey": "SentWaL1et111111111111111111111111111111111",
     "origin": "shank"
   },
   "renderers": {
     "js": {
-      "output": "sdk/sentinel-ts/src/generated",
+      "output": "sdk/seal-ts/src/generated",
       "renderer": "@codama/renderers-js"
     },
     "dart": {
-      "output": "sdk/sentinel-dart/lib/src/generated",
+      "output": "sdk/seal-dart/lib/src/generated",
       "renderer": "@limechain/codama-dart"
     },
     "rust": {
-      "output": "crates/sentinel-generated",
+      "output": "crates/seal-generated",
       "renderer": "@codama/renderers-rust"
     }
   }

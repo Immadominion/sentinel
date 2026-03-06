@@ -15,4 +15,4 @@ Defined in: instructions.ts:107
 | <a id="property-name"></a> `name` | `string` | Human-readable name for the agent (max 32 chars) | instructions.ts:113 |
 | <a id="property-owner"></a> `owner` | `PublicKey` | The owner's public key (must sign) | instructions.ts:109 |
 | <a id="property-pertxlimitlamports"></a> `perTxLimitLamports` | `bigint` | Maximum SOL the agent can spend per transaction (in lamports) | instructions.ts:121 |
-| <a id="property-programid"></a> `programId?` | `PublicKey` | Program ID (defaults to SENTINEL_PROGRAM_ID) | instructions.ts:127 |
+| <a id="property-programid"></a> `programId?` | `PublicKey` | Program ID (defaults to SEAL_PROGRAM_ID) | instructions.ts:127 |

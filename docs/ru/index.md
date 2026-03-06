@@ -1,11 +1,11 @@
 ---
 layout: home
-title: Sentinel — Смарт-кошельки для AI-агентов
+title: Seal — Смарт-кошельки для AI-агентов
 lang: ru
 description: Онлайн-применение политик для автономных агентов на Solana. Сессионные ключи, лимиты расходов, восстановление через хранителей.
 
 hero:
-  name: Sentinel
+  name: Seal
   text: Смарт-кошельки для агентов, которые реально работают.
   tagline: Применение политик на блокчейне — не обещания. Ваши агенты действуют в рамках, которые вы определяете и которые применяет сам блокчейн.
   actions:
@@ -14,7 +14,7 @@ hero:
       link: /ru/guide/getting-started
     - theme: alt
       text: GitHub
-      link: https://github.com/immadominion/sentinel
+      link: https://github.com/immadominion/seal
 
 features:
   - icon: 🔑

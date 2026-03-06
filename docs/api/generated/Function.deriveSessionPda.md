@@ -20,7 +20,7 @@ Seeds: ["session", wallet_pubkey, agent_pubkey, session_pubkey]
 | `wallet` | `PublicKey` | `undefined` |
 | `agent` | `PublicKey` | `undefined` |
 | `sessionPubkey` | `PublicKey` | `undefined` |
-| `programId` | `PublicKey` | `SENTINEL_PROGRAM_ID` |
+| `programId` | `PublicKey` | `SEAL_PROGRAM_ID` |
 
 ## Returns
 

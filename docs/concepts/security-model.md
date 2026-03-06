@@ -1,12 +1,12 @@
 # Security Model
 
-Sentinel's security model is designed around one principle: **the Solana runtime is the only enforcer**. There's no backend server, no admin key, no middleware that can override policy. Every spending limit, every program allowlist, every session expiry is validated inside the program before any CPI executes.
+Seal's security model is designed around one principle: **the Solana runtime is the only enforcer**. There's no backend server, no admin key, no middleware that can override policy. Every spending limit, every program allowlist, every session expiry is validated inside the program before any CPI executes.
 
 ## Threat Model
 
-### What Sentinel Protects Against
+### What Seal Protects Against
 
-| Threat | How Sentinel Handles It |
+| Threat | How Seal Handles It |
 |--------|------------------------|
 | Agent key compromise | Bounded by agent daily/per-tx limits and program allowlist. Revoke the agent. |
 | Session key steal | Session is time-bounded and amount-capped. Worst case: the session's remaining budget. |
@@ -16,11 +16,11 @@ Sentinel's security model is designed around one principle: **the Solana runtime
 | Excessive spending | Three-layer limits: per-tx → agent daily → wallet daily. Each checked independently. |
 | Time-of-check/time-of-use | All state mutations happen atomically within a single Solana transaction. |
 
-### What Sentinel Does NOT Protect Against
+### What Seal Does NOT Protect Against
 
-- **Solana runtime bugs** — Sentinel trusts the Solana VM. If the runtime has a vulnerability, all programs are affected.
-- **Price oracle manipulation** — Sentinel enforces lamport-denominated limits, not USD-denominated. A flash-loan attack on a DeFi protocol can still cause losses within the spending cap.
-- **Logic bugs in target programs** — If your agent calls a buggy DeFi protocol, Sentinel can't prevent the protocol from misbehaving. It only validates that the call is within scope.
+- **Solana runtime bugs** — Seal trusts the Solana VM. If the runtime has a vulnerability, all programs are affected.
+- **Price oracle manipulation** — Seal enforces lamport-denominated limits, not USD-denominated. A flash-loan attack on a DeFi protocol can still cause losses within the spending cap.
+- **Logic bugs in target programs** — If your agent calls a buggy DeFi protocol, Seal can't prevent the protocol from misbehaving. It only validates that the call is within scope.
 
 ## Three-Layer Limit Enforcement
 
@@ -93,7 +93,7 @@ If either check fails, the transaction reverts with `ProgramNotAllowed` (error 5
 
 ## Session Key Security
 
-Session keys are the most exposed component — they're the keys that agents actually use to sign. Sentinel minimizes their blast radius:
+Session keys are the most exposed component — they're the keys that agents actually use to sign. Seal minimizes their blast radius:
 
 | Property | How It Helps |
 |----------|-------------|
@@ -101,7 +101,7 @@ Session keys are the most exposed component — they're the keys that agents act
 | **Amount-capped** | Each session has a total spending cap. Once reached, the session is useless. |
 | **Per-tx limit** | Even within the cap, each transaction is bounded. No single tx can drain the session budget. |
 | **Revocable** | The owner or the parent agent can revoke a session immediately via `RevokeSession`. |
-| **Non-transferable** | Session keys are PDA-bound. They can only be used through the Sentinel program with the correct wallet + agent + session PDA chain. |
+| **Non-transferable** | Session keys are PDA-bound. They can only be used through the Seal program with the correct wallet + agent + session PDA chain. |
 
 ### Best Practices
 
@@ -112,13 +112,13 @@ Session keys are the most exposed component — they're the keys that agents act
 
 ## Guardian Recovery
 
-Sentinel supports up to 5 guardians per wallet. Guardians can collectively vote to rotate the wallet owner — useful when the owner key is lost or compromised.
+Seal supports up to 5 guardians per wallet. Guardians can collectively vote to rotate the wallet owner — useful when the owner key is lost or compromised.
 
 ```mermaid
 sequenceDiagram
     participant G1 as Guardian 1
     participant G2 as Guardian 2
-    participant SP as Sentinel Program
+    participant SP as Seal Program
     participant SW as SmartWallet
 
     Note over G1,G2: Owner key lost/compromised
@@ -141,7 +141,7 @@ Recovery does **not** affect registered agents or active sessions. The new owner
 
 ## Error Codes
 
-Sentinel uses structured error codes for precise failure diagnosis:
+Seal uses structured error codes for precise failure diagnosis:
 
 | Range | Category | Examples |
 |-------|----------|---------|
@@ -152,4 +152,4 @@ Sentinel uses structured error codes for precise failure diagnosis:
 | 400–499 | Guardian | `MaxGuardiansReached`, `InsufficientGuardianApprovals` |
 | 500–599 | CPI | `ProgramNotAllowed`, `InstructionNotAllowed`, `CpiExecutionFailed` |
 
-See the [full error enum](https://github.com/immadominion/sentinel/blob/main/programs/sentinel-wallet/src/error.rs) for all codes.
+See the [full error enum](https://github.com/immadominion/seal/blob/main/programs/seal-wallet/src/error.rs) for all codes.

@@ -16,15 +16,15 @@ export function getConnection(): Connection {
     return connection;
 }
 
-export const SENTINEL_PROGRAM_ID = new PublicKey(config.SENTINEL_PROGRAM_ID);
+export const SEAL_PROGRAM_ID = new PublicKey(config.SEAL_PROGRAM_ID);
 
 /**
  * Derive SmartWallet PDA from owner pubkey.
  */
 export function deriveWalletPda(owner: PublicKey): [PublicKey, number] {
     return PublicKey.findProgramAddressSync(
-        [Buffer.from("sentinel"), owner.toBuffer()],
-        SENTINEL_PROGRAM_ID
+        [Buffer.from("seal"), owner.toBuffer()],
+        SEAL_PROGRAM_ID
     );
 }
 
@@ -37,7 +37,7 @@ export function deriveAgentPda(
 ): [PublicKey, number] {
     return PublicKey.findProgramAddressSync(
         [Buffer.from("agent"), wallet.toBuffer(), agent.toBuffer()],
-        SENTINEL_PROGRAM_ID
+        SEAL_PROGRAM_ID
     );
 }
 
@@ -52,6 +52,6 @@ export function deriveSessionPda(
     sessionIdBuf.writeUInt32LE(sessionId);
     return PublicKey.findProgramAddressSync(
         [Buffer.from("session"), agent.toBuffer(), sessionIdBuf],
-        SENTINEL_PROGRAM_ID
+        SEAL_PROGRAM_ID
     );
 }

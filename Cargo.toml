@@ -1,16 +1,16 @@
 [workspace]
 resolver = "2"
 members = [
-    "programs/sentinel-wallet",
-    "crates/sentinel-core",
-    # "sdk/sentinel-ts/native", # Uncomment when native TS bindings are added
+    "programs/seal-wallet",
+    "crates/seal-core",
+    # "sdk/seal-ts/native", # Uncomment when native TS bindings are added
 ]
 
 [workspace.package]
 version = "0.1.0"
 edition = "2021"
 license = "Apache-2.0"
-repository = "https://github.com/sentinel-wallet/sentinel"
+repository = "https://github.com/seal-wallet/seal"
 
 [workspace.dependencies]
 # Pinocchio ecosystem (latest)

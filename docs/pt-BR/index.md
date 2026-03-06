@@ -1,11 +1,11 @@
 ---
 layout: home
-title: Sentinel — Carteiras inteligentes para agentes AI
+title: Seal — Carteiras inteligentes para agentes AI
 lang: pt-BR
 description: Cumprimento de políticas on-chain para agentes autônomos na Solana. Chaves de sessão, limites de gastos, recuperação com guardiões.
 
 hero:
-  name: Sentinel
+  name: Seal
   text: Carteiras inteligentes para agentes que realmente funcionam.
   tagline: Cumprimento de políticas on-chain — não promessas. Seus agentes operam dentro dos limites que você define, aplicados pela própria blockchain.
   actions:
@@ -14,7 +14,7 @@ hero:
       link: /pt-BR/guide/getting-started
     - theme: alt
       text: Ver no GitHub
-      link: https://github.com/immadominion/sentinel
+      link: https://github.com/immadominion/seal
 
 features:
   - icon: 🔑
@@ -42,10 +42,10 @@ features:
     details: Até 5 agentes completamente independentes por carteira. Bot LP, sniper, otimizador de yield — cada um com seus próprios limites.
 ---
 
-## Por que Sentinel?
+## Por que Seal?
 
 Agentes AI na Solana estão executando trades, gerenciando liquidez e interagindo com protocolos de forma autônoma. Mas dar uma chave privada completa a um agente é como dar a um funcionário acesso ilimitado à sua conta bancária.
 
-Sentinel resolve isso com políticas on-chain que o blockchain mesmo aplica.
+Seal resolve isso com políticas on-chain que o blockchain mesmo aplica.
 
 [Começar em minutos →](/pt-BR/guide/getting-started)

@@ -1,15 +1,15 @@
 # TypeScript SDK
 
-The `@sentinel-wallet/sdk` package provides a high-level TypeScript client for the Sentinel smart wallet program. It wraps all 10 program instructions, PDA derivation, and account deserialization into a clean API.
+The `@seal-wallet/sdk` package provides a high-level TypeScript client for the Seal smart wallet program. It wraps all 10 program instructions, PDA derivation, and account deserialization into a clean API.
 
-## SentinelClient
+## SealClient
 
 The main entry point. Manages RPC connections and provides methods for every wallet operation.
 
 ```typescript
-import { SentinelClient } from "@sentinel-wallet/sdk";
+import { SealClient } from "@seal-wallet/sdk";
 
-const client = new SentinelClient({
+const client = new SealClient({
   network: "devnet",           // "devnet" | "mainnet" | "localnet"
   rpcUrl: "https://...",       // Override default RPC endpoint
   commitment: "confirmed",     // "processed" | "confirmed" | "finalized"
@@ -22,7 +22,7 @@ const client = new SentinelClient({
 |-----------|------|---------|-------------|
 | `network` | `string` | `"devnet"` | Network preset (`devnet`, `mainnet`, `localnet`) |
 | `rpcUrl` | `string` | Network default | Custom RPC endpoint URL |
-| `programId` | `PublicKey` | Sentinel program ID | Override program ID |
+| `programId` | `PublicKey` | Seal program ID | Override program ID |
 | `commitment` | `string` | `"confirmed"` | Transaction confirmation level |
 
 ## Wallet Operations
@@ -213,7 +213,7 @@ import {
   recoverWalletInstruction,
   deregisterAgentInstruction,
   closeWalletInstruction,
-} from "@sentinel-wallet/sdk";
+} from "@seal-wallet/sdk";
 ```
 
 See [Instructions](/api/instructions) for the full instruction builder reference.
@@ -227,7 +227,7 @@ import {
   deserializeSmartWallet,
   deserializeAgentConfig,
   deserializeSessionKey,
-} from "@sentinel-wallet/sdk";
+} from "@seal-wallet/sdk";
 
 const accountInfo = await connection.getAccountInfo(walletPda);
 const wallet = deserializeSmartWallet(accountInfo.data);
@@ -242,12 +242,12 @@ import type {
   SmartWallet,
   AgentConfig,
   SessionKey,
-  SentinelClientConfig,
+  SealClientConfig,
   CreateWalletParams,
   RegisterAgentParams,
   CreateSessionParams,
   // ... all parameter interfaces
-} from "@sentinel-wallet/sdk";
+} from "@seal-wallet/sdk";
 ```
 
 See the [Generated API Docs](/api/generated/README) for complete TypeDoc-generated reference.

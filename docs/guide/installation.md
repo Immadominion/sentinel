@@ -2,20 +2,20 @@
 
 ## TypeScript SDK
 
-Install the Sentinel TypeScript SDK from npm:
+Install the Seal TypeScript SDK from npm:
 
 ::: code-group
 
 ```sh [npm]
-npm install @sentinel-wallet/sdk
+npm install @seal-wallet/sdk
 ```
 
 ```sh [pnpm]
-pnpm add @sentinel-wallet/sdk
+pnpm add @seal-wallet/sdk
 ```
 
 ```sh [yarn]
-yarn add @sentinel-wallet/sdk
+yarn add @seal-wallet/sdk
 ```
 
 :::
@@ -41,21 +41,21 @@ The SDK uses `BigInt` for all lamport values — ensure your `tsconfig.json` tar
 ### Verify Installation
 
 ```typescript
-import { SentinelClient } from "@sentinel-wallet/sdk";
+import { SealClient } from "@seal-wallet/sdk";
 
-const client = new SentinelClient({ network: "devnet" });
+const client = new SealClient({ network: "devnet" });
 console.log("Program ID:", client.programId.toBase58());
 // → EV3TKRVz7pTHpAqBTjP8jmwuvoRBRCpjmVSPHhcMnXqb
 ```
 
 ## Dart SDK
 
-The Dart SDK is under development at [`sdk/sentinel-dart/`](https://github.com/immadominion/sentinel/tree/main/sdk/sentinel-dart):
+The Dart SDK is under development at [`sdk/seal-dart/`](https://github.com/immadominion/seal/tree/main/sdk/seal-dart):
 
 ```yaml
 # pubspec.yaml (coming soon)
 dependencies:
-  sentinel_dart: ^0.1.0
+  seal_dart: ^0.1.0
 ```
 
 ## Building from Source
@@ -63,8 +63,8 @@ dependencies:
 Clone and build the Solana program locally:
 
 ```sh
-git clone https://github.com/immadominion/sentinel.git
-cd sentinel/programs/sentinel-wallet
+git clone https://github.com/immadominion/seal.git
+cd seal/programs/seal-wallet
 ```
 
 ### Program (Rust)
@@ -82,13 +82,13 @@ cargo build-sbf
 cargo test-sbf
 ```
 
-The compiled `.so` file appears in `target/deploy/sentinel_wallet.so`.
+The compiled `.so` file appears in `target/deploy/seal_wallet.so`.
 
 ### Deploy to Devnet
 
 ```sh
 solana config set --url devnet
-solana program deploy target/deploy/sentinel_wallet.so
+solana program deploy target/deploy/seal_wallet.so
 ```
 
 ::: warning
@@ -98,7 +98,7 @@ Deploying to devnet requires ~2 SOL for program rent. Airdrop using `solana aird
 ### TypeScript SDK (from source)
 
 ```sh
-cd sdk/sentinel-ts
+cd sdk/seal-ts
 npm install
 npm run build
 ```
@@ -118,14 +118,14 @@ The SDK connects to default Solana RPC endpoints:
 For production workloads, use a dedicated RPC provider (Helius, Triton, QuickNode) to avoid rate limits:
 
 ```typescript
-const client = new SentinelClient({
+const client = new SealClient({
   rpcUrl: "https://devnet.helius-rpc.com/?api-key=YOUR_KEY",
 });
 ```
 
 ### Wallet Setup
 
-Sentinel requires a Solana keypair for the owner. Generate one for testing:
+Seal requires a Solana keypair for the owner. Generate one for testing:
 
 ```sh
 solana-keygen new --outfile ./test-wallet.json

@@ -1,11 +1,11 @@
 ---
 layout: home
-title: Sentinel — AI 代理的智能钱包
+title: Seal — AI 代理的智能钱包
 lang: zh-CN
 description: 为 Solana 上的自主 AI 代理提供链上策略执行。会话密钥、消费限额、守护者恢复。
 
 hero:
-  name: Sentinel
+  name: Seal
   text: 为真正运行的代理打造的智能钱包。
   tagline: 链上策略执行——不是承诺。你的代理在你定义的边界内操作，由区块链本身强制执行。
   actions:
@@ -14,7 +14,7 @@ hero:
       link: /zh-CN/guide/getting-started
     - theme: alt
       text: 查看 GitHub
-      link: https://github.com/immadominion/sentinel
+      link: https://github.com/immadominion/seal
 
 features:
   - icon: 🔑
@@ -42,11 +42,11 @@ features:
     details: 每个钱包最多 5 个完全独立的代理。LP 机器人、狙击手、收益优化器——各自拥有独立限额。
 ---
 
-## 为什么选择 Sentinel？
+## 为什么选择 Seal？
 
 Solana 上的 AI 代理正在自主执行交易、管理流动性并与协议交互。但给代理提供完整私钥就好比给员工无限制访问你的银行账户。
 
-Sentinel 通过链上策略解决了这个问题：
+Seal 通过链上策略解决了这个问题：
 
 ```typescript
 // 注册具有严格限制的代理

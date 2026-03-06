@@ -1,11 +1,11 @@
 ---
 layout: home
-title: Sentinel — Portefeuilles intelligents pour agents AI
+title: Seal — Portefeuilles intelligents pour agents AI
 lang: fr
 description: Application de politiques on-chain pour agents autonomes sur Solana. Clés de session, limites de dépenses, récupération par gardiens.
 
 hero:
-  name: Sentinel
+  name: Seal
   text: Des portefeuilles intelligents pour des agents qui fonctionnent vraiment.
   tagline: Application de politiques on-chain — pas des promesses. Vos agents opèrent dans les limites que vous définissez, appliquées par la blockchain elle-même.
   actions:
@@ -14,7 +14,7 @@ hero:
       link: /fr/guide/getting-started
     - theme: alt
       text: Voir sur GitHub
-      link: https://github.com/immadominion/sentinel
+      link: https://github.com/immadominion/seal
 
 features:
   - icon: 🔑

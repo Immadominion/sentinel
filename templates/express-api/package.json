@@ -1,7 +1,7 @@
 {
-  "name": "@sentinel/backend",
+  "name": "@seal/backend",
   "version": "0.1.0",
-  "description": "Sentinel Smart Wallet Backend API for Sage",
+  "description": "Seal Smart Wallet Backend API for Sage",
   "type": "module",
   "main": "dist/index.js",
   "scripts": {
@@ -13,7 +13,7 @@
   "keywords": [
     "solana",
     "wallet",
-    "sentinel",
+    "seal",
     "sage"
   ],
   "author": "",

@@ -1,6 +1,6 @@
-# Sentinel Express API Template
+# Seal Express API Template
 
-> **Starter template** — a minimal Express 5 REST API showing how to integrate with Sentinel smart wallets on Solana. For production, see [`sage-backend`](https://github.com/immadominion/sentinel) which adds auth, DB, sponsor support, and the full trading engine.
+> **Starter template** — a minimal Express 5 REST API showing how to integrate with Seal smart wallets on Solana. For production, see [`sage-backend`](https://github.com/immadominion/seal) which adds auth, DB, sponsor support, and the full trading engine.
 
 ## Quick Start
 
@@ -29,7 +29,7 @@ npm start
 | `NODE_ENV` | Environment | `development` |
 | `SOLANA_NETWORK` | Solana network | `devnet` |
 | `SOLANA_RPC_URL` | RPC endpoint | `https://api.devnet.solana.com` |
-| `SENTINEL_PROGRAM_ID` | Deployed program ID | Required |
+| `SEAL_PROGRAM_ID` | Deployed program ID | Required |
 | `CORS_ORIGINS` | Allowed CORS origins | `*` |
 
 ## API Endpoints

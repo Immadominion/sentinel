@@ -1,11 +1,11 @@
 ---
 layout: home
-title: Sentinel — Billeteras inteligentes para agentes AI
+title: Seal — Billeteras inteligentes para agentes AI
 lang: es
 description: Cumplimiento de políticas en cadena para agentes autónomos en Solana. Claves de sesión, límites de gasto, recuperación con guardianes.
 
 hero:
-  name: Sentinel
+  name: Seal
   text: Billeteras inteligentes para agentes que realmente operan.
   tagline: Cumplimiento de políticas en cadena — no promesas. Tus agentes actúan dentro de los límites que tú defines, aplicados directamente en la blockchain.
   actions:
@@ -14,7 +14,7 @@ hero:
       link: /es/guide/getting-started
     - theme: alt
       text: Ver en GitHub
-      link: https://github.com/immadominion/sentinel
+      link: https://github.com/immadominion/seal
 
 features:
   - icon: 🔑
@@ -42,11 +42,11 @@ features:
     details: Hasta 5 agentes completamente independientes por monedero. Bot LP, sniper, optimizador de yield — cada uno con sus propios límites.
 ---
 
-## ¿Por qué Sentinel?
+## ¿Por qué Seal?
 
 Los agentes AI en Solana están ejecutando trades, gestionando liquidez e interactuando con protocolos de forma autónoma. Pero darle a un agente una clave privada completa es como darle a un empleado acceso ilimitado a tu cuenta bancaria.
 
-Sentinel resuelve esto con políticas en cadena:
+Seal resuelve esto con políticas en cadena:
 
 ```typescript
 // Registra un agente con límites estrictos

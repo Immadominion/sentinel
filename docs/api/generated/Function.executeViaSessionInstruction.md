@@ -9,7 +9,7 @@ Defined in: instructions.ts:365
 Execute a transaction via session key on behalf of the smart wallet.
 
 This is the CORE instruction for autonomous agent operations.
-The session key signs, and the Sentinel program:
+The session key signs, and the Seal program:
 1. Validates session validity (time, spending limits, allowed programs)
 2. Executes the inner CPI with wallet PDA as signer
 3. Updates spending counters

@@ -1,6 +1,6 @@
 # Session Keys
 
-Session keys are Sentinel's core mechanism for autonomous agent operation. They're ephemeral keypairs with cryptographically enforced time, amount, and scope boundaries — designed to be created, used, and discarded frequently.
+Session keys are Seal's core mechanism for autonomous agent operation. They're ephemeral keypairs with cryptographically enforced time, amount, and scope boundaries — designed to be created, used, and discarded frequently.
 
 ## Why Session Keys?
 
@@ -17,13 +17,13 @@ Session keys are the best trade-off for high-frequency autonomous agents.
 
 ## How They Work
 
-A session key is an ephemeral `Keypair` that exists only in the agent's memory. The agent asks the Sentinel program to create a `SessionKey` PDA that links the ephemeral key to a specific wallet and agent configuration:
+A session key is an ephemeral `Keypair` that exists only in the agent's memory. The agent asks the Seal program to create a `SessionKey` PDA that links the ephemeral key to a specific wallet and agent configuration:
 
 ```typescript
 import { Keypair, LAMPORTS_PER_SOL } from "@solana/web3.js";
-import { SentinelClient } from "@sentinel-wallet/sdk";
+import { SealClient } from "@seal-wallet/sdk";
 
-const client = new SentinelClient({ network: "devnet" });
+const client = new SealClient({ network: "devnet" });
 
 // Generate an ephemeral keypair (never stored on disk)
 const sessionKeypair = Keypair.generate();
@@ -37,7 +37,7 @@ const session = await client.createSession(agentKeypair, ownerPubkey, {
 });
 ```
 
-Once created, the agent signs transactions with `sessionKeypair` instead of the owner or agent key. The Sentinel program validates the session before executing any CPI.
+Once created, the agent signs transactions with `sessionKeypair` instead of the owner or agent key. The Seal program validates the session before executing any CPI.
 
 ## Session Lifecycle
 
@@ -69,7 +69,7 @@ The program checks **all three conditions** on every `ExecuteViaSession` call. A
 ## Execution with a Session Key
 
 ```typescript
-import { executeViaSessionInstruction } from "@sentinel-wallet/sdk";
+import { executeViaSessionInstruction } from "@seal-wallet/sdk";
 
 const execIx = executeViaSessionInstruction({
   sessionKeypair,              // The ephemeral key that signs
@@ -82,7 +82,7 @@ const execIx = executeViaSessionInstruction({
 });
 ```
 
-The Sentinel program then:
+The Seal program then:
 
 1. Loads the `SessionKey` PDA and validates it's active
 2. Checks `amount_lamports ≤ session.max_per_tx`
@@ -114,7 +114,7 @@ Production agents should rotate sessions automatically:
 
 ```typescript
 async function withSession(
-  client: SentinelClient,
+  client: SealClient,
   agent: Keypair,
   ownerPubkey: PublicKey,
   task: (session: Keypair) => Promise<void>
@@ -201,4 +201,4 @@ const monitorSession = await client.createSession(agent, owner, {
 
 ### Rate Limiting
 
-Sentinel does not impose transaction rate limits beyond Solana's native throughput. However, the spending counters act as an economic rate limit — once a session's budget is exhausted, it must create a new one.
+Seal does not impose transaction rate limits beyond Solana's native throughput. However, the spending counters act as an economic rate limit — once a session's budget is exhausted, it must create a new one.

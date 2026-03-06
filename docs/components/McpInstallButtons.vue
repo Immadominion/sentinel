@@ -10,9 +10,9 @@ interface Props {
 
 const props = withDefaults(defineProps<Props>(), {
   title: 'Install MCP Server',
-  description: 'Add Sentinel documentation to your AI assistant',
-  serverName: 'sentinel-docs',
-  packageName: '@sentinel-wallet/mcp-docs'
+  description: 'Add Seal documentation to your AI assistant',
+  serverName: 'seal-docs',
+  packageName: '@seal-wallet/mcp-docs'
 })
 
 const copied = ref<string | null>(null)

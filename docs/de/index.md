@@ -1,11 +1,11 @@
 ---
 layout: home
-title: Sentinel — Smart Wallets für KI-Agenten
+title: Seal — Smart Wallets für KI-Agenten
 lang: de
 description: On-Chain-Richtliniendurchsetzung für autonome KI-Agenten auf Solana. Session-Keys, Ausgabenlimits, Guardian-Wiederherstellung.
 
 hero:
-  name: Sentinel
+  name: Seal
   text: Smart Wallets für Agenten, die wirklich funktionieren.
   tagline: On-Chain-Richtliniendurchsetzung — keine Versprechen. Ihre Agenten arbeiten innerhalb der Grenzen, die Sie definieren und die die Blockchain selbst durchsetzt.
   actions:
@@ -14,7 +14,7 @@ hero:
       link: /de/guide/getting-started
     - theme: alt
       text: Auf GitHub ansehen
-      link: https://github.com/immadominion/sentinel
+      link: https://github.com/immadominion/seal
 
 features:
   - icon: 🔑

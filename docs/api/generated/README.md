@@ -1,8 +1,8 @@
-# Sentinel TypeScript SDK
+# Seal TypeScript SDK
 
-Sentinel Smart Wallet SDK
+Seal Smart Wallet SDK
 
-A TypeScript SDK for interacting with the Sentinel smart wallet program on Solana.
+A TypeScript SDK for interacting with the Seal smart wallet program on Solana.
 Provides autonomous agent capabilities with on-chain spending limits and scoped permissions.
 
 ## Enumerations
@@ -11,7 +11,7 @@ Provides autonomous agent capabilities with on-chain spending limits and scoped 
 
 ## Classes
 
-- [SentinelClient](Class.SentinelClient.md)
+- [SealClient](Class.SealClient.md)
 
 ## Interfaces
 
@@ -25,7 +25,7 @@ Provides autonomous agent capabilities with on-chain spending limits and scoped 
 - [RecoverWalletParams](Interface.RecoverWalletParams.md)
 - [RegisterAgentParams](Interface.RegisterAgentParams.md)
 - [RevokeSessionParams](Interface.RevokeSessionParams.md)
-- [SentinelClientConfig](Interface.SentinelClientConfig.md)
+- [SealClientConfig](Interface.SealClientConfig.md)
 - [SessionKey](Interface.SessionKey.md)
 - [SmartWallet](Interface.SmartWallet.md)
 - [UpdateSpendingLimitParams](Interface.UpdateSpendingLimitParams.md)
@@ -40,7 +40,7 @@ Provides autonomous agent capabilities with on-chain spending limits and scoped 
 - [MAX\_ALLOWED\_PROGRAMS](Variable.MAX_ALLOWED_PROGRAMS.md)
 - [MAX\_GUARDIANS](Variable.MAX_GUARDIANS.md)
 - [MAX\_SESSION\_DURATION\_SECS](Variable.MAX_SESSION_DURATION_SECS.md)
-- [SENTINEL\_PROGRAM\_ID](Variable.SENTINEL_PROGRAM_ID.md)
+- [SEAL\_PROGRAM\_ID](Variable.SEAL_PROGRAM_ID.md)
 - [SESSION\_KEY\_DISCRIMINATOR](Variable.SESSION_KEY_DISCRIMINATOR.md)
 - [SESSION\_KEY\_SIZE](Variable.SESSION_KEY_SIZE.md)
 - [SESSION\_SEED](Variable.SESSION_SEED.md)

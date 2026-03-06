@@ -1,11 +1,11 @@
 ---
 layout: home
-title: Sentinel — AIエージェントのスマートウォレット
+title: Seal — AIエージェントのスマートウォレット
 lang: ja
 description: Solana上の自律型AIエージェントのためのオンチェーンポリシー実施。セッションキー、支出制限、ガーディアン回復。
 
 hero:
-  name: Sentinel
+  name: Seal
   text: 実際に動くエージェントのためのスマートウォレット。
   tagline: オンチェーンポリシー実施——約束ではなく。あなたのエージェントは、ブロックチェーン自体が適用する境界内で動作します。
   actions:
@@ -14,7 +14,7 @@ hero:
       link: /ja/guide/getting-started
     - theme: alt
       text: GitHubで見る
-      link: https://github.com/immadominion/sentinel
+      link: https://github.com/immadominion/seal
 
 features:
   - icon: 🔑

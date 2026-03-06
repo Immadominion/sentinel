@@ -41,7 +41,7 @@ Thumbs.db
 *.swo
 *~
 
-# Dart / Flutter (sentinel-dart SDK)
+# Dart / Flutter (seal-dart SDK)
 .dart_tool/
 build/
 pubspec.lock

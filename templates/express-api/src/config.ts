@@ -12,7 +12,7 @@ const envSchema = z.object({
     NODE_ENV: z.enum(["development", "production", "test"]).default("development"),
     SOLANA_NETWORK: z.enum(["mainnet-beta", "devnet", "localnet"]).default("devnet"),
     SOLANA_RPC_URL: z.string().url().default("https://api.devnet.solana.com"),
-    SENTINEL_PROGRAM_ID: z.string().min(32).max(50),
+    SEAL_PROGRAM_ID: z.string().min(32).max(50),
     AGENT_KEYPAIR_PATH: z.string().optional(),
     CORS_ORIGINS: z.string().default("*"),
 });

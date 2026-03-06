@@ -10,7 +10,7 @@ import {
     SystemProgram,
     LAMPORTS_PER_SOL,
 } from "@solana/web3.js";
-import { getConnection, deriveWalletPda, SENTINEL_PROGRAM_ID } from "../services/solana.js";
+import { getConnection, deriveWalletPda, SEAL_PROGRAM_ID } from "../services/solana.js";
 import { createError } from "../middleware/error.js";
 
 const router = Router();
@@ -118,7 +118,7 @@ function buildCreateWalletIx(
     ]);
 
     return {
-        programId: SENTINEL_PROGRAM_ID,
+        programId: SEAL_PROGRAM_ID,
         keys: [
             { pubkey: funder, isSigner: true, isWritable: true },
             { pubkey: owner, isSigner: true, isWritable: false },

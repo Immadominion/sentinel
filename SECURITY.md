@@ -1,10 +1,10 @@
-# Sentinel Smart Wallet — Security Considerations
+# Seal Smart Wallet — Security Considerations
 
 ## Overview
 
-This document outlines known security considerations, limitations, and best practices for the Sentinel smart wallet program. **This is a financial system dealing with REAL MONEY.** Users and integrators should carefully review these notes before deploying to production.
+This document outlines known security considerations, limitations, and best practices for the Seal smart wallet program. **This is a financial system dealing with REAL MONEY.** Users and integrators should carefully review these notes before deploying to production.
 
-> **Status**: Sentinel is deployed on **devnet only** and has not undergone a formal third-party audit. Do not use on mainnet for significant value without an independent audit.
+> **Status**: Seal is deployed on **devnet only** and has not undergone a formal third-party audit. Do not use on mainnet for significant value without an independent audit.
 
 ---
 
@@ -30,7 +30,7 @@ In v1, ANY single registered guardian can unilaterally:
 5. No recourse — the change is immediate and on-chain
 ```
 
-**Code**: [`instructions/recover_wallet.rs`](programs/sentinel-wallet/src/instructions/recover_wallet.rs)
+**Code**: [`instructions/recover_wallet.rs`](programs/seal-wallet/src/instructions/recover_wallet.rs)
 
 **Mitigation until v2:**
 
@@ -51,7 +51,7 @@ The `ExecuteViaSession` instruction accepts `amount_lamports` as a **caller-decl
 
 This means an agent can declare `amount_lamports = 0` while the inner CPI transfers the wallet's entire SOL balance. All three spending limit tiers (session, agent, wallet) are bypassable.
 
-**Code**: [`instructions/execute_via_session.rs`](programs/sentinel-wallet/src/instructions/execute_via_session.rs)
+**Code**: [`instructions/execute_via_session.rs`](programs/seal-wallet/src/instructions/execute_via_session.rs)
 
 **Mitigation:**
 
@@ -73,7 +73,7 @@ When an agent is registered with `allowed_programs_count = 0`, the agent can CPI
 
 This is a "default open" design — an agent without explicit restrictions has no restrictions.
 
-**Code**: [`state/agent_config.rs`](programs/sentinel-wallet/src/state/agent_config.rs) — `is_program_allowed()` and `is_instruction_allowed()`
+**Code**: [`state/agent_config.rs`](programs/seal-wallet/src/state/agent_config.rs) — `is_program_allowed()` and `is_instruction_allowed()`
 
 ```rust
 pub fn is_program_allowed(&self, program_id: &[u8; 32]) -> bool {
@@ -92,7 +92,7 @@ pub fn is_program_allowed(&self, program_id: &[u8; 32]) -> bool {
 
 If the inner instruction data is less than 8 bytes, the instruction discriminator check is **skipped entirely**. An attacker could craft a CPI with <8 bytes of data to bypass instruction allowlisting.
 
-**Code**: [`instructions/execute_via_session.rs`](programs/sentinel-wallet/src/instructions/execute_via_session.rs) — conditional check `if inner_instruction_data.len() >= 8`
+**Code**: [`instructions/execute_via_session.rs`](programs/seal-wallet/src/instructions/execute_via_session.rs) — conditional check `if inner_instruction_data.len() >= 8`
 
 **Mitigation:** Target programs that require ≥8 bytes of instruction data are unaffected. For programs accepting short instructions, rely on the program allowlist instead.
 
@@ -185,8 +185,8 @@ Spending limits are enforced at three independent levels:
 
 | Directory | Contents |
 |-----------|----------|
-| [`programs/sentinel-wallet/`](programs/sentinel-wallet/) | On-chain program (Pinocchio, ~100KB binary) |
-| [`sdk/sentinel-ts/`](sdk/sentinel-ts/) | TypeScript SDK |
+| [`programs/seal-wallet/`](programs/seal-wallet/) | On-chain program (Pinocchio, ~100KB binary) |
+| [`sdk/seal-ts/`](sdk/seal-ts/) | TypeScript SDK |
 | [`tests/`](tests/) | Integration tests (LiteSVM + Vitest) |
 
 ---

@@ -8,4 +8,4 @@ Defined in: instructions.ts:456
 | ------ | ------ | ------ | ------ |
 | <a id="property-guardian"></a> `guardian` | `PublicKey` | The guardian's public key to add | instructions.ts:460 |
 | <a id="property-owner"></a> `owner` | `PublicKey` | The owner's public key (must sign) | instructions.ts:458 |
-| <a id="property-programid"></a> `programId?` | `PublicKey` | Program ID (defaults to SENTINEL_PROGRAM_ID) | instructions.ts:462 |
+| <a id="property-programid"></a> `programId?` | `PublicKey` | Program ID (defaults to SEAL_PROGRAM_ID) | instructions.ts:462 |

@@ -1,0 +1,28 @@
+[package]
+name = "seal-wallet"
+version.workspace = true
+edition.workspace = true
+license.workspace = true
+description = "Pinocchio smart wallet program with on-chain session keys, spending limits, and agent delegation"
+
+[features]
+default = ["alloc"]
+alloc = ["pinocchio/alloc"]
+cpi = ["pinocchio/cpi"]
+bpf-entrypoint = []
+no-entrypoint = []
+test-sbf = []
+
+[dependencies]
+pinocchio = { workspace = true }
+pinocchio-system = { workspace = true }
+pinocchio-token = { workspace = true }
+solana-program-log = { workspace = true }
+borsh = { workspace = true }
+bytemuck = { workspace = true }
+
+[dev-dependencies]
+solana-sdk = { workspace = true }
+
+[lib]
+crate-type = ["cdylib", "lib"]

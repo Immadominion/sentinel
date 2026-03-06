@@ -15,7 +15,7 @@ import {
     deriveWalletPda,
     deriveAgentPda,
     deriveSessionPda,
-    SENTINEL_PROGRAM_ID,
+    SEAL_PROGRAM_ID,
 } from "../services/solana.js";
 import { createError } from "../middleware/error.js";
 
@@ -142,7 +142,7 @@ function buildCreateSessionIx(
     ]);
 
     return {
-        programId: SENTINEL_PROGRAM_ID,
+        programId: SEAL_PROGRAM_ID,
         keys: [
             { pubkey: owner, isSigner: true, isWritable: true },
             { pubkey: wallet, isSigner: false, isWritable: false },
@@ -165,7 +165,7 @@ function buildRevokeSessionIx(
     const data = Buffer.from([InstructionDiscriminant.RevokeSession]);
 
     return {
-        programId: SENTINEL_PROGRAM_ID,
+        programId: SEAL_PROGRAM_ID,
         keys: [
             { pubkey: revoker, isSigner: true, isWritable: false },
             { pubkey: wallet, isSigner: false, isWritable: false },

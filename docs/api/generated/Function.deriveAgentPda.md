@@ -18,7 +18,7 @@ Seeds: ["agent", wallet_pubkey, agent_pubkey]
 | ------ | ------ | ------ |
 | `wallet` | `PublicKey` | `undefined` |
 | `agent` | `PublicKey` | `undefined` |
-| `programId` | `PublicKey` | `SENTINEL_PROGRAM_ID` |
+| `programId` | `PublicKey` | `SEAL_PROGRAM_ID` |
 
 ## Returns
 

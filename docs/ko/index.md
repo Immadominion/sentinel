@@ -1,11 +1,11 @@
 ---
 layout: home
-title: Sentinel — AI 에이전트를 위한 스마트 지갑
+title: Seal — AI 에이전트를 위한 스마트 지갑
 lang: ko
 description: Solana의 자율 AI 에이전트를 위한 온체인 정책 실행. 세션 키, 지출 한도, 가디언 복구.
 
 hero:
-  name: Sentinel
+  name: Seal
   text: 실제로 실행되는 에이전트를 위한 스마트 지갑.
   tagline: 온체인 정책 실행 — 약속이 아닙니다. 에이전트는 블록체인 자체가 시행하는 한계 내에서 작동합니다.
   actions:
@@ -14,7 +14,7 @@ hero:
       link: /ko/guide/getting-started
     - theme: alt
       text: GitHub 보기
-      link: https://github.com/immadominion/sentinel
+      link: https://github.com/immadominion/seal
 
 features:
   - icon: 🔑

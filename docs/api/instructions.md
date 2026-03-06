@@ -1,6 +1,6 @@
 # Instructions
 
-Sentinel exposes 10 instructions through a single-byte discriminant at the start of the instruction data. This page documents every instruction's accounts, data layout, and behavior.
+Seal exposes 10 instructions through a single-byte discriminant at the start of the instruction data. This page documents every instruction's accounts, data layout, and behavior.
 
 ## Instruction Table
 
@@ -51,7 +51,7 @@ Deploy a new SmartWallet PDA. Supports sponsored creation where a separate funde
 ### SDK
 
 ```typescript
-import { createWalletInstruction } from "@sentinel-wallet/sdk";
+import { createWalletInstruction } from "@seal-wallet/sdk";
 
 const ix = createWalletInstruction({
   owner: ownerPubkey,
@@ -104,7 +104,7 @@ Register an agent with scoped permissions on the wallet.
 ### SDK
 
 ```typescript
-import { registerAgentInstruction } from "@sentinel-wallet/sdk";
+import { registerAgentInstruction } from "@seal-wallet/sdk";
 
 const ix = registerAgentInstruction({
   owner: ownerPubkey,

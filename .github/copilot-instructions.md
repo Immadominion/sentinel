@@ -1,4 +1,4 @@
-# Sentinel Wallet — AI Agent Coding Instructions
+# Seal Wallet — AI Agent Coding Instructions
 
 ## ⚠️ CRITICAL: SECURITY-FIRST DEVELOPMENT
 This is a **smart wallet program that controls real money on Solana mainnet**. Every code change, every parameter, every assumption can result in **total loss of user funds**. When in doubt, STOP and verify.
@@ -35,9 +35,9 @@ This project uses **Pinocchio** (anza-xyz/pinocchio), NOT Anchor. Reasons:
 - Use Codama (not Anchor) for IDL/client generation
 
 ### 3. ALL POLICY ENFORCEMENT IS ON-CHAIN
-The on-chain program is the ONLY source of truth. Client-side checks in sentinel-core/policy.rs are **optimistic pre-validation** only — they exist to give better error messages, NOT to enforce security.
+The on-chain program is the ONLY source of truth. Client-side checks in seal-core/policy.rs are **optimistic pre-validation** only — they exist to give better error messages, NOT to enforce security.
 
-**Every** limit, allowlist, and permission check must be enforced in `programs/sentinel-wallet/src/instructions/`.
+**Every** limit, allowlist, and permission check must be enforced in `programs/seal-wallet/src/instructions/`.
 
 ### 4. NEVER STORE RAW PRIVATE KEYS
 - Private keys must ALWAYS be encrypted at rest (AES-256-GCM)
@@ -57,11 +57,11 @@ The on-chain program is the ONLY source of truth. Client-side checks in sentinel
 ## Project Structure
 
 ```
-sentinel/
-├── programs/sentinel-wallet/  # Pinocchio on-chain program (Rust)
-├── crates/sentinel-core/      # Crypto core (Rust → Dart via FRB)
-├── sdk/sentinel-dart/         # Flutter/Dart SDK
-├── sdk/sentinel-ts/           # TypeScript SDK
+seal/
+├── programs/seal-wallet/  # Pinocchio on-chain program (Rust)
+├── crates/seal-core/      # Crypto core (Rust → Dart via FRB)
+├── sdk/seal-dart/         # Flutter/Dart SDK
+├── sdk/seal-ts/           # TypeScript SDK
 ├── tests/                     # Integration tests (bankrun)
 ├── codama.json                # IDL generation config
 ├── ARCHITECTURE.md            # Technical architecture docs
@@ -107,7 +107,7 @@ Every instruction MUST validate:
 
 ### Error Handling
 Every error must:
-- Use a specific `SentinelError` variant (NOT generic ProgramError)
+- Use a specific `SealError` variant (NOT generic ProgramError)
 - Have a unique error code number
 - Be categorized (General 0-99, Wallet 100-199, Agent 200-299, Session 300-399, Guardian 400-499, CPI 500-599, Nonce 600-699)
 - Log context via `solana_program_log::sol_log()`
@@ -126,7 +126,7 @@ Every error must:
 
 ---
 
-## sentinel-core (Rust Crypto) Rules
+## seal-core (Rust Crypto) Rules
 
 ### Key Management
 - Generate keys using `ed25519_dalek::SigningKey::generate(&mut OsRng)`
@@ -145,7 +145,7 @@ Every error must:
 
 ### flutter_rust_bridge Integration
 - Rust core is exposed to Dart via auto-generated FFI bindings
-- Run `flutter_rust_bridge_codegen generate` after modifying sentinel-core
+- Run `flutter_rust_bridge_codegen generate` after modifying seal-core
 - Never manually write FFI bindings — always auto-generate
 - Keep Rust API surface simple (no complex generics in public API)
 
@@ -181,7 +181,7 @@ Every error must:
 5. **Closed/locked account** — must reject operations
 
 ### Test Tools
-- **Rust unit tests**: `cargo test` in programs/sentinel-wallet
+- **Rust unit tests**: `cargo test` in programs/seal-wallet
 - **Integration tests**: solana-bankrun (TypeScript)
 - **SDK tests**: vitest (TS), flutter_test (Dart)
 
@@ -191,7 +191,7 @@ Every error must:
 
 ```bash
 # Build on-chain program
-cd sentinel && cargo build-sbf
+cd seal && cargo build-sbf
 
 # Run Rust tests
 cargo test --workspace
@@ -200,13 +200,13 @@ cargo test --workspace
 npx codama generate
 
 # Build TypeScript SDK
-cd sdk/sentinel-ts && npm run build
+cd sdk/seal-ts && npm run build
 
 # Run integration tests
 cd tests && npm test
 
 # Generate Dart FFI bindings
-cd sdk/sentinel-dart && flutter_rust_bridge_codegen generate
+cd sdk/seal-dart && flutter_rust_bridge_codegen generate
 ```
 
 ---

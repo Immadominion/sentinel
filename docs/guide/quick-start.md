@@ -6,20 +6,20 @@ Create a smart wallet, register an agent, and execute an autonomous transaction 
 
 - Node.js 18+
 - A funded Solana keypair on devnet (`solana airdrop 2 --url devnet`)
-- The Sentinel SDK (`npm install @sentinel-wallet/sdk`)
+- The Seal SDK (`npm install @seal-wallet/sdk`)
 
 ## Full Example
 
 ```typescript
 import { Keypair, LAMPORTS_PER_SOL } from "@solana/web3.js";
-import { SentinelClient } from "@sentinel-wallet/sdk";
+import { SealClient } from "@seal-wallet/sdk";
 
 // Load your owner keypair
 const owner = Keypair.fromSecretKey(
   Uint8Array.from(JSON.parse(require("fs").readFileSync("./wallet.json", "utf-8")))
 );
 
-const client = new SentinelClient({ network: "devnet" });
+const client = new SealClient({ network: "devnet" });
 
 async function main() {
   // ① Create a SmartWallet
@@ -59,7 +59,7 @@ main().catch(console.error);
 
 ## What Happened
 
-1. **`createWallet`** deployed a `SmartWallet` PDA derived from `["sentinel", owner_pubkey]`. The PDA holds the wallet's spending policy — not your funds directly. SOL is sent to the PDA like any other account.
+1. **`createWallet`** deployed a `SmartWallet` PDA derived from `["seal", owner_pubkey]`. The PDA holds the wallet's spending policy — not your funds directly. SOL is sent to the PDA like any other account.
 
 2. **`registerAgent`** created an `AgentConfig` PDA at `["agent", wallet_pda, agent_pubkey]`. The agent is scoped to 2 SOL/day and 0.5 SOL/tx. You can also restrict which programs and instruction discriminators it can call.
 
@@ -71,7 +71,7 @@ Once a session exists, the agent can execute CPI calls through the wallet:
 
 ```typescript
 import { PublicKey, TransactionInstruction } from "@solana/web3.js";
-import { executeViaSessionInstruction } from "@sentinel-wallet/sdk";
+import { executeViaSessionInstruction } from "@seal-wallet/sdk";
 
 // Build the inner instruction (whatever your agent needs to do)
 const innerIx = new TransactionInstruction({
@@ -80,7 +80,7 @@ const innerIx = new TransactionInstruction({
   data: Buffer.from([/* ... instruction data ... */]),
 });
 
-// Wrap it in a Sentinel execution
+// Wrap it in a Seal execution
 const execIx = executeViaSessionInstruction({
   sessionKeypair,
   walletOwner: owner.publicKey,
@@ -92,7 +92,7 @@ const execIx = executeViaSessionInstruction({
 });
 ```
 
-The Sentinel program will:
+The Seal program will:
 
 1. Verify the session key is valid and not expired
 2. Check the amount against per-tx limits, session cap, daily limit, and wallet-level limits

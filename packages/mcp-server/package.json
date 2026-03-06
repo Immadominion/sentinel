@@ -1,0 +1,36 @@
+{
+    "name": "@seal-wallet/mcp-server",
+    "version": "0.1.0",
+    "description": "MCP server for Seal smart wallet — exposes on-chain wallet operations as AI-agent tools",
+    "type": "module",
+    "main": "dist/index.js",
+    "bin": {
+        "seal-mcp": "dist/index.js"
+    },
+    "scripts": {
+        "build": "tsup src/index.ts --format esm --dts --clean",
+        "dev": "tsup src/index.ts --format esm --dts --watch",
+        "start": "node dist/index.js",
+        "lint": "eslint src/"
+    },
+    "dependencies": {
+        "@modelcontextprotocol/sdk": "^1.12.1",
+        "@seal-wallet/sdk": "file:../../sdk/seal-ts",
+        "@solana/web3.js": "^1.98.0",
+        "bs58": "^6.0.0",
+        "zod": "^3.24.0"
+    },
+    "devDependencies": {
+        "eslint": "^9.0.0",
+        "tsup": "^8.0.0",
+        "typescript": "^5.7.0"
+    },
+    "license": "Apache-2.0",
+    "repository": {
+        "type": "git",
+        "directory": "packages/mcp-server"
+    },
+    "files": [
+        "dist"
+    ]
+}

@@ -2,7 +2,7 @@
   <div class="bento-section">
     <div class="bento-header">
       <span class="bento-label">BUILT DIFFERENT</span>
-      <h2 class="bento-title">Why Sentinel?</h2>
+      <h2 class="bento-title">Why Seal?</h2>
     </div>
     <div class="bento-grid">
       <!-- Large card: On-Chain Enforcement (spans 2 cols) -->
@@ -32,7 +32,7 @@
           <span class="card-tag">ECONOMICS</span>
           <h3 class="card-title">Zero-Cost Signing</h3>
           <p class="card-description">
-            Unlike competitors charging per signature, Sentinel charges nothing. Session keys sign directly via CPI — no relay, no paywall.
+            Unlike competitors charging per signature, Seal charges nothing. Session keys sign directly via CPI — no relay, no paywall.
           </p>
         </div>
         <div class="card-metric">
@@ -89,7 +89,7 @@
         </div>
         <div class="card-comparison">
           <div class="comparison-bar">
-            <div class="bar-fill bar-sentinel">
+            <div class="bar-fill bar-seal">
               <span>~100KB</span>
             </div>
           </div>
@@ -99,7 +99,7 @@
             </div>
           </div>
           <div class="comparison-labels">
-            <span>Sentinel</span>
+            <span>Seal</span>
             <span>Anchor</span>
           </div>
         </div>
@@ -295,7 +295,7 @@ html.dark .bento-card:hover {
   border-radius: 5px;
 }
 
-.bar-sentinel {
+.bar-seal {
   width: 20%;
   background: var(--vp-c-text-1);
   color: var(--vp-c-bg);

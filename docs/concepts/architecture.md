@@ -1,6 +1,6 @@
 # Architecture
 
-Sentinel is structured as a single Solana program with three on-chain account types that form a hierarchical delegation model. Understanding this hierarchy is key to reasoning about how Sentinel enforces policy.
+Seal is structured as a single Solana program with three on-chain account types that form a hierarchical delegation model. Understanding this hierarchy is key to reasoning about how Seal enforces policy.
 
 ## Account Hierarchy
 
@@ -33,7 +33,7 @@ When an agent wants to execute a transaction autonomously, the flow passes throu
 ```mermaid
 sequenceDiagram
     participant SK as Session Key
-    participant SP as Sentinel Program
+    participant SP as Seal Program
     participant SW as SmartWallet PDA
     participant AC as AgentConfig PDA
     participant SKP as SessionKey PDA
@@ -60,9 +60,9 @@ Every check is performed **inside the program** before CPI execution. If any che
 
 ### Pinocchio Runtime
 
-Sentinel is built with [Pinocchio](https://github.com/anza-xyz/pinocchio), a zero-copy Solana runtime framework. Unlike Anchor, Pinocchio doesn't generate IDL boilerplate or framework overhead:
+Seal is built with [Pinocchio](https://github.com/anza-xyz/pinocchio), a zero-copy Solana runtime framework. Unlike Anchor, Pinocchio doesn't generate IDL boilerplate or framework overhead:
 
-| Metric | Sentinel (Pinocchio) | Typical Anchor Program |
+| Metric | Seal (Pinocchio) | Typical Anchor Program |
 |--------|---------------------|----------------------|
 | Binary size | ~100 KB | ~500 KB+ |
 | Account deserialization | Zero-copy borsh | Framework-managed |
@@ -73,7 +73,7 @@ The trade-off is more manual code, but the result is a smaller, more auditable p
 
 ### Instruction Set
 
-Sentinel exposes 10 instructions via a single-byte discriminant:
+Seal exposes 10 instructions via a single-byte discriminant:
 
 | Discriminant | Instruction | Authority | Purpose |
 |-------------|-------------|-----------|---------|
@@ -93,7 +93,7 @@ Sentinel exposes 10 instructions via a single-byte discriminant:
 All accounts are PDAs derived from deterministic seeds:
 
 ```
-SmartWallet:  ["sentinel", owner_pubkey]
+SmartWallet:  ["seal", owner_pubkey]
 AgentConfig:  ["agent", wallet_pda, agent_pubkey]
 SessionKey:   ["session", wallet_pda, agent_pubkey, session_pubkey]
 ```
@@ -128,7 +128,7 @@ graph LR
 
 ## Comparison with Alternatives
 
-| Feature | Sentinel | Squads v4 | Privy | Crossmint |
+| Feature | Seal | Squads v4 | Privy | Crossmint |
 |---------|----------|-----------|-------|-----------|
 | Enforcement | On-chain program | On-chain multisig | Server-side | Server-side |
 | Per-sig cost | $0 (tx fee only) | $0 (tx fee only) | $0.01/sig | $0.05/MAW |

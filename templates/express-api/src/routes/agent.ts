@@ -14,7 +14,7 @@ import {
     getConnection,
     deriveWalletPda,
     deriveAgentPda,
-    SENTINEL_PROGRAM_ID,
+    SEAL_PROGRAM_ID,
 } from "../services/solana.js";
 import { createError } from "../middleware/error.js";
 
@@ -143,7 +143,7 @@ function buildRegisterAgentIx(
     ]);
 
     return {
-        programId: SENTINEL_PROGRAM_ID,
+        programId: SEAL_PROGRAM_ID,
         keys: [
             { pubkey: owner, isSigner: true, isWritable: true },
             { pubkey: wallet, isSigner: false, isWritable: true },

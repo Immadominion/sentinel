@@ -1,15 +1,15 @@
-# SKILLS.md — Sentinel Wallet
+# SKILLS.md — Seal Wallet
 
-> This file describes the capabilities and tools exposed by the Sentinel smart wallet for AI agents operating on Solana.
+> This file describes the capabilities and tools exposed by the Seal smart wallet for AI agents operating on Solana.
 
 ## Identity
 
-- **Name**: Sentinel
+- **Name**: Seal
 - **Type**: On-chain smart wallet with session key delegation
 - **Network**: Solana (devnet)
 - **Program ID**: `EV3TKRVz7pTHpAqBTjP8jmwuvoRBRCpjmVSPHhcMnXqb`
 - **License**: Apache-2.0
-- **Repository**: <https://github.com/immadominion/sentinel>
+- **Repository**: <https://github.com/immadominion/seal>
 
 ## What I Can Do
 
@@ -59,13 +59,13 @@
 ### TypeScript
 
 ```bash
-npm install @sentinel-wallet/sdk
+npm install @seal-wallet/sdk
 ```
 
 ```typescript
-import { SentinelClient } from "@sentinel-wallet/sdk";
+import { SealClient } from "@seal-wallet/sdk";
 
-const client = new SentinelClient({ network: "devnet" });
+const client = new SealClient({ network: "devnet" });
 
 // Create wallet → Register agent → Create session → Execute
 const wallet = await client.createWallet(owner, { dailyLimitSol: 10, perTxLimitSol: 1 });
@@ -77,7 +77,7 @@ const session = await client.createSession(agentKey, owner.publicKey, { ... });
 
 ```yaml
 dependencies:
-  sentinel_dart: ^0.1.0
+  seal_dart: ^0.1.0
 ```
 
 ## Security Model
@@ -92,20 +92,20 @@ dependencies:
 
 ### Documentation MCP (Available)
 
-Sentinel provides docs as an MCP server, so AI agents can search and retrieve Sentinel documentation to generate correct integration code:
+Seal provides docs as an MCP server, so AI agents can search and retrieve Seal documentation to generate correct integration code:
 
-- `sentinel_search_docs` — Full-text search across all Sentinel documentation
-- `sentinel_get_doc` — Retrieve a specific documentation page
-- `sentinel_list_docs` — List all available documentation pages
+- `seal_search_docs` — Full-text search across all Seal documentation
+- `seal_get_doc` — Retrieve a specific documentation page
+- `seal_list_docs` — List all available documentation pages
 
 ### Wallet MCP (Planned)
 
-A wallet MCP server is on our roadmap — it will let AI agents operate Sentinel wallets via tool calls, with all spending limits enforced on-chain:
+A wallet MCP server is on our roadmap — it will let AI agents operate Seal wallets via tool calls, with all spending limits enforced on-chain:
 
-- `sentinel_create_wallet` — Create a sub-wallet with spending limits
-- `sentinel_execute` — Execute a CPI through the wallet via session key
-- `sentinel_get_balance` — Check wallet SOL balance
-- `sentinel_revoke_session` — Emergency session revoke
+- `seal_create_wallet` — Create a sub-wallet with spending limits
+- `seal_execute` — Execute a CPI through the wallet via session key
+- `seal_get_balance` — Check wallet SOL balance
+- `seal_revoke_session` — Emergency session revoke
 
 Combined with the upcoming mobile app, users will create sub-wallets from their phone, pass them to AI agents via MCP, and maintain full control over spending limits and program access — all enforced on-chain.
 
@@ -120,4 +120,4 @@ Combined with the upcoming mobile app, users will create sub-wallets from their 
 
 ## Documentation
 
-Full docs: <https://github.com/immadominion/sentinel/tree/main/docs>
+Full docs: <https://github.com/immadominion/seal/tree/main/docs>

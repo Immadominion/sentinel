@@ -1,12 +1,12 @@
 # PDA Derivation
 
-Sentinel uses three Program Derived Addresses (PDAs). All are deterministic — you can compute any address client-side without querying the chain.
+Seal uses three Program Derived Addresses (PDAs). All are deterministic — you can compute any address client-side without querying the chain.
 
 ## Seeds
 
 | Account | Seeds | Address |
 |---------|-------|---------|
-| SmartWallet | `["sentinel", owner_pubkey]` | One per owner |
+| SmartWallet | `["seal", owner_pubkey]` | One per owner |
 | AgentConfig | `["agent", wallet_pda, agent_pubkey]` | One per wallet-agent pair |
 | SessionKey | `["session", wallet_pda, agent_pubkey, session_pubkey]` | One per session |
 
@@ -15,35 +15,35 @@ Sentinel uses three Program Derived Addresses (PDAs). All are deterministic — 
 ```typescript
 import { PublicKey } from "@solana/web3.js";
 import {
-  SENTINEL_PROGRAM_ID,
-  WALLET_SEED,    // Buffer.from("sentinel")
+  SEAL_PROGRAM_ID,
+  WALLET_SEED,    // Buffer.from("seal")
   AGENT_SEED,     // Buffer.from("agent")
   SESSION_SEED,   // Buffer.from("session")
-} from "@sentinel-wallet/sdk";
+} from "@seal-wallet/sdk";
 ```
 
 ### deriveWalletPda
 
 ```typescript
-import { deriveWalletPda } from "@sentinel-wallet/sdk";
+import { deriveWalletPda } from "@seal-wallet/sdk";
 
 const [walletPda, bump] = deriveWalletPda(ownerPubkey);
-// Seeds: [Buffer.from("sentinel"), owner.toBuffer()]
+// Seeds: [Buffer.from("seal"), owner.toBuffer()]
 ```
 
 **Manual derivation:**
 
 ```typescript
 const [walletPda, bump] = PublicKey.findProgramAddressSync(
-  [Buffer.from("sentinel"), ownerPubkey.toBuffer()],
-  SENTINEL_PROGRAM_ID
+  [Buffer.from("seal"), ownerPubkey.toBuffer()],
+  SEAL_PROGRAM_ID
 );
 ```
 
 ### deriveAgentPda
 
 ```typescript
-import { deriveAgentPda } from "@sentinel-wallet/sdk";
+import { deriveAgentPda } from "@seal-wallet/sdk";
 
 const [agentPda, bump] = deriveAgentPda(walletPda, agentPubkey);
 // Seeds: [Buffer.from("agent"), wallet.toBuffer(), agent.toBuffer()]
@@ -54,14 +54,14 @@ const [agentPda, bump] = deriveAgentPda(walletPda, agentPubkey);
 ```typescript
 const [agentPda, bump] = PublicKey.findProgramAddressSync(
   [Buffer.from("agent"), walletPda.toBuffer(), agentPubkey.toBuffer()],
-  SENTINEL_PROGRAM_ID
+  SEAL_PROGRAM_ID
 );
 ```
 
 ### deriveSessionPda
 
 ```typescript
-import { deriveSessionPda } from "@sentinel-wallet/sdk";
+import { deriveSessionPda } from "@seal-wallet/sdk";
 
 const [sessionPda, bump] = deriveSessionPda(walletPda, agentPubkey, sessionPubkey);
 // Seeds: [Buffer.from("session"), wallet.toBuffer(), agent.toBuffer(), session.toBuffer()]
@@ -77,20 +77,20 @@ const [sessionPda, bump] = PublicKey.findProgramAddressSync(
     agentPubkey.toBuffer(),
     sessionPubkey.toBuffer(),
   ],
-  SENTINEL_PROGRAM_ID
+  SEAL_PROGRAM_ID
 );
 ```
 
 ## Rust (Program-Side)
 
-Inside the Sentinel program, PDA derivation uses Pinocchio's address utilities:
+Inside the Seal program, PDA derivation uses Pinocchio's address utilities:
 
 ```rust
 use crate::state::{WALLET_SEED, AGENT_SEED, SESSION_SEED};
 
 // SmartWallet PDA
 let wallet_seeds = &[
-    WALLET_SEED,           // b"sentinel"
+    WALLET_SEED,           // b"seal"
     owner.address().as_ref(),
     &[bump],
 ];
@@ -117,7 +117,7 @@ let session_seeds = &[
 
 ```mermaid
 graph TD
-    Owner[Owner Pubkey] -->|seed| WS["sentinel" + owner]
+    Owner[Owner Pubkey] -->|seed| WS["seal" + owner]
     WS --> Wallet[SmartWallet PDA]
     Wallet -->|seed| AS["agent" + wallet + agent"]
     Agent[Agent Pubkey] -->|seed| AS

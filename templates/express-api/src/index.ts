@@ -1,8 +1,8 @@
 /**
- * Sentinel Backend API
+ * Seal Backend API
  *
  * Express 5 server providing REST endpoints for Sage mobile app
- * to interact with Sentinel smart wallets on Solana.
+ * to interact with Seal smart wallets on Solana.
  */
 
 import express from "express";
@@ -59,12 +59,12 @@ const PORT = config.PORT;
 app.listen(PORT, () => {
     console.log();
     console.log("═".repeat(60));
-    console.log("  Sentinel Backend API");
+    console.log("  Seal Backend API");
     console.log("═".repeat(60));
     console.log(`  Port:      ${PORT}`);
     console.log(`  Network:   ${config.SOLANA_NETWORK}`);
     console.log(`  RPC:       ${config.SOLANA_RPC_URL}`);
-    console.log(`  Program:   ${config.SENTINEL_PROGRAM_ID}`);
+    console.log(`  Program:   ${config.SEAL_PROGRAM_ID}`);
     console.log("═".repeat(60));
     console.log();
     console.log("Endpoints:");

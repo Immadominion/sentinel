@@ -1,12 +1,12 @@
 # Account Model
 
-Sentinel uses three on-chain account types, all stored as PDAs with deterministic derivation. Every account uses Borsh serialization with a fixed-size layout — no variable-length fields, no reallocations.
+Seal uses three on-chain account types, all stored as PDAs with deterministic derivation. Every account uses Borsh serialization with a fixed-size layout — no variable-length fields, no reallocations.
 
 ## SmartWallet
 
 The root account that holds assets and enforces global spending policy.
 
-**PDA Seeds**: `["sentinel", owner_pubkey]`
+**PDA Seeds**: `["seal", owner_pubkey]`
 **Discriminator**: `SentWalt` (8 bytes)
 **Size**: 245 bytes
 
@@ -121,7 +121,7 @@ A session key becomes unusable when **any** of these conditions is true:
 
 | Account | Size (bytes) | Rent-Exempt (SOL) | Key |
 |---------|-------------|-------------------|-----|
-| SmartWallet | 245 | ~0.0028 | `["sentinel", owner]` |
+| SmartWallet | 245 | ~0.0028 | `["seal", owner]` |
 | AgentConfig | 540 | ~0.0049 | `["agent", wallet, agent]` |
 | SessionKey | 154 | ~0.0021 | `["session", wallet, agent, session]` |
 
