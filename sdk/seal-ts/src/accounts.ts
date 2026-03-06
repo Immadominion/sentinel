@@ -43,26 +43,28 @@ function readFixedString(buf: Buffer, offset: number, length: number): string {
 /**
  * Deserialize a SmartWallet account from raw bytes.
  *
- * Layout (245 bytes total - verified from Rust):
+ * Layout (278 bytes total - verified from Rust):
  * - [0..8]    discriminator "SealWalt" (8)
- * - [8..40]   owner: Pubkey (32)
- * - [40]      bump: u8 (1)
- * - [41..49]  nonce: u64 (8)
- * - [49]      agent_count: u8 (1)
- * - [50]      guardian_count: u8 (1)
- * - [51..211] guardians: [Pubkey; 5] (160 = 5*32)
- * - [211..219] daily_limit_lamports: u64 (8)
- * - [219..227] per_tx_limit_lamports: u64 (8)
- * - [227..235] spent_today_lamports: u64 (8)
- * - [235..243] day_start_timestamp: i64 (8)
- * - [243]     is_locked: bool (1)
- * - [244]     is_closed: bool (1)
+ * - [8..40]   pda_authority: Pubkey (32) — immutable PDA derivation key
+ * - [40..72]  owner: Pubkey (32) — rotatable master authority
+ * - [72]      bump: u8 (1)
+ * - [73..81]  nonce: u64 (8)
+ * - [81]      agent_count: u8 (1)
+ * - [82]      guardian_count: u8 (1)
+ * - [83]      recovery_threshold: u8 (1)
+ * - [84..244] guardians: [Pubkey; 5] (160 = 5*32)
+ * - [244..252] daily_limit_lamports: u64 (8)
+ * - [252..260] per_tx_limit_lamports: u64 (8)
+ * - [260..268] spent_today_lamports: u64 (8)
+ * - [268..276] day_start_timestamp: i64 (8)
+ * - [276]     is_locked: bool (1)
+ * - [277]     is_closed: bool (1)
  */
 export function deserializeSmartWallet(
     address: PublicKey,
     data: Buffer
 ): SmartWallet | null {
-    if (data.length < 245) {
+    if (data.length < 278) {
         return null;
     }
 
@@ -72,32 +74,36 @@ export function deserializeSmartWallet(
         return null;
     }
 
-    const owner = readPubkey(data, 8);
-    const bump = data[40];
-    const nonce = readU64LE(data, 41);
-    const agentCount = data[49];
-    const guardianCount = data[50];
+    const pdaAuthority = readPubkey(data, 8);
+    const owner = readPubkey(data, 40);
+    const bump = data[72];
+    const nonce = readU64LE(data, 73);
+    const agentCount = data[81];
+    const guardianCount = data[82];
+    const recoveryThreshold = data[83];
 
     // Read guardians (up to guardianCount)
     const guardians: string[] = [];
     for (let i = 0; i < guardianCount && i < MAX_GUARDIANS; i++) {
-        guardians.push(readPubkey(data, 51 + i * 32));
+        guardians.push(readPubkey(data, 84 + i * 32));
     }
 
-    const dailyLimitLamports = readU64LE(data, 211);
-    const perTxLimitLamports = readU64LE(data, 219);
-    const spentTodayLamports = readU64LE(data, 227);
-    const dayStartTimestamp = readI64LE(data, 235);
-    const isLocked = data[243] !== 0;
-    const isClosed = data[244] !== 0;
+    const dailyLimitLamports = readU64LE(data, 244);
+    const perTxLimitLamports = readU64LE(data, 252);
+    const spentTodayLamports = readU64LE(data, 260);
+    const dayStartTimestamp = readI64LE(data, 268);
+    const isLocked = data[276] !== 0;
+    const isClosed = data[277] !== 0;
 
     return {
         address: address.toBase58(),
+        pdaAuthority,
         owner,
         bump,
         nonce,
         agentCount,
         guardianCount,
+        recoveryThreshold,
         guardians,
         dailyLimitLamports,
         perTxLimitLamports,
@@ -115,7 +121,7 @@ export function deserializeSmartWallet(
 /**
  * Deserialize an AgentConfig account from raw bytes.
  *
- * Layout (540 bytes total - verified from Rust):
+ * Layout (556 bytes total - verified from Rust):
  * - [0..8]     discriminator "SealAgnt" (8)
  * - [8..40]    wallet: Pubkey (32)
  * - [40..72]   agent: Pubkey (32)
@@ -132,12 +138,14 @@ export function deserializeSmartWallet(
  * - [516..524] max_session_duration: i64 (8)
  * - [524..532] total_spent: u64 (8)
  * - [532..540] tx_count: u64 (8)
+ * - [540..548] spent_today: u64 (8)
+ * - [548..556] day_start_timestamp: i64 (8)
  */
 export function deserializeAgentConfig(
     address: PublicKey,
     data: Buffer
 ): AgentConfig | null {
-    if (data.length < 540) {
+    if (data.length < 556) {
         return null;
     }
 
@@ -174,6 +182,8 @@ export function deserializeAgentConfig(
     const maxSessionDuration = readI64LE(data, limitsOffset + 24);
     const totalSpent = readU64LE(data, limitsOffset + 32);
     const txCount = readU64LE(data, limitsOffset + 40);
+    const spentToday = readU64LE(data, limitsOffset + 48);
+    const dayStartTimestamp = readI64LE(data, limitsOffset + 56);
 
     return {
         configAddress: address.toBase58(),
@@ -190,6 +200,8 @@ export function deserializeAgentConfig(
         maxSessionDuration,
         totalSpent,
         txCount,
+        spentToday,
+        dayStartTimestamp,
     };
 }
 

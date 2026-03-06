@@ -18,6 +18,8 @@ pub enum SealInstruction {
     DeregisterAgent = 8,
     CloseWallet = 9,
     LockWallet = 10,
+    RemoveGuardian = 11,
+    SetRecoveryThreshold = 12,
 }
 
 impl TryFrom<u8> for SealInstruction {
@@ -36,6 +38,8 @@ impl TryFrom<u8> for SealInstruction {
             8 => Ok(Self::DeregisterAgent),
             9 => Ok(Self::CloseWallet),
             10 => Ok(Self::LockWallet),
+            11 => Ok(Self::RemoveGuardian),
+            12 => Ok(Self::SetRecoveryThreshold),
             _ => Err(SealError::InvalidInstruction),
         }
     }
@@ -100,6 +104,14 @@ pub fn process_instruction(
         SealInstruction::LockWallet => {
             log!("Instruction: LockWallet");
             instructions::lock_wallet::process(program_id, accounts, data)
+        }
+        SealInstruction::RemoveGuardian => {
+            log!("Instruction: RemoveGuardian");
+            instructions::remove_guardian::process(program_id, accounts, data)
+        }
+        SealInstruction::SetRecoveryThreshold => {
+            log!("Instruction: SetRecoveryThreshold");
+            instructions::set_recovery_threshold::process(program_id, accounts, data)
         }
     }
 }

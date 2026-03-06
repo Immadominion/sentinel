@@ -47,6 +47,8 @@ const IX_RECOVER_WALLET = 7;
 const IX_DEREGISTER_AGENT = 8;
 const IX_CLOSE_WALLET = 9;
 const IX_LOCK_WALLET = 10;
+const IX_REMOVE_GUARDIAN = 11;
+const IX_SET_RECOVERY_THRESHOLD = 12;
 
 // Sizes
 const MAX_GUARDIANS = 5;
@@ -321,18 +323,22 @@ describe("Seal Wallet", () => {
         SMART_WALLET_DISCRIMINATOR.toString()
       );
 
-      // Verify owner (bytes 8-40)
+      // Verify owner (bytes 40-72, after pda_authority at 8-40)
+      expect(data.subarray(40, 72)).toEqual(
+        Buffer.from(owner.publicKey.toBuffer())
+      );
+
+      // Verify pda_authority == owner at creation (bytes 8-40)
       expect(data.subarray(8, 40)).toEqual(
         Buffer.from(owner.publicKey.toBuffer())
       );
 
-      // Verify bump (byte 40)
-      expect(data[40]).toBe(walletBump);
+      // Verify bump (byte 72)
+      expect(data[72]).toBe(walletBump);
 
-      // Verify daily limit (bytes 43-51, after nonce(8) + agent_count(1) + guardian_count(1) + guardians(160))
-      // nonce at 41-48, agent_count at 49, guardian_count at 50, guardians at 51-210
-      // daily_limit at 211-218, per_tx at 219-226
-      const dailyLimitOffset = 8 + 32 + 1 + 8 + 1 + 1 + (MAX_GUARDIANS * 32);
+      // Verify daily limit
+      // Layout: disc(8) + pda_authority(32) + owner(32) + bump(1) + nonce(8) + agent_count(1) + guardian_count(1) + recovery_threshold(1) + guardians(160)
+      const dailyLimitOffset = 8 + 32 + 32 + 1 + 8 + 1 + 1 + 1 + (MAX_GUARDIANS * 32);
       const readDailyLimit = data.readBigUInt64LE(dailyLimitOffset);
       expect(readDailyLimit).toBe(dailyLimit);
 
@@ -774,7 +780,7 @@ describe("Seal Wallet", () => {
       // Verify updated limits
       const account = svm.getAccount(walletPda);
       const data = Buffer.from(account!.data);
-      const dailyLimitOffset = 8 + 32 + 1 + 8 + 1 + 1 + (MAX_GUARDIANS * 32);
+      const dailyLimitOffset = 8 + 32 + 32 + 1 + 8 + 1 + 1 + 1 + (MAX_GUARDIANS * 32);
       expect(data.readBigUInt64LE(dailyLimitOffset)).toBe(newDaily);
       expect(data.readBigUInt64LE(dailyLimitOffset + 8)).toBe(newPerTx);
     });
@@ -837,11 +843,11 @@ describe("Seal Wallet", () => {
       // Verify guardian_count incremented
       const account = svm.getAccount(walletPda);
       const data = Buffer.from(account!.data);
-      // guardian_count at offset 8+32+1+8+1 = 50
-      expect(data[50]).toBe(1);
+      // guardian_count at offset 8+32+32+1+8+1 = 82
+      expect(data[82]).toBe(1);
 
-      // Verify guardian pubkey at offset 51
-      expect(data.subarray(51, 83)).toEqual(
+      // Verify guardian pubkey at offset 84 (after recovery_threshold at 83)
+      expect(data.subarray(84, 116)).toEqual(
         Buffer.from(guardian.publicKey.toBuffer())
       );
     });
@@ -850,7 +856,7 @@ describe("Seal Wallet", () => {
       // Read current guardian
       const account = svm.getAccount(walletPda);
       const data = Buffer.from(account!.data);
-      const existingGuardian = new PublicKey(data.subarray(51, 83));
+      const existingGuardian = new PublicKey(data.subarray(84, 116));
 
       const ix = new TransactionInstruction({
         programId: PROGRAM_ID,
@@ -998,14 +1004,13 @@ describe("Seal Wallet", () => {
       // Verify wallet nonce was incremented (from 0 to 1)
       const walletAcc = svm.getAccount(walletPda)!;
       const walletData = Buffer.from(walletAcc.data);
-      // nonce at offset 8+32+1 = 41
-      expect(walletData.readBigUInt64LE(41)).toBe(1n);
+      // nonce at offset 8+32+32+1 = 73
+      expect(walletData.readBigUInt64LE(73)).toBe(1n);
 
       // Verify agent tx_count incremented
       const agentAcc = svm.getAccount(cpiAgentPda)!;
       const agentData = Buffer.from(agentAcc.data);
-      // AgentConfig SIZE = 8+32+32+32+1+1+1+(8*32)+1+(16*8)+8+8+8+8+8+8 = 540
-      // total_spent at offset 524, tx_count at offset 532
+      // AgentConfig: total_spent at 524, tx_count at 532 (unchanged — new fields at end)
       expect(agentData.readBigUInt64LE(532)).toBe(1n);
 
       // Verify session amount_spent updated (0n since amount tracked = 0)
@@ -1040,7 +1045,7 @@ describe("Seal Wallet", () => {
       // Wallet nonce should be 2 now (second execution)
       const walletAcc = svm.getAccount(walletPda)!;
       const walletData = Buffer.from(walletAcc.data);
-      expect(walletData.readBigUInt64LE(41)).toBe(2n);
+      expect(walletData.readBigUInt64LE(73)).toBe(2n);
 
       // Agent tx_count should be 2
       const agentAcc = svm.getAccount(cpiAgentPda)!;
@@ -1054,7 +1059,7 @@ describe("Seal Wallet", () => {
       expect(sessionData.readBigUInt64LE(amountSpentOffset)).toBe(trackedAmount);
 
       // Wallet spent_today should be 1 SOL
-      const dailyLimitOffset = 8 + 32 + 1 + 8 + 1 + 1 + (MAX_GUARDIANS * 32);
+      const dailyLimitOffset = 8 + 32 + 32 + 1 + 8 + 1 + 1 + 1 + (MAX_GUARDIANS * 32);
       const spentTodayOffset = dailyLimitOffset + 16; // after daily_limit(8) + per_tx_limit(8)
       expect(walletData.readBigUInt64LE(spentTodayOffset)).toBe(trackedAmount);
     });
@@ -1180,10 +1185,10 @@ describe("Seal Wallet", () => {
       });
       sendTx(svm, [lockIx], [owner]);
 
-      // Verify is_locked (offset: 8+32+1+8+1+1+160+8+8+8+8 = 243)
+      // Verify is_locked (offset: 8+32+32+1+8+1+1+1+160+8+8+8+8 = 276)
       let account = svm.getAccount(walletPda);
       let data = Buffer.from(account!.data);
-      const isLockedOffset = 8 + 32 + 1 + 8 + 1 + 1 + (MAX_GUARDIANS * 32) + 8 + 8 + 8 + 8;
+      const isLockedOffset = 8 + 32 + 32 + 1 + 8 + 1 + 1 + 1 + (MAX_GUARDIANS * 32) + 8 + 8 + 8 + 8;
       expect(data[isLockedOffset]).toBe(1); // locked
 
       // Unlock
@@ -1296,10 +1301,10 @@ describe("Seal Wallet", () => {
       });
       sendTx(svm, [ix], [guardian]);
 
-      // Verify owner changed
+      // Verify owner changed (offset 40-72, pda_authority at 8-40 stays the same)
       const account = svm.getAccount(recoveryWalletPda);
       const data = Buffer.from(account!.data);
-      expect(data.subarray(8, 40)).toEqual(
+      expect(data.subarray(40, 72)).toEqual(
         Buffer.from(newOwner.publicKey.toBuffer())
       );
     });
@@ -1414,10 +1419,10 @@ describe("Seal Wallet", () => {
       const agentAccount = svm.getAccount(closeAgentPda);
       expect(agentAccount?.data.length ?? 0).toBe(0);
 
-      // Verify agent_count decremented (offset 49)
+      // Verify agent_count decremented (offset 81)
       const walletAccount = svm.getAccount(closeWalletPda);
       const walletData = Buffer.from(walletAccount!.data);
-      expect(walletData[49]).toBe(0); // agent_count = 0
+      expect(walletData[81]).toBe(0); // agent_count = 0
     });
 
     it("should close wallet after all agents are removed", () => {
@@ -1552,6 +1557,620 @@ describe("Seal Wallet", () => {
       });
 
       sendTxExpectFail(svm, [execIx], [noAllowSession]);
+    });
+  });
+
+  // ────────────────────────────────────────────────────────
+  // RemoveGuardian
+  // ────────────────────────────────────────────────────────
+
+  describe("RemoveGuardian", () => {
+    let rmOwner: Keypair;
+    let rmWalletPda: PublicKey;
+    let rmWalletBump: number;
+    let rmGuardian1: Keypair;
+    let rmGuardian2: Keypair;
+
+    beforeAll(() => {
+      rmOwner = Keypair.generate();
+      svm.airdrop(rmOwner.publicKey, BigInt(10 * LAMPORTS_PER_SOL));
+      [rmWalletPda, rmWalletBump] = deriveWalletPda(rmOwner.publicKey);
+
+      // Create wallet
+      const createIx = new TransactionInstruction({
+        programId: PROGRAM_ID,
+        keys: [
+          { pubkey: rmOwner.publicKey, isSigner: true, isWritable: true },
+          { pubkey: rmOwner.publicKey, isSigner: true, isWritable: false },
+          { pubkey: rmWalletPda, isSigner: false, isWritable: true },
+          { pubkey: SystemProgram.programId, isSigner: false, isWritable: false },
+        ],
+        data: buildCreateWalletData(rmWalletBump, BigInt(10 * LAMPORTS_PER_SOL), BigInt(1 * LAMPORTS_PER_SOL)),
+      });
+      sendTx(svm, [createIx], [rmOwner]);
+
+      // Add two guardians
+      rmGuardian1 = Keypair.generate();
+      rmGuardian2 = Keypair.generate();
+
+      sendTx(svm, [new TransactionInstruction({
+        programId: PROGRAM_ID,
+        keys: [
+          { pubkey: rmOwner.publicKey, isSigner: true, isWritable: false },
+          { pubkey: rmWalletPda, isSigner: false, isWritable: true },
+        ],
+        data: buildAddGuardianData(rmGuardian1.publicKey),
+      })], [rmOwner]);
+
+      sendTx(svm, [new TransactionInstruction({
+        programId: PROGRAM_ID,
+        keys: [
+          { pubkey: rmOwner.publicKey, isSigner: true, isWritable: false },
+          { pubkey: rmWalletPda, isSigner: false, isWritable: true },
+        ],
+        data: buildAddGuardianData(rmGuardian2.publicKey),
+      })], [rmOwner]);
+    });
+
+    it("should remove a guardian (owner only)", () => {
+      // Remove guardian1
+      const ix = new TransactionInstruction({
+        programId: PROGRAM_ID,
+        keys: [
+          { pubkey: rmOwner.publicKey, isSigner: true, isWritable: false },
+          { pubkey: rmWalletPda, isSigner: false, isWritable: true },
+        ],
+        data: Buffer.concat([Buffer.from([IX_REMOVE_GUARDIAN]), rmGuardian1.publicKey.toBuffer()]),
+      });
+      sendTx(svm, [ix], [rmOwner]);
+
+      // Verify guardian_count decremented to 1
+      const account = svm.getAccount(rmWalletPda);
+      const data = Buffer.from(account!.data);
+      expect(data[82]).toBe(1); // guardian_count
+
+      // Verify remaining guardian is guardian2 (shifted to slot 0)
+      expect(data.subarray(84, 116)).toEqual(Buffer.from(rmGuardian2.publicKey.toBuffer()));
+    });
+
+    it("should reject removing non-existent guardian", () => {
+      const fake = Keypair.generate();
+      const ix = new TransactionInstruction({
+        programId: PROGRAM_ID,
+        keys: [
+          { pubkey: rmOwner.publicKey, isSigner: true, isWritable: false },
+          { pubkey: rmWalletPda, isSigner: false, isWritable: true },
+        ],
+        data: Buffer.concat([Buffer.from([IX_REMOVE_GUARDIAN]), fake.publicKey.toBuffer()]),
+      });
+      sendTxExpectFail(svm, [ix], [rmOwner]);
+    });
+
+    it("should reject remove from non-owner", () => {
+      const imposter = Keypair.generate();
+      svm.airdrop(imposter.publicKey, BigInt(LAMPORTS_PER_SOL));
+      const ix = new TransactionInstruction({
+        programId: PROGRAM_ID,
+        keys: [
+          { pubkey: imposter.publicKey, isSigner: true, isWritable: false },
+          { pubkey: rmWalletPda, isSigner: false, isWritable: true },
+        ],
+        data: Buffer.concat([Buffer.from([IX_REMOVE_GUARDIAN]), rmGuardian2.publicKey.toBuffer()]),
+      });
+      sendTxExpectFail(svm, [ix], [imposter]);
+    });
+  });
+
+  // ────────────────────────────────────────────────────────
+  // SetRecoveryThreshold
+  // ────────────────────────────────────────────────────────
+
+  describe("SetRecoveryThreshold", () => {
+    let threshOwner: Keypair;
+    let threshWalletPda: PublicKey;
+    let threshWalletBump: number;
+
+    beforeAll(() => {
+      threshOwner = Keypair.generate();
+      svm.airdrop(threshOwner.publicKey, BigInt(10 * LAMPORTS_PER_SOL));
+      [threshWalletPda, threshWalletBump] = deriveWalletPda(threshOwner.publicKey);
+
+      // Create wallet
+      sendTx(svm, [new TransactionInstruction({
+        programId: PROGRAM_ID,
+        keys: [
+          { pubkey: threshOwner.publicKey, isSigner: true, isWritable: true },
+          { pubkey: threshOwner.publicKey, isSigner: true, isWritable: false },
+          { pubkey: threshWalletPda, isSigner: false, isWritable: true },
+          { pubkey: SystemProgram.programId, isSigner: false, isWritable: false },
+        ],
+        data: buildCreateWalletData(threshWalletBump, BigInt(10 * LAMPORTS_PER_SOL), BigInt(1 * LAMPORTS_PER_SOL)),
+      })], [threshOwner]);
+
+      // Add 3 guardians
+      for (let i = 0; i < 3; i++) {
+        const g = Keypair.generate();
+        sendTx(svm, [new TransactionInstruction({
+          programId: PROGRAM_ID,
+          keys: [
+            { pubkey: threshOwner.publicKey, isSigner: true, isWritable: false },
+            { pubkey: threshWalletPda, isSigner: false, isWritable: true },
+          ],
+          data: buildAddGuardianData(g.publicKey),
+        })], [threshOwner]);
+      }
+    });
+
+    it("should set recovery threshold", () => {
+      const ix = new TransactionInstruction({
+        programId: PROGRAM_ID,
+        keys: [
+          { pubkey: threshOwner.publicKey, isSigner: true, isWritable: false },
+          { pubkey: threshWalletPda, isSigner: false, isWritable: true },
+        ],
+        data: Buffer.from([IX_SET_RECOVERY_THRESHOLD, 2]),
+      });
+      sendTx(svm, [ix], [threshOwner]);
+
+      // Verify recovery_threshold = 2 at offset 83
+      const account = svm.getAccount(threshWalletPda);
+      const data = Buffer.from(account!.data);
+      expect(data[83]).toBe(2);
+    });
+
+    it("should reject threshold of 0", () => {
+      const ix = new TransactionInstruction({
+        programId: PROGRAM_ID,
+        keys: [
+          { pubkey: threshOwner.publicKey, isSigner: true, isWritable: false },
+          { pubkey: threshWalletPda, isSigner: false, isWritable: true },
+        ],
+        data: Buffer.from([IX_SET_RECOVERY_THRESHOLD, 0]),
+      });
+      sendTxExpectFail(svm, [ix], [threshOwner]);
+    });
+
+    it("should reject threshold exceeding guardian count", () => {
+      // 3 guardians, try threshold=4
+      const ix = new TransactionInstruction({
+        programId: PROGRAM_ID,
+        keys: [
+          { pubkey: threshOwner.publicKey, isSigner: true, isWritable: false },
+          { pubkey: threshWalletPda, isSigner: false, isWritable: true },
+        ],
+        data: Buffer.from([IX_SET_RECOVERY_THRESHOLD, 4]),
+      });
+      sendTxExpectFail(svm, [ix], [threshOwner]);
+    });
+  });
+
+  // ────────────────────────────────────────────────────────
+  // M-of-N Recovery
+  // ────────────────────────────────────────────────────────
+
+  describe("M-of-N Recovery", () => {
+    let mnOwner: Keypair;
+    let mnWalletPda: PublicKey;
+    let mnWalletBump: number;
+    let mnGuardian1: Keypair;
+    let mnGuardian2: Keypair;
+    let mnGuardian3: Keypair;
+
+    beforeAll(() => {
+      mnOwner = Keypair.generate();
+      svm.airdrop(mnOwner.publicKey, BigInt(10 * LAMPORTS_PER_SOL));
+      [mnWalletPda, mnWalletBump] = deriveWalletPda(mnOwner.publicKey);
+
+      // Create wallet
+      sendTx(svm, [new TransactionInstruction({
+        programId: PROGRAM_ID,
+        keys: [
+          { pubkey: mnOwner.publicKey, isSigner: true, isWritable: true },
+          { pubkey: mnOwner.publicKey, isSigner: true, isWritable: false },
+          { pubkey: mnWalletPda, isSigner: false, isWritable: true },
+          { pubkey: SystemProgram.programId, isSigner: false, isWritable: false },
+        ],
+        data: buildCreateWalletData(mnWalletBump, BigInt(10 * LAMPORTS_PER_SOL), BigInt(1 * LAMPORTS_PER_SOL)),
+      })], [mnOwner]);
+
+      // Add 3 guardians
+      mnGuardian1 = Keypair.generate();
+      mnGuardian2 = Keypair.generate();
+      mnGuardian3 = Keypair.generate();
+      svm.airdrop(mnGuardian1.publicKey, BigInt(LAMPORTS_PER_SOL));
+      svm.airdrop(mnGuardian2.publicKey, BigInt(LAMPORTS_PER_SOL));
+      svm.airdrop(mnGuardian3.publicKey, BigInt(LAMPORTS_PER_SOL));
+
+      for (const g of [mnGuardian1, mnGuardian2, mnGuardian3]) {
+        sendTx(svm, [new TransactionInstruction({
+          programId: PROGRAM_ID,
+          keys: [
+            { pubkey: mnOwner.publicKey, isSigner: true, isWritable: false },
+            { pubkey: mnWalletPda, isSigner: false, isWritable: true },
+          ],
+          data: buildAddGuardianData(g.publicKey),
+        })], [mnOwner]);
+      }
+
+      // Set threshold to 2-of-3
+      sendTx(svm, [new TransactionInstruction({
+        programId: PROGRAM_ID,
+        keys: [
+          { pubkey: mnOwner.publicKey, isSigner: true, isWritable: false },
+          { pubkey: mnWalletPda, isSigner: false, isWritable: true },
+        ],
+        data: Buffer.from([IX_SET_RECOVERY_THRESHOLD, 2]),
+      })], [mnOwner]);
+    });
+
+    it("should reject recovery with 1 guardian when threshold is 2", () => {
+      const newOwner = Keypair.generate();
+      const ix = new TransactionInstruction({
+        programId: PROGRAM_ID,
+        keys: [
+          { pubkey: mnGuardian1.publicKey, isSigner: true, isWritable: false },
+          { pubkey: mnWalletPda, isSigner: false, isWritable: true },
+        ],
+        data: buildRecoverWalletData(newOwner.publicKey),
+      });
+      sendTxExpectFail(svm, [ix], [mnGuardian1]);
+    });
+
+    it("should succeed with 2 guardians when threshold is 2", () => {
+      const newOwner = Keypair.generate();
+      const ix = new TransactionInstruction({
+        programId: PROGRAM_ID,
+        keys: [
+          // Two guardian signers
+          { pubkey: mnGuardian1.publicKey, isSigner: true, isWritable: false },
+          { pubkey: mnGuardian2.publicKey, isSigner: true, isWritable: false },
+          // Wallet is last account
+          { pubkey: mnWalletPda, isSigner: false, isWritable: true },
+        ],
+        data: buildRecoverWalletData(newOwner.publicKey),
+      });
+      sendTx(svm, [ix], [mnGuardian1, mnGuardian2]);
+
+      // Verify owner changed but pda_authority unchanged
+      const account = svm.getAccount(mnWalletPda);
+      const data = Buffer.from(account!.data);
+      expect(data.subarray(40, 72)).toEqual(Buffer.from(newOwner.publicKey.toBuffer()));
+      // pda_authority should still be original owner
+      expect(data.subarray(8, 40)).toEqual(Buffer.from(mnOwner.publicKey.toBuffer()));
+    });
+
+    it("should reject recovery with duplicate guardian signers", () => {
+      const newOwner2 = Keypair.generate();
+      const ix = new TransactionInstruction({
+        programId: PROGRAM_ID,
+        keys: [
+          // Same guardian twice
+          { pubkey: mnGuardian3.publicKey, isSigner: true, isWritable: false },
+          { pubkey: mnGuardian3.publicKey, isSigner: true, isWritable: false },
+          { pubkey: mnWalletPda, isSigner: false, isWritable: true },
+        ],
+        data: buildRecoverWalletData(newOwner2.publicKey),
+      });
+      sendTxExpectFail(svm, [ix], [mnGuardian3]);
+    });
+  });
+
+  // ────────────────────────────────────────────────────────
+  // Edge Cases: Recovery then CPI (C1 regression test)
+  // ────────────────────────────────────────────────────────
+
+  describe("Recovery then CPI (C1 regression)", () => {
+    const MEMO_PROGRAM_ID = new PublicKey("MemoSq4gqABAXKb96qnH8TysNcWxMyWCqXgDLGmfcHr");
+
+    it("should execute CPI after guardian recovery (pda_authority stable)", () => {
+      // Create wallet, add guardian, register agent, create session, recover, then execute
+      const origOwner = Keypair.generate();
+      svm.airdrop(origOwner.publicKey, BigInt(10 * LAMPORTS_PER_SOL));
+      const [wPda, wBump] = deriveWalletPda(origOwner.publicKey);
+
+      // Create
+      sendTx(svm, [new TransactionInstruction({
+        programId: PROGRAM_ID,
+        keys: [
+          { pubkey: origOwner.publicKey, isSigner: true, isWritable: true },
+          { pubkey: origOwner.publicKey, isSigner: true, isWritable: false },
+          { pubkey: wPda, isSigner: false, isWritable: true },
+          { pubkey: SystemProgram.programId, isSigner: false, isWritable: false },
+        ],
+        data: buildCreateWalletData(wBump, BigInt(10 * LAMPORTS_PER_SOL), BigInt(2 * LAMPORTS_PER_SOL)),
+      })], [origOwner]);
+
+      // Add guardian
+      const guard = Keypair.generate();
+      svm.airdrop(guard.publicKey, BigInt(LAMPORTS_PER_SOL));
+      sendTx(svm, [new TransactionInstruction({
+        programId: PROGRAM_ID,
+        keys: [
+          { pubkey: origOwner.publicKey, isSigner: true, isWritable: false },
+          { pubkey: wPda, isSigner: false, isWritable: true },
+        ],
+        data: buildAddGuardianData(guard.publicKey),
+      })], [origOwner]);
+
+      // Register agent with Memo allowed
+      const agent = Keypair.generate();
+      const [aPda, aBump] = deriveAgentPda(wPda, agent.publicKey);
+      sendTx(svm, [new TransactionInstruction({
+        programId: PROGRAM_ID,
+        keys: [
+          { pubkey: origOwner.publicKey, isSigner: true, isWritable: true },
+          { pubkey: wPda, isSigner: false, isWritable: true },
+          { pubkey: aPda, isSigner: false, isWritable: true },
+          { pubkey: SystemProgram.programId, isSigner: false, isWritable: false },
+        ],
+        data: buildRegisterAgentData(aBump, agent.publicKey, "PostRecovery", [MEMO_PROGRAM_ID], [],
+          BigInt(5 * LAMPORTS_PER_SOL), BigInt(2 * LAMPORTS_PER_SOL), 3600n, 86400n),
+      })], [origOwner]);
+
+      svm.airdrop(agent.publicKey, BigInt(5 * LAMPORTS_PER_SOL));
+
+      // Create session
+      const sessKey = Keypair.generate();
+      const [sPda, sBump] = deriveSessionPda(wPda, agent.publicKey, sessKey.publicKey);
+      sendTx(svm, [new TransactionInstruction({
+        programId: PROGRAM_ID,
+        keys: [
+          { pubkey: agent.publicKey, isSigner: true, isWritable: true },
+          { pubkey: wPda, isSigner: false, isWritable: false },
+          { pubkey: aPda, isSigner: false, isWritable: false },
+          { pubkey: sPda, isSigner: false, isWritable: true },
+          { pubkey: SystemProgram.programId, isSigner: false, isWritable: false },
+        ],
+        data: buildCreateSessionData(sBump, sessKey.publicKey, 3600n, BigInt(5 * LAMPORTS_PER_SOL), BigInt(2 * LAMPORTS_PER_SOL)),
+      })], [agent]);
+      svm.airdrop(sessKey.publicKey, BigInt(LAMPORTS_PER_SOL));
+
+      // *** RECOVER WALLET — rotate owner ***
+      const newOwner = Keypair.generate();
+      sendTx(svm, [new TransactionInstruction({
+        programId: PROGRAM_ID,
+        keys: [
+          { pubkey: guard.publicKey, isSigner: true, isWritable: false },
+          { pubkey: wPda, isSigner: false, isWritable: true },
+        ],
+        data: buildRecoverWalletData(newOwner.publicKey),
+      })], [guard]);
+
+      // Verify owner changed
+      let wData = Buffer.from(svm.getAccount(wPda)!.data);
+      expect(wData.subarray(40, 72)).toEqual(Buffer.from(newOwner.publicKey.toBuffer()));
+      // pda_authority stays the same
+      expect(wData.subarray(8, 40)).toEqual(Buffer.from(origOwner.publicKey.toBuffer()));
+
+      // *** CPI AFTER RECOVERY — should still work because pda_authority is immutable ***
+      const memoText = Buffer.from("Post-recovery memo!");
+      const execData = Buffer.concat([
+        Buffer.from([IX_EXECUTE_VIA_SESSION]),
+        encodeU64(0n),
+        memoText,
+      ]);
+      const execIx = new TransactionInstruction({
+        programId: PROGRAM_ID,
+        keys: [
+          { pubkey: sessKey.publicKey, isSigner: true, isWritable: false },
+          { pubkey: wPda, isSigner: false, isWritable: true },
+          { pubkey: aPda, isSigner: false, isWritable: true },
+          { pubkey: sPda, isSigner: false, isWritable: true },
+          { pubkey: MEMO_PROGRAM_ID, isSigner: false, isWritable: false },
+          { pubkey: wPda, isSigner: false, isWritable: true },
+        ],
+        data: execData,
+      });
+
+      // This is the critical test — CPI must succeed after recovery
+      sendTx(svm, [execIx], [sessKey]);
+
+      // Verify nonce incremented (proves CPI executed)
+      wData = Buffer.from(svm.getAccount(wPda)!.data);
+      expect(wData.readBigUInt64LE(73)).toBe(1n);
+    });
+  });
+
+  // ────────────────────────────────────────────────────────
+  // Edge Cases: Locked wallet blocks execution
+  // ────────────────────────────────────────────────────────
+
+  describe("Edge Cases", () => {
+    it("should reject CPI on locked wallet", () => {
+      const MEMO_PROGRAM_ID = new PublicKey("MemoSq4gqABAXKb96qnH8TysNcWxMyWCqXgDLGmfcHr");
+
+      // Create a fresh wallet for this test
+      const edgeOwner = Keypair.generate();
+      svm.airdrop(edgeOwner.publicKey, BigInt(10 * LAMPORTS_PER_SOL));
+      const [ePda, eBump] = deriveWalletPda(edgeOwner.publicKey);
+
+      sendTx(svm, [new TransactionInstruction({
+        programId: PROGRAM_ID,
+        keys: [
+          { pubkey: edgeOwner.publicKey, isSigner: true, isWritable: true },
+          { pubkey: edgeOwner.publicKey, isSigner: true, isWritable: false },
+          { pubkey: ePda, isSigner: false, isWritable: true },
+          { pubkey: SystemProgram.programId, isSigner: false, isWritable: false },
+        ],
+        data: buildCreateWalletData(eBump, BigInt(10 * LAMPORTS_PER_SOL), BigInt(2 * LAMPORTS_PER_SOL)),
+      })], [edgeOwner]);
+
+      // Register agent + session
+      const eAgent = Keypair.generate();
+      const [eAPda, eABump] = deriveAgentPda(ePda, eAgent.publicKey);
+      sendTx(svm, [new TransactionInstruction({
+        programId: PROGRAM_ID,
+        keys: [
+          { pubkey: edgeOwner.publicKey, isSigner: true, isWritable: true },
+          { pubkey: ePda, isSigner: false, isWritable: true },
+          { pubkey: eAPda, isSigner: false, isWritable: true },
+          { pubkey: SystemProgram.programId, isSigner: false, isWritable: false },
+        ],
+        data: buildRegisterAgentData(eABump, eAgent.publicKey, "EdgeAgent", [MEMO_PROGRAM_ID], [],
+          BigInt(5 * LAMPORTS_PER_SOL), BigInt(2 * LAMPORTS_PER_SOL), 3600n, 86400n),
+      })], [edgeOwner]);
+      svm.airdrop(eAgent.publicKey, BigInt(5 * LAMPORTS_PER_SOL));
+
+      const eSess = Keypair.generate();
+      const [eSPda, eSBump] = deriveSessionPda(ePda, eAgent.publicKey, eSess.publicKey);
+      sendTx(svm, [new TransactionInstruction({
+        programId: PROGRAM_ID,
+        keys: [
+          { pubkey: eAgent.publicKey, isSigner: true, isWritable: true },
+          { pubkey: ePda, isSigner: false, isWritable: false },
+          { pubkey: eAPda, isSigner: false, isWritable: false },
+          { pubkey: eSPda, isSigner: false, isWritable: true },
+          { pubkey: SystemProgram.programId, isSigner: false, isWritable: false },
+        ],
+        data: buildCreateSessionData(eSBump, eSess.publicKey, 3600n, BigInt(5 * LAMPORTS_PER_SOL), BigInt(2 * LAMPORTS_PER_SOL)),
+      })], [eAgent]);
+      svm.airdrop(eSess.publicKey, BigInt(LAMPORTS_PER_SOL));
+
+      // Lock the wallet
+      sendTx(svm, [new TransactionInstruction({
+        programId: PROGRAM_ID,
+        keys: [
+          { pubkey: edgeOwner.publicKey, isSigner: true, isWritable: false },
+          { pubkey: ePda, isSigner: false, isWritable: true },
+        ],
+        data: buildLockWalletData(true),
+      })], [edgeOwner]);
+
+      // Try CPI — should fail with WalletLocked
+      const execData = Buffer.concat([
+        Buffer.from([IX_EXECUTE_VIA_SESSION]),
+        encodeU64(0n),
+        Buffer.from("locked test"),
+      ]);
+      const execIx = new TransactionInstruction({
+        programId: PROGRAM_ID,
+        keys: [
+          { pubkey: eSess.publicKey, isSigner: true, isWritable: false },
+          { pubkey: ePda, isSigner: false, isWritable: true },
+          { pubkey: eAPda, isSigner: false, isWritable: true },
+          { pubkey: eSPda, isSigner: false, isWritable: true },
+          { pubkey: MEMO_PROGRAM_ID, isSigner: false, isWritable: false },
+          { pubkey: ePda, isSigner: false, isWritable: true },
+        ],
+        data: execData,
+      });
+      sendTxExpectFail(svm, [execIx], [eSess]);
+    });
+
+    it("should reject agent limits exceeding wallet limits (H3)", () => {
+      const h3Owner = Keypair.generate();
+      svm.airdrop(h3Owner.publicKey, BigInt(10 * LAMPORTS_PER_SOL));
+      const [h3Pda, h3Bump] = deriveWalletPda(h3Owner.publicKey);
+
+      sendTx(svm, [new TransactionInstruction({
+        programId: PROGRAM_ID,
+        keys: [
+          { pubkey: h3Owner.publicKey, isSigner: true, isWritable: true },
+          { pubkey: h3Owner.publicKey, isSigner: true, isWritable: false },
+          { pubkey: h3Pda, isSigner: false, isWritable: true },
+          { pubkey: SystemProgram.programId, isSigner: false, isWritable: false },
+        ],
+        data: buildCreateWalletData(h3Bump, BigInt(5 * LAMPORTS_PER_SOL), BigInt(1 * LAMPORTS_PER_SOL)),
+      })], [h3Owner]);
+
+      // Try registering agent with daily limit > wallet daily limit
+      const h3Agent = Keypair.generate();
+      const [h3APda, h3ABump] = deriveAgentPda(h3Pda, h3Agent.publicKey);
+      const ix = new TransactionInstruction({
+        programId: PROGRAM_ID,
+        keys: [
+          { pubkey: h3Owner.publicKey, isSigner: true, isWritable: true },
+          { pubkey: h3Pda, isSigner: false, isWritable: true },
+          { pubkey: h3APda, isSigner: false, isWritable: true },
+          { pubkey: SystemProgram.programId, isSigner: false, isWritable: false },
+        ],
+        data: buildRegisterAgentData(h3ABump, h3Agent.publicKey, "OverLimit",
+          [SystemProgram.programId], [],
+          BigInt(20 * LAMPORTS_PER_SOL), // EXCEEDS wallet's 5 SOL daily limit
+          BigInt(1 * LAMPORTS_PER_SOL), 3600n, 86400n),
+      });
+      sendTxExpectFail(svm, [ix], [h3Owner]);
+    });
+
+    it("should reject recovery with zero address as new owner", () => {
+      const zeroOwner = Keypair.generate();
+      svm.airdrop(zeroOwner.publicKey, BigInt(10 * LAMPORTS_PER_SOL));
+      const [zPda, zBump] = deriveWalletPda(zeroOwner.publicKey);
+
+      sendTx(svm, [new TransactionInstruction({
+        programId: PROGRAM_ID,
+        keys: [
+          { pubkey: zeroOwner.publicKey, isSigner: true, isWritable: true },
+          { pubkey: zeroOwner.publicKey, isSigner: true, isWritable: false },
+          { pubkey: zPda, isSigner: false, isWritable: true },
+          { pubkey: SystemProgram.programId, isSigner: false, isWritable: false },
+        ],
+        data: buildCreateWalletData(zBump, BigInt(10 * LAMPORTS_PER_SOL), BigInt(1 * LAMPORTS_PER_SOL)),
+      })], [zeroOwner]);
+
+      const zGuard = Keypair.generate();
+      svm.airdrop(zGuard.publicKey, BigInt(LAMPORTS_PER_SOL));
+      sendTx(svm, [new TransactionInstruction({
+        programId: PROGRAM_ID,
+        keys: [
+          { pubkey: zeroOwner.publicKey, isSigner: true, isWritable: false },
+          { pubkey: zPda, isSigner: false, isWritable: true },
+        ],
+        data: buildAddGuardianData(zGuard.publicKey),
+      })], [zeroOwner]);
+
+      // Try recovery with zero address
+      const ix = new TransactionInstruction({
+        programId: PROGRAM_ID,
+        keys: [
+          { pubkey: zGuard.publicKey, isSigner: true, isWritable: false },
+          { pubkey: zPda, isSigner: false, isWritable: true },
+        ],
+        data: buildRecoverWalletData(PublicKey.default),
+      });
+      sendTxExpectFail(svm, [ix], [zGuard]);
+    });
+
+    it("should reject max guardians + 1", () => {
+      const maxGOwner = Keypair.generate();
+      svm.airdrop(maxGOwner.publicKey, BigInt(10 * LAMPORTS_PER_SOL));
+      const [maxGPda, maxGBump] = deriveWalletPda(maxGOwner.publicKey);
+
+      sendTx(svm, [new TransactionInstruction({
+        programId: PROGRAM_ID,
+        keys: [
+          { pubkey: maxGOwner.publicKey, isSigner: true, isWritable: true },
+          { pubkey: maxGOwner.publicKey, isSigner: true, isWritable: false },
+          { pubkey: maxGPda, isSigner: false, isWritable: true },
+          { pubkey: SystemProgram.programId, isSigner: false, isWritable: false },
+        ],
+        data: buildCreateWalletData(maxGBump, BigInt(10 * LAMPORTS_PER_SOL), BigInt(1 * LAMPORTS_PER_SOL)),
+      })], [maxGOwner]);
+
+      // Add MAX_GUARDIANS (5)
+      for (let i = 0; i < MAX_GUARDIANS; i++) {
+        const g = Keypair.generate();
+        sendTx(svm, [new TransactionInstruction({
+          programId: PROGRAM_ID,
+          keys: [
+            { pubkey: maxGOwner.publicKey, isSigner: true, isWritable: false },
+            { pubkey: maxGPda, isSigner: false, isWritable: true },
+          ],
+          data: buildAddGuardianData(g.publicKey),
+        })], [maxGOwner]);
+      }
+
+      // 6th guardian should fail
+      const extraGuardian = Keypair.generate();
+      const ix = new TransactionInstruction({
+        programId: PROGRAM_ID,
+        keys: [
+          { pubkey: maxGOwner.publicKey, isSigner: true, isWritable: false },
+          { pubkey: maxGPda, isSigner: false, isWritable: true },
+        ],
+        data: buildAddGuardianData(extraGuardian.publicKey),
+      });
+      sendTxExpectFail(svm, [ix], [maxGOwner]);
     });
   });
 });

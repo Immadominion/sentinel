@@ -136,13 +136,15 @@ pub fn process(
     }
 
     // Check inner instruction discriminator (first 8 bytes) is allowed.
-    // If the agent has an instruction allowlist AND the data is <8 bytes,
+    // If the agent has instruction restrictions AND data is <8 bytes,
     // reject — we cannot verify the discriminator.
-    if agent_config.allowed_instructions_count > 0 && inner_instruction_data.len() < 8 {
-        log!("ExecuteViaSession: instruction data too short to verify discriminator");
-        return Err(SealError::InstructionNotAllowed.into());
-    }
-    if inner_instruction_data.len() >= 8 {
+    // If no instruction restrictions (count=0), all instructions are allowed
+    // on the already-validated program (programs are default-closed).
+    if agent_config.allowed_instructions_count > 0 {
+        if inner_instruction_data.len() < 8 {
+            log!("ExecuteViaSession: instruction data too short to verify discriminator");
+            return Err(SealError::InstructionNotAllowed.into());
+        }
         let mut disc = [0u8; 8];
         disc.copy_from_slice(&inner_instruction_data[..8]);
         if !agent_config.is_instruction_allowed(&disc) {
@@ -198,12 +200,20 @@ pub fn process(
         return Err(SealError::PerTransactionLimitExceeded.into());
     }
 
-    // Agent daily limit (cumulative total_spent is lifetime —
-    // we re-use the wallet's daily window for simplicity).
-    // Note: agent_config doesn't have its own day_start, so we
-    // check against the agent's daily_limit using total_spent
-    // modulo the wallet's rolling day window.
-    // For now, enforce as a per-tx + cumulative cap.
+    // Agent daily limit — rolling daily window, same logic as wallet.
+    utils::maybe_reset_daily_spend(
+        &mut agent_config.spent_today,
+        &mut agent_config.day_start_timestamp,
+        current_timestamp,
+    );
+    let agent_new_daily = agent_config
+        .spent_today
+        .checked_add(amount_lamports)
+        .ok_or(ProgramError::ArithmeticOverflow)?;
+    if agent_new_daily > agent_config.daily_limit {
+        log!("ExecuteViaSession: agent daily limit exceeded");
+        return Err(SealError::DailyLimitExceeded.into());
+    }
 
     // ── Capture pre-CPI wallet balance ──────────────────────
     let pre_cpi_balance = wallet_account.lamports();
@@ -238,12 +248,14 @@ pub fn process(
         data: inner_instruction_data,
     };
 
-    // Build wallet PDA signer seeds: ["seal", owner, bump].
-    let owner_ref: &[u8] = wallet_state.owner.as_ref();
+    // Build wallet PDA signer seeds: ["seal", pda_authority, bump].
+    // CRITICAL: use pda_authority (immutable), NOT owner (rotatable).
+    // After guardian recovery, owner changes but PDA stays the same.
+    let authority_ref: &[u8] = wallet_state.pda_authority.as_ref();
     let bump_bytes = [wallet_state.bump];
     let signer_seeds = [
         Seed::from(WALLET_SEED),
-        Seed::from(owner_ref),
+        Seed::from(authority_ref),
         Seed::from(bump_bytes.as_slice()),
     ];
     let pda_signer = Signer::from(&signer_seeds);
@@ -297,7 +309,7 @@ pub fn process(
         .ok_or(ProgramError::ArithmeticOverflow)?;
     utils::save_account(&wallet_state, wallet_account)?;
 
-    // Update agent cumulative stats.
+    // Update agent cumulative stats + daily spending.
     agent_config.total_spent = agent_config
         .total_spent
         .checked_add(effective_amount)
@@ -305,6 +317,10 @@ pub fn process(
     agent_config.tx_count = agent_config
         .tx_count
         .checked_add(1)
+        .ok_or(ProgramError::ArithmeticOverflow)?;
+    agent_config.spent_today = agent_config
+        .spent_today
+        .checked_add(effective_amount)
         .ok_or(ProgramError::ArithmeticOverflow)?;
     utils::save_account(&agent_config, agent_account)?;
 

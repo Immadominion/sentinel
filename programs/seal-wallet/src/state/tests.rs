@@ -36,6 +36,8 @@ mod tests {
 
         assert_eq!(wallet.discriminator, SMART_WALLET_DISCRIMINATOR);
         assert_eq!(wallet.owner, owner);
+        assert_eq!(wallet.pda_authority, owner); // pda_authority == owner at creation
+        assert_eq!(wallet.recovery_threshold, 1);
         assert_eq!(wallet.bump, 254);
         assert_eq!(wallet.nonce, 0);
         assert_eq!(wallet.agent_count, 0);
@@ -67,6 +69,8 @@ mod tests {
 
         assert_eq!(decoded.discriminator, SMART_WALLET_DISCRIMINATOR);
         assert_eq!(decoded.owner, owner);
+        assert_eq!(decoded.pda_authority, owner); // immutable, always matches initial owner
+        assert_eq!(decoded.recovery_threshold, 1);
         assert_eq!(decoded.bump, 253);
         assert_eq!(decoded.nonce, 7);
         assert_eq!(decoded.agent_count, 3);
@@ -243,6 +247,8 @@ mod tests {
             max_session_duration: 86400,
             total_spent: 100_000,
             tx_count: 5,
+            spent_today: 0,
+            day_start_timestamp: 0,
         }
     }
 
@@ -298,12 +304,12 @@ mod tests {
     }
 
     #[test]
-    fn agent_config_is_program_allowed_zero_count_allows_all() {
+    fn agent_config_is_program_allowed_zero_count_denies_all() {
         let mut agent = make_agent_config();
         agent.allowed_programs_count = 0;
-        // count=0 means "allow all" (no restrictions)
-        assert!(agent.is_program_allowed(&[99u8; 32]));
-        assert!(agent.is_program_allowed(&[0u8; 32]));
+        // count=0 means default-closed: no programs = no access
+        assert!(!agent.is_program_allowed(&[99u8; 32]));
+        assert!(!agent.is_program_allowed(&[0u8; 32]));
     }
 
     #[test]
@@ -322,7 +328,7 @@ mod tests {
     fn agent_config_is_instruction_allowed_zero_count_allows_all() {
         let mut agent = make_agent_config();
         agent.allowed_instructions_count = 0;
-        // When no restrictions, all instructions are allowed
+        // Default-open: no instruction restrictions = all instructions allowed
         assert!(agent.is_instruction_allowed(&[0xFF; 8]));
         assert!(agent.is_instruction_allowed(&[0x00; 8]));
     }

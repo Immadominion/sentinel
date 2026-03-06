@@ -9,3 +9,5 @@ pub mod recover_wallet;
 pub mod deregister_agent;
 pub mod close_wallet;
 pub mod lock_wallet;
+pub mod remove_guardian;
+pub mod set_recovery_threshold;

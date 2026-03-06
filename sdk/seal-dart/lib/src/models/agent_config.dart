@@ -14,6 +14,8 @@ class AgentConfig {
   final int maxSessionDuration;
   final int totalSpent;
   final int txCount;
+  final int spentToday;
+  final int dayStartTimestamp;
 
   const AgentConfig({
     required this.configAddress,
@@ -29,5 +31,7 @@ class AgentConfig {
     required this.maxSessionDuration,
     required this.totalSpent,
     required this.txCount,
+    required this.spentToday,
+    required this.dayStartTimestamp,
   });
 }

@@ -5,7 +5,9 @@
 export interface SmartWallet {
   /** Base58 address of the SmartWallet PDA */
   address: string;
-  /** Base58 address of the owner (has full control) */
+  /** Base58 address of the immutable PDA authority (original owner, used for PDA derivation) */
+  pdaAuthority: string;
+  /** Base58 address of the owner (has full control, rotatable via recovery) */
   owner: string;
   /** PDA bump seed */
   bump: number;
@@ -15,6 +17,8 @@ export interface SmartWallet {
   agentCount: number;
   /** Number of guardians */
   guardianCount: number;
+  /** Minimum guardians required for recovery (m-of-n) */
+  recoveryThreshold: number;
   /** Guardian public keys (for recovery) */
   guardians: string[];
   /** Maximum lamports that can be spent per day */
@@ -60,6 +64,10 @@ export interface AgentConfig {
   totalSpent: bigint;
   /** Total transactions executed by this agent */
   txCount: bigint;
+  /** Lamports spent by this agent today (rolling daily window) */
+  spentToday: bigint;
+  /** Unix timestamp of the start of the current daily window */
+  dayStartTimestamp: bigint;
 }
 
 export interface SessionKey {

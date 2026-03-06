@@ -59,7 +59,7 @@ pub fn process(
 
     if wallet_state.is_locked {
         log!("CreateSession: wallet is locked");
-        return Err(SealError::WalletClosed.into());
+        return Err(SealError::WalletLocked.into());
     }
     if wallet_state.is_closed {
         log!("CreateSession: wallet is closed");
@@ -128,6 +128,15 @@ pub fn process(
     }
     if max_per_tx > agent_config.per_tx_limit {
         log!("CreateSession: max_per_tx exceeds agent per-tx limit");
+        return Err(SealError::PerTransactionLimitExceeded.into());
+    }
+    // H3: Session spending also cannot exceed wallet limits.
+    if max_amount > wallet_state.daily_limit_lamports {
+        log!("CreateSession: max_amount exceeds wallet daily limit");
+        return Err(SealError::SpendingLimitExceeded.into());
+    }
+    if max_per_tx > wallet_state.per_tx_limit_lamports {
+        log!("CreateSession: max_per_tx exceeds wallet per-tx limit");
         return Err(SealError::PerTransactionLimitExceeded.into());
     }
 

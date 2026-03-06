@@ -68,7 +68,7 @@ pub fn process(
 
     if wallet_state.is_locked {
         log!("RegisterAgent: wallet is locked");
-        return Err(SealError::WalletClosed.into());
+        return Err(SealError::WalletLocked.into());
     }
     if wallet_state.is_closed {
         log!("RegisterAgent: wallet is closed");
@@ -156,6 +156,16 @@ pub fn process(
         return Err(ProgramError::InvalidInstructionData);
     }
 
+    // H3: Agent limits must not exceed wallet limits.
+    if daily_limit > wallet_state.daily_limit_lamports {
+        log!("RegisterAgent: agent daily limit exceeds wallet daily limit");
+        return Err(SealError::SpendingLimitExceeded.into());
+    }
+    if per_tx_limit > wallet_state.per_tx_limit_lamports {
+        log!("RegisterAgent: agent per-tx limit exceeds wallet per-tx limit");
+        return Err(SealError::PerTransactionLimitExceeded.into());
+    }
+
     // ── Create AgentConfig PDA ──────────────────────────────
     let wallet_addr: &[u8] = wallet_account.address().as_ref();
     let bump_bytes = [bump];
@@ -195,6 +205,8 @@ pub fn process(
         max_session_duration,
         total_spent: 0,
         tx_count: 0,
+        spent_today: 0,
+        day_start_timestamp: 0,
     };
 
     utils::save_account(&agent_config, agent_account)?;

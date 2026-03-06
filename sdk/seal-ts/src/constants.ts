@@ -44,6 +44,6 @@ export const DEFAULT_SESSION_DURATION_SECS = BigInt(24 * 60 * 60); // 24 hours
 export const MAX_SESSION_DURATION_SECS = BigInt(7 * 24 * 60 * 60); // 7 days
 
 // Account sizes (MUST match Rust - verified from programs/seal-wallet/src/state/*.rs)
-export const SMART_WALLET_SIZE = 245; // 8+32+1+8+1+1+160+8+8+8+8+1+1
-export const AGENT_CONFIG_SIZE = 540; // 8+32+32+32+1+1+1+256+1+128+8+8+8+8+8+8
+export const SMART_WALLET_SIZE = 278; // 8+32+32+1+8+1+1+1+160+8+8+8+8+1+1
+export const AGENT_CONFIG_SIZE = 556; // 8+32+32+32+1+1+1+256+1+128+8+8+8+8+8+8+8+8
 export const SESSION_KEY_SIZE = 154;  // 8+32+32+32+1+8+8+8+8+8+1+8

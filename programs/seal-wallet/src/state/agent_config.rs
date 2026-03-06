@@ -42,6 +42,10 @@ pub struct AgentConfig {
     pub total_spent: u64,
     /// Number of transactions executed by this agent (cumulative).
     pub tx_count: u64,
+    /// Lamports spent by this agent today (rolling daily window).
+    pub spent_today: u64,
+    /// Unix timestamp of the start of the current daily window.
+    pub day_start_timestamp: i64,
 }
 
 impl AgentConfig {
@@ -61,7 +65,9 @@ impl AgentConfig {
         + 8                       // default_session_duration
         + 8                       // max_session_duration
         + 8                       // total_spent
-        + 8;                      // tx_count
+        + 8                       // tx_count
+        + 8                       // spent_today
+        + 8;                      // day_start_timestamp
 
     /// Check if this agent is allowed to call a specific program.
     ///
@@ -81,13 +87,14 @@ impl AgentConfig {
 
     /// Check if this agent is allowed to execute a specific instruction.
     ///
-    /// **Default-open for instructions**: if no instruction restrictions
-    /// are set, all instructions on allowed programs are permitted.
-    /// This is safe because programs are already default-closed.
+    /// **Default-open for instructions**: if no instruction restrictions are set,
+    /// all instructions on an allowed program are permitted.
+    /// Programs are default-closed, which provides the primary security gate.
+    /// Use instruction restrictions for fine-grained control on sensitive programs
+    /// (e.g., restricting Token Program to Transfer only).
     pub fn is_instruction_allowed(&self, discriminator: &[u8; 8]) -> bool {
-        // If no instruction restrictions, allow all (programs gate access)
         if self.allowed_instructions_count == 0 {
-            return true;
+            return true; // no restrictions = all instructions allowed on allowed programs
         }
         for i in 0..self.allowed_instructions_count as usize {
             if self.allowed_instructions[i] == *discriminator {
