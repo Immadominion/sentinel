@@ -2,13 +2,12 @@
 
 Add Sentinel's documentation MCP server to Cursor so your AI assistant can look up Sentinel APIs, concepts, and examples inline.
 
-## One-Click Install
-
-Click the button below to add the Sentinel Docs MCP server to Cursor:
-
-<a href="cursor://anysphere.cursor-deeplink/mcp/install?name=sentinel-docs&config=eyJjb21tYW5kIjoibnB4IiwiYXJncyI6WyIteSIsIkBzZW50aW5lbC13YWxsZXQvbWNwLWRvY3MiXX0=" class="vp-button medium brand" style="display:inline-block;margin:16px 0;">
-  Add to Cursor
-</a>
+<McpInstallButtons 
+  title="Install Sentinel MCP for Cursor"
+  description="Give your Cursor AI instant access to Sentinel's documentation — session keys, spending limits, instructions API, and more."
+  server-name="sentinel-docs"
+  package-name="@sentinel-wallet/mcp-docs"
+/>
 
 ## Manual Setup
 

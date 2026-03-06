@@ -2,6 +2,13 @@
 
 Add the Sentinel Docs MCP server to VS Code (with GitHub Copilot or Continue) so your AI can reference Sentinel's full documentation inline.
 
+<McpInstallButtons 
+  title="Install Sentinel MCP for VS Code"
+  description="Enable GitHub Copilot and other AI assistants to access Sentinel documentation directly."
+  server-name="sentinel-docs"
+  package-name="@sentinel-wallet/mcp-docs"
+/>
+
 ## Option A — GitHub Copilot Agent Mode
 
 Add to your VS Code workspace settings (`.vscode/mcp.json`):

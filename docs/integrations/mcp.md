@@ -58,6 +58,15 @@ sentinel_list_docs()
 → Returns: All page paths with titles
 ```
 
+## Quick Install
+
+<McpInstallButtons 
+  title="Add Sentinel to Your AI Assistant"
+  description="One-click install for Cursor, VS Code (Copilot), or Claude Desktop. Your AI will have instant access to all Sentinel documentation."
+  server-name="sentinel-docs"
+  package-name="@sentinel-wallet/mcp-docs"
+/>
+
 ## Configuration
 
 Add to your MCP client configuration (e.g., Claude Desktop `claude_desktop_config.json`):
