@@ -4,7 +4,8 @@
 
 import { PublicKey } from "@solana/web3.js";
 
-// Program ID — deployed to devnet on Feb 25, 2026
+// Default program ID used by the SDK unless a caller overrides `programId`.
+// Production integrations should inject the cluster-specific deployment they intend to use.
 export const SEAL_PROGRAM_ID = new PublicKey(
     "EV3TKRVz7pTHpAqBTjP8jmwuvoRBRCpjmVSPHhcMnXqb"
 );
@@ -31,13 +32,16 @@ export enum InstructionDiscriminant {
     RecoverWallet = 7,
     DeregisterAgent = 8,
     CloseWallet = 9,
+    LockWallet = 10,
+    RemoveGuardian = 11,
+    SetRecoveryThreshold = 12,
 }
 
 // Limits
 export const MAX_GUARDIANS = 5;
-export const MAX_ALLOWED_PROGRAMS = 8;
-export const MAX_ALLOWED_INSTRUCTIONS = 16;
-export const MAX_AGENT_NAME_LENGTH = 32;
+export const MAX_ALLOWED_PROGRAMS = 10;
+export const MAX_ALLOWED_INSTRUCTIONS = 5;
+export const MAX_AGENT_NAME_LENGTH = 64;
 
 // Default values
 export const DEFAULT_SESSION_DURATION_SECS = BigInt(24 * 60 * 60); // 24 hours

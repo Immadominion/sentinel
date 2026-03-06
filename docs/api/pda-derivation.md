@@ -19,13 +19,13 @@ import {
   WALLET_SEED,    // Buffer.from("seal")
   AGENT_SEED,     // Buffer.from("agent")
   SESSION_SEED,   // Buffer.from("session")
-} from "@seal-wallet/sdk";
+} from "seal-wallet-sdk";
 ```
 
 ### deriveWalletPda
 
 ```typescript
-import { deriveWalletPda } from "@seal-wallet/sdk";
+import { deriveWalletPda } from "seal-wallet-sdk";
 
 const [walletPda, bump] = deriveWalletPda(ownerPubkey);
 // Seeds: [Buffer.from("seal"), owner.toBuffer()]
@@ -43,7 +43,7 @@ const [walletPda, bump] = PublicKey.findProgramAddressSync(
 ### deriveAgentPda
 
 ```typescript
-import { deriveAgentPda } from "@seal-wallet/sdk";
+import { deriveAgentPda } from "seal-wallet-sdk";
 
 const [agentPda, bump] = deriveAgentPda(walletPda, agentPubkey);
 // Seeds: [Buffer.from("agent"), wallet.toBuffer(), agent.toBuffer()]
@@ -61,7 +61,7 @@ const [agentPda, bump] = PublicKey.findProgramAddressSync(
 ### deriveSessionPda
 
 ```typescript
-import { deriveSessionPda } from "@seal-wallet/sdk";
+import { deriveSessionPda } from "seal-wallet-sdk";
 
 const [sessionPda, bump] = deriveSessionPda(walletPda, agentPubkey, sessionPubkey);
 // Seeds: [Buffer.from("session"), wallet.toBuffer(), agent.toBuffer(), session.toBuffer()]

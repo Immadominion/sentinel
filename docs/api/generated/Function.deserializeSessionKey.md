@@ -4,12 +4,12 @@
 function deserializeSessionKey(address, data): SessionKey | null;
 ```
 
-Defined in: accounts.ts:217
+Defined in: [accounts.ts:229](https://github.com/Immadominion/sentinel/blob/fd31494042e1512e4c8be3ae0572497b18170ae0/sdk/seal-ts/src/accounts.ts#L229)
 
 Deserialize a SessionKey account from raw bytes.
 
 Layout (154 bytes total - verified from Rust):
-- [0..8]     discriminator "SentSess" (8)
+- [0..8]     discriminator "SealSess" (8)
 - [8..40]    wallet: Pubkey (32)
 - [40..72]   agent: Pubkey (32)
 - [72..104]  session_pubkey: Pubkey (32)

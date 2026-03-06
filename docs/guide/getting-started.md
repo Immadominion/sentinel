@@ -75,17 +75,17 @@ Built with [Pinocchio](https://github.com/anza-xyz/pinocchio) instead of Anchor.
 
 ### Guardian Recovery
 
-If the owner key is compromised, guardians can vote to rotate the owner — recovering the wallet without losing funds or freezing operations.
+If the owner key is compromised, guardians can rotate the owner without moving funds. Recovery requires meeting the configured threshold. New wallets start with `recovery_threshold = 1`, so set the threshold explicitly after adding multiple guardians if you want multi-party approval.
 
 ## Program ID
 
-Seal is deployed on **Solana devnet**:
+The SDK and docs currently reference this program ID by default:
 
 ```
 EV3TKRVz7pTHpAqBTjP8jmwuvoRBRCpjmVSPHhcMnXqb
 ```
 
-[View on Solana Explorer →](https://explorer.solana.com/address/EV3TKRVz7pTHpAqBTjP8jmwuvoRBRCpjmVSPHhcMnXqb?cluster=devnet)
+[View on Solana Explorer →](https://explorer.solana.com/address/EV3TKRVz7pTHpAqBTjP8jmwuvoRBRCpjmVSPHhcMnXqb)
 
 ## Next Steps
 

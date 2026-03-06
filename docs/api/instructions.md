@@ -1,6 +1,6 @@
 # Instructions
 
-Seal exposes 10 instructions through a single-byte discriminant at the start of the instruction data. This page documents every instruction's accounts, data layout, and behavior.
+Seal exposes 13 instructions through a single-byte discriminant at the start of the instruction data. This page documents every instruction's accounts, data layout, and behavior.
 
 ## Instruction Table
 
@@ -13,9 +13,12 @@ Seal exposes 10 instructions through a single-byte discriminant at the start of 
 | `4` | [RevokeSession](#revokesession) | Owner / Agent | 4 | 0 bytes |
 | `5` | [UpdateSpendingLimit](#updatespendinglimit) | Owner | 2 | 16 bytes |
 | `6` | [AddGuardian](#addguardian) | Owner | 2 | 32 bytes |
-| `7` | [RecoverWallet](#recoverwallet) | Guardians | 2 | 32 bytes |
+| `7` | [RecoverWallet](#recoverwallet) | m-of-n Guardians | 2+ | 32 bytes |
 | `8` | [DeregisterAgent](#deregisteragent) | Owner | 3 | 0 bytes |
 | `9` | [CloseWallet](#closewallet) | Owner | 2 | 0 bytes |
+| `10` | [LockWallet](#lockwallet) | Owner | 2 | 1 byte |
+| `11` | [RemoveGuardian](#removeguardian) | Owner | 2 | 32 bytes |
+| `12` | [SetRecoveryThreshold](#setrecoverythreshold) | Owner | 2 | 1 byte |
 
 ---
 
@@ -51,7 +54,7 @@ Deploy a new SmartWallet PDA. Supports sponsored creation where a separate funde
 ### SDK
 
 ```typescript
-import { createWalletInstruction } from "@seal-wallet/sdk";
+import { createWalletInstruction } from "seal-wallet-sdk";
 
 const ix = createWalletInstruction({
   owner: ownerPubkey,
@@ -98,13 +101,15 @@ Register an agent with scoped permissions on the wallet.
 - Wallet must not be locked or closed
 - Agent count must be below `MAX_AGENTS`
 - Agent account must not already exist
-- `allowed_programs_count ≤ MAX_ALLOWED_PROGRAMS` (8)
-- `allowed_instructions_count ≤ MAX_ALLOWED_INSTRUCTIONS` (16)
+- `allowed_programs_count ≤ MAX_ALLOWED_PROGRAMS` (10)
+- `allowed_instructions_count ≤ MAX_ALLOWED_INSTRUCTIONS` (5)
+- `agent.daily_limit ≤ wallet.daily_limit` (cross-level validation)
+- `agent.per_tx_limit ≤ wallet.per_tx_limit` (cross-level validation)
 
 ### SDK
 
 ```typescript
-import { registerAgentInstruction } from "@seal-wallet/sdk";
+import { registerAgentInstruction } from "seal-wallet-sdk";
 
 const ix = registerAgentInstruction({
   owner: ownerPubkey,
@@ -254,20 +259,27 @@ Fails if `guardian_count ≥ MAX_GUARDIANS` (5) or guardian is already added.
 
 ## RecoverWallet
 
-Rotate the wallet owner via guardian consensus.
+Rotate the wallet owner via m-of-n guardian consensus. Requires `recovery_threshold` guardian co-signers.
 
 ### Accounts
 
 | # | Account | Signer | Writable | Description |
 |---|---------|--------|----------|-------------|
-| 0 | Guardian | ☑ | | Must be a registered guardian |
-| 1 | SmartWallet PDA | | ☑ | Wallet to recover |
+| 0..N-1 | Guardian signers | ☑ | | Must be registered guardians (at least `recovery_threshold` count) |
+| N | SmartWallet PDA | | ☑ | Wallet to recover (must be the last account) |
 
 ### Data Layout (32 bytes)
 
 | Offset | Size | Field | Type |
 |--------|------|-------|------|
 | 0 | 32 | `new_owner_pubkey` | `[u8; 32]` |
+
+### Validation Rules
+
+- Number of guardian signers must be ≥ `recovery_threshold`
+- Each signer must be a registered guardian
+- No duplicate guardian signers allowed
+- Only rotates `owner` — `pda_authority` remains unchanged (CPI signer seeds stay stable)
 
 ---
 
@@ -297,3 +309,67 @@ Permanently close the wallet. Sets `is_closed = true`. This is **irreversible**.
 |---|---------|--------|----------|-------------|
 | 0 | Owner | ☑ | | Must be wallet owner |
 | 1 | SmartWallet PDA | | ☑ | Wallet to close |
+
+---
+
+## LockWallet
+
+Emergency lock or unlock the wallet. When locked, all `ExecuteViaSession` calls are blocked.
+
+### Accounts
+
+| # | Account | Signer | Writable | Description |
+|---|---------|--------|----------|-------------|
+| 0 | Owner | ☑ | | Must be wallet owner |
+| 1 | SmartWallet PDA | | ☑ | Wallet to lock/unlock |
+
+### Data Layout (1 byte)
+
+| Offset | Size | Field | Type |
+|--------|------|-------|------|
+| 0 | 1 | `lock_flag` | `u8` — `1` = lock, `0` = unlock |
+
+---
+
+## RemoveGuardian
+
+Remove a guardian from the wallet. Only the owner can do this. If `recovery_threshold` exceeds the new guardian count, it is automatically clamped.
+
+### Accounts
+
+| # | Account | Signer | Writable | Description |
+|---|---------|--------|----------|-------------|
+| 0 | Owner | ☑ | | Must be wallet owner |
+| 1 | SmartWallet PDA | | ☑ | Wallet to update |
+
+### Data Layout (32 bytes)
+
+| Offset | Size | Field | Type |
+|--------|------|-------|------|
+| 0 | 32 | `guardian_pubkey` | `[u8; 32]` — guardian to remove |
+
+### Behavior
+
+- Shifts remaining guardians left to fill the gap
+- Zeros the last slot
+- Decrements `guardian_count`
+- Clamps `recovery_threshold` to `min(current_threshold, new_guardian_count)`
+
+---
+
+## SetRecoveryThreshold
+
+Set the m-of-n threshold for guardian recovery. The threshold determines how many guardians must co-sign a `RecoverWallet` call.
+
+### Accounts
+
+| # | Account | Signer | Writable | Description |
+|---|---------|--------|----------|-------------|
+| 0 | Owner | ☑ | | Must be wallet owner |
+| 1 | SmartWallet PDA | | ☑ | Wallet to update |
+
+### Data Layout (1 byte)
+
+| Offset | Size | Field | Type |
+|--------|------|-------|------|
+| 0 | 1 | `threshold` | `u8` — must be 1 ≤ threshold ≤ `guardian_count` |

@@ -7,15 +7,15 @@ Install the Seal TypeScript SDK from npm:
 ::: code-group
 
 ```sh [npm]
-npm install @seal-wallet/sdk
+npm install seal-wallet-sdk
 ```
 
 ```sh [pnpm]
-pnpm add @seal-wallet/sdk
+pnpm add seal-wallet-sdk
 ```
 
 ```sh [yarn]
-yarn add @seal-wallet/sdk
+yarn add seal-wallet-sdk
 ```
 
 :::
@@ -41,7 +41,7 @@ The SDK uses `BigInt` for all lamport values — ensure your `tsconfig.json` tar
 ### Verify Installation
 
 ```typescript
-import { SealClient } from "@seal-wallet/sdk";
+import { SealClient } from "seal-wallet-sdk";
 
 const client = new SealClient({ network: "devnet" });
 console.log("Program ID:", client.programId.toBase58());

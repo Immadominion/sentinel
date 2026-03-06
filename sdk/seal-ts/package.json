@@ -1,6 +1,6 @@
 {
-  "name": "@seal-wallet/sdk",
-  "version": "0.1.0",
+  "name": "seal-wallet-sdk",
+  "version": "0.1.1",
   "description": "TypeScript SDK for the Seal smart wallet on Solana",
   "type": "module",
   "main": "dist/index.js",
@@ -28,9 +28,19 @@
     "typescript": "^5.7.0",
     "vitest": "^3.0.0"
   },
+  "keywords": [
+    "solana",
+    "wallet",
+    "smart-wallet",
+    "session-keys",
+    "agent",
+    "pinocchio"
+  ],
   "license": "Apache-2.0",
+  "homepage": "https://seal.scrolls.fun",
   "repository": {
     "type": "git",
+    "url": "https://github.com/immadominion/seal",
     "directory": "sdk/seal-ts"
   },
   "files": [

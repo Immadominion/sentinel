@@ -1,13 +1,13 @@
 # TypeScript SDK
 
-The `@seal-wallet/sdk` package provides a high-level TypeScript client for the Seal smart wallet program. It wraps all 10 program instructions, PDA derivation, and account deserialization into a clean API.
+The `seal-wallet-sdk` package provides a high-level TypeScript client for the Seal smart wallet program. It wraps all 10 program instructions, PDA derivation, and account deserialization into a clean API.
 
 ## SealClient
 
 The main entry point. Manages RPC connections and provides methods for every wallet operation.
 
 ```typescript
-import { SealClient } from "@seal-wallet/sdk";
+import { SealClient } from "seal-wallet-sdk";
 
 const client = new SealClient({
   network: "devnet",           // "devnet" | "mainnet" | "localnet"
@@ -213,7 +213,7 @@ import {
   recoverWalletInstruction,
   deregisterAgentInstruction,
   closeWalletInstruction,
-} from "@seal-wallet/sdk";
+} from "seal-wallet-sdk";
 ```
 
 See [Instructions](/api/instructions) for the full instruction builder reference.
@@ -227,7 +227,7 @@ import {
   deserializeSmartWallet,
   deserializeAgentConfig,
   deserializeSessionKey,
-} from "@seal-wallet/sdk";
+} from "seal-wallet-sdk";
 
 const accountInfo = await connection.getAccountInfo(walletPda);
 const wallet = deserializeSmartWallet(accountInfo.data);
@@ -247,7 +247,7 @@ import type {
   RegisterAgentParams,
   CreateSessionParams,
   // ... all parameter interfaces
-} from "@seal-wallet/sdk";
+} from "seal-wallet-sdk";
 ```
 
 See the [Generated API Docs](/api/generated/README) for complete TypeDoc-generated reference.

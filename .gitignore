@@ -46,3 +46,7 @@ Thumbs.db
 build/
 pubspec.lock
 .vercel
+
+#scripts
+scripts/publish-npm.sh  
+scripts/

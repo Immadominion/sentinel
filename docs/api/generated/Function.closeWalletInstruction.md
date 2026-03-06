@@ -4,7 +4,7 @@
 function closeWalletInstruction(params): TransactionInstruction;
 ```
 
-Defined in: instructions.ts:607
+Defined in: [instructions.ts:609](https://github.com/Immadominion/sentinel/blob/fd31494042e1512e4c8be3ae0572497b18170ae0/sdk/seal-ts/src/instructions.ts#L609)
 
 Permanently close the SmartWallet (returns rent to owner).
 

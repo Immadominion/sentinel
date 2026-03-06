@@ -7,7 +7,7 @@ function deriveAgentPda(
    programId?): [PublicKey, number];
 ```
 
-Defined in: pda.ts:31
+Defined in: [pda.ts:31](https://github.com/Immadominion/sentinel/blob/fd31494042e1512e4c8be3ae0572497b18170ae0/sdk/seal-ts/src/pda.ts#L31)
 
 Derive the AgentConfig PDA for a wallet + agent pair.
 Seeds: ["agent", wallet_pubkey, agent_pubkey]

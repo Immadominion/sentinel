@@ -73,7 +73,7 @@ The trade-off is more manual code, but the result is a smaller, more auditable p
 
 ### Instruction Set
 
-Seal exposes 10 instructions via a single-byte discriminant:
+Seal exposes 13 instructions via a single-byte discriminant:
 
 | Discriminant | Instruction | Authority | Purpose |
 |-------------|-------------|-----------|---------|
@@ -84,9 +84,12 @@ Seal exposes 10 instructions via a single-byte discriminant:
 | `4` | `RevokeSession` | Owner / Agent | Revoke a session key immediately |
 | `5` | `UpdateSpendingLimit` | Owner | Modify wallet spending limits |
 | `6` | `AddGuardian` | Owner | Add a guardian for wallet recovery |
-| `7` | `RecoverWallet` | Guardians | Rotate the wallet owner via guardian vote |
+| `7` | `RecoverWallet` | m-of-n Guardians | Rotate the wallet owner via guardian vote |
 | `8` | `DeregisterAgent` | Owner | Remove an agent from the wallet |
 | `9` | `CloseWallet` | Owner | Permanently close the wallet |
+| `10` | `LockWallet` | Owner | Emergency lock/unlock the wallet |
+| `11` | `RemoveGuardian` | Owner | Remove a guardian |
+| `12` | `SetRecoveryThreshold` | Owner | Set m-of-n recovery threshold |
 
 ### PDA Derivation
 

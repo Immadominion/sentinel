@@ -13,7 +13,7 @@
       <!-- Left: Text content -->
       <div class="content-wrapper">
         <div class="badge-wrapper" ref="badgeRef">
-          <span class="badge">v0.1.0-alpha • Deployed on Devnet</span>
+          <span class="badge">v0.1.0 • Deployed on Mainnet</span>
         </div>
 
         <h1 class="hero-title" ref="titleRef">

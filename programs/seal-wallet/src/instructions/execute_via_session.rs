@@ -8,8 +8,8 @@ use solana_program_log::log;
 
 use crate::error::SealError;
 use crate::state::{
-    AgentConfig, SessionKey, SmartWallet, AGENT_CONFIG_DISCRIMINATOR,
-    SESSION_KEY_DISCRIMINATOR, SMART_WALLET_DISCRIMINATOR, WALLET_SEED,
+    AgentConfig, SessionKey, SmartWallet, AGENT_CONFIG_DISCRIMINATOR, SESSION_KEY_DISCRIMINATOR,
+    SMART_WALLET_DISCRIMINATOR, WALLET_SEED,
 };
 use crate::utils;
 
@@ -32,11 +32,7 @@ use crate::utils;
 /// ## Data
 /// - `[0..8]  amount_lamports: u64` (LE) — amount for limit tracking
 /// - `[8..]   inner_instruction_data: &[u8]` — data for the target CPI
-pub fn process(
-    program_id: &Address,
-    accounts: &[AccountView],
-    data: &[u8],
-) -> ProgramResult {
+pub fn process(program_id: &Address, accounts: &[AccountView], data: &[u8]) -> ProgramResult {
     // ── Parse accounts ──────────────────────────────────────
     if accounts.len() < 5 {
         log!("ExecuteViaSession: expected at least 5 accounts");
@@ -225,10 +221,8 @@ pub fn process(
     let wallet_addr_bytes = wallet_account.address().to_bytes();
     let cpi_count = accounts.len() - 5;
 
-    let mut cpi_instruction_accounts: Vec<InstructionAccount> =
-        Vec::with_capacity(cpi_count);
-    let mut cpi_account_views: Vec<&AccountView> =
-        Vec::with_capacity(cpi_count);
+    let mut cpi_instruction_accounts: Vec<InstructionAccount> = Vec::with_capacity(cpi_count);
+    let mut cpi_account_views: Vec<&AccountView> = Vec::with_capacity(cpi_count);
 
     for i in 5..accounts.len() {
         let acc = &accounts[i];
@@ -261,11 +255,7 @@ pub fn process(
     let pda_signer = Signer::from(&signer_seeds);
 
     // Execute the CPI. Errors from the target program propagate.
-    invoke_signed_with_bounds::<32>(
-        &instruction,
-        &cpi_account_views,
-        &[pda_signer],
-    )?;
+    invoke_signed_with_bounds::<32>(&instruction, &cpi_account_views, &[pda_signer])?;
 
     // ── Post-CPI balance verification ───────────────────────
     // The actual SOL decrease must not exceed the declared amount.
@@ -285,7 +275,11 @@ pub fn process(
     // This way spending limits can never be understated.
     let effective_amount = if post_cpi_balance < pre_cpi_balance {
         let actual_spent = pre_cpi_balance - post_cpi_balance;
-        if actual_spent > amount_lamports { actual_spent } else { amount_lamports }
+        if actual_spent > amount_lamports {
+            actual_spent
+        } else {
+            amount_lamports
+        }
     } else {
         amount_lamports
     };

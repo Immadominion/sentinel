@@ -532,12 +532,12 @@ export function deregisterAgentInstruction(
 }
 
 // ════════════════════════════════════════════════════════════════
-// RecoverWallet (Guardian-initiated owner rotation)
+// RecoverWallet (Guardian-initiated owner rotation, m-of-n threshold)
 // ════════════════════════════════════════════════════════════════
 
 export interface RecoverWalletParams {
-  /** The guardian's public key (must sign - must be registered guardian) */
-  guardian: PublicKey;
+  /** Guardian public keys (must all sign - must each be registered) */
+  guardians: PublicKey[];
   /** The wallet owner's public key (to derive wallet PDA) */
   walletOwner: PublicKey;
   /** The new owner's public key */
@@ -547,16 +547,14 @@ export interface RecoverWalletParams {
 }
 
 /**
- * Recover a wallet by rotating the owner key (guardian-initiated).
+ * Recover a wallet by rotating the owner key (guardian-initiated, m-of-n threshold).
  *
- * ⚠️ CRITICAL SECURITY WARNING:
- * In v1, ANY SINGLE registered guardian can unilaterally rotate the owner.
- * This means a compromised guardian can steal the entire wallet.
- * See SECURITY.md for full details.
+ * Multiple guardians must co-sign to reach the wallet's recovery_threshold.
+ * All signing guardians must be unique and registered.
  *
  * Accounts:
- * 0. `[signer]`    Guardian (must be registered on the wallet)
- * 1. `[writable]`  SmartWallet PDA
+ * 0..M `[signer]`   Guardians (M must be >= recovery_threshold)
+ * M    `[writable]`  SmartWallet PDA
  *
  * Data:
  * - `[0..32] new_owner: Pubkey` — the new owner public key
@@ -572,12 +570,16 @@ export function recoverWalletInstruction(
     params.newOwner.toBuffer(),
   ]);
 
+  const keys = params.guardians.map((g) => ({
+    pubkey: g,
+    isSigner: true,
+    isWritable: false,
+  }));
+  keys.push({ pubkey: walletPda, isSigner: false, isWritable: true });
+
   return new TransactionInstruction({
     programId,
-    keys: [
-      { pubkey: params.guardian, isSigner: true, isWritable: false },
-      { pubkey: walletPda, isSigner: false, isWritable: true },
-    ],
+    keys,
     data,
   });
 }
@@ -616,6 +618,147 @@ export function closeWalletInstruction(
     programId,
     keys: [
       { pubkey: params.owner, isSigner: true, isWritable: true },
+      { pubkey: walletPda, isSigner: false, isWritable: true },
+    ],
+    data,
+  });
+}
+
+// ════════════════════════════════════════════════════════════════
+// LockWallet (Owner-only emergency lock/unlock)
+// ════════════════════════════════════════════════════════════════
+
+export interface LockWalletParams {
+  /** The owner's public key (must sign) */
+  owner: PublicKey;
+  /** true to lock, false to unlock */
+  lock: boolean;
+  /** Program ID (defaults to SEAL_PROGRAM_ID) */
+  programId?: PublicKey;
+}
+
+/**
+ * Lock or unlock a wallet (owner-only emergency toggle).
+ *
+ * When locked, ALL agent operations via ExecuteViaSession are blocked.
+ * The owner can unlock at any time.
+ *
+ * Accounts:
+ * 0. `[signer]`    Owner
+ * 1. `[writable]`  SmartWallet PDA
+ *
+ * Data:
+ * - `[0] lock_flag: u8` — 1 = lock, 0 = unlock
+ */
+export function lockWalletInstruction(
+  params: LockWalletParams
+): TransactionInstruction {
+  const programId = params.programId ?? SEAL_PROGRAM_ID;
+  const [walletPda] = deriveWalletPda(params.owner, programId);
+
+  const data = Buffer.from([
+    InstructionDiscriminant.LockWallet,
+    params.lock ? 1 : 0,
+  ]);
+
+  return new TransactionInstruction({
+    programId,
+    keys: [
+      { pubkey: params.owner, isSigner: true, isWritable: false },
+      { pubkey: walletPda, isSigner: false, isWritable: true },
+    ],
+    data,
+  });
+}
+
+// ════════════════════════════════════════════════════════════════
+// RemoveGuardian (Owner-only)
+// ════════════════════════════════════════════════════════════════
+
+export interface RemoveGuardianParams {
+  /** The owner's public key (must sign) */
+  owner: PublicKey;
+  /** Public key of the guardian to remove */
+  guardian: PublicKey;
+  /** Program ID (defaults to SEAL_PROGRAM_ID) */
+  programId?: PublicKey;
+}
+
+/**
+ * Remove a guardian from the wallet (owner-only).
+ *
+ * After removal, the recovery_threshold is automatically clamped
+ * to the remaining guardian count so recovery remains possible.
+ *
+ * Accounts:
+ * 0. `[signer]`    Owner
+ * 1. `[writable]`  SmartWallet PDA
+ *
+ * Data:
+ * - `[0..32] guardian_pubkey: Pubkey` — the guardian to remove
+ */
+export function removeGuardianInstruction(
+  params: RemoveGuardianParams
+): TransactionInstruction {
+  const programId = params.programId ?? SEAL_PROGRAM_ID;
+  const [walletPda] = deriveWalletPda(params.owner, programId);
+
+  const data = Buffer.concat([
+    Buffer.from([InstructionDiscriminant.RemoveGuardian]),
+    params.guardian.toBuffer(),
+  ]);
+
+  return new TransactionInstruction({
+    programId,
+    keys: [
+      { pubkey: params.owner, isSigner: true, isWritable: false },
+      { pubkey: walletPda, isSigner: false, isWritable: true },
+    ],
+    data,
+  });
+}
+
+// ════════════════════════════════════════════════════════════════
+// SetRecoveryThreshold (Owner-only)
+// ════════════════════════════════════════════════════════════════
+
+export interface SetRecoveryThresholdParams {
+  /** The owner's public key (must sign) */
+  owner: PublicKey;
+  /** New recovery threshold (1 ≤ threshold ≤ guardian_count) */
+  threshold: number;
+  /** Program ID (defaults to SEAL_PROGRAM_ID) */
+  programId?: PublicKey;
+}
+
+/**
+ * Set the m-of-n recovery threshold (owner-only).
+ *
+ * Determines how many guardians must co-sign a RecoverWallet call.
+ * Must be between 1 and the current guardian count.
+ *
+ * Accounts:
+ * 0. `[signer]`    Owner
+ * 1. `[writable]`  SmartWallet PDA
+ *
+ * Data:
+ * - `[0] threshold: u8` — the new recovery threshold
+ */
+export function setRecoveryThresholdInstruction(
+  params: SetRecoveryThresholdParams
+): TransactionInstruction {
+  const programId = params.programId ?? SEAL_PROGRAM_ID;
+  const [walletPda] = deriveWalletPda(params.owner, programId);
+
+  const data = Buffer.from([
+    InstructionDiscriminant.SetRecoveryThreshold,
+    params.threshold & 0xff,
+  ]);
+
+  return new TransactionInstruction({
+    programId,
+    keys: [
+      { pubkey: params.owner, isSigner: true, isWritable: false },
       { pubkey: walletPda, isSigner: false, isWritable: true },
     ],
     data,

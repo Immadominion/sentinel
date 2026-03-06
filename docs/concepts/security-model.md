@@ -112,7 +112,7 @@ Session keys are the most exposed component — they're the keys that agents act
 
 ## Guardian Recovery
 
-Seal supports up to 5 guardians per wallet. Guardians can collectively vote to rotate the wallet owner — useful when the owner key is lost or compromised.
+Seal supports up to 5 guardians per wallet. Guardians can collectively vote to rotate the wallet owner — useful when the owner key is lost or compromised. Recovery requires meeting the **m-of-n threshold** (configurable via `SetRecoveryThreshold`).
 
 ```mermaid
 sequenceDiagram
@@ -122,22 +122,25 @@ sequenceDiagram
     participant SW as SmartWallet
 
     Note over G1,G2: Owner key lost/compromised
-    G1->>SP: recoverWallet(new_owner)
-    SP->>SW: Record guardian vote
-    G2->>SP: recoverWallet(new_owner)
-    SP->>SW: Quorum reached → rotate owner
+    Note over G1,G2: Both sign a single RecoverWallet tx
+    G1->>SP: recoverWallet(new_owner) [co-signed]
+    G2->>SP: (co-signer on same tx)
+    SP->>SW: Threshold met (2/2) → rotate owner
     Note over SW: owner field updated to new_owner
+    Note over SW: pda_authority unchanged (CPI still works)
     Note over SW: All existing sessions still valid<br/>Agents still registered
 ```
 
-Recovery does **not** affect registered agents or active sessions. The new owner inherits all wallet configuration. This avoids downtime — agents can continue operating through the recovery process.
+Recovery does **not** affect the immutable `pda_authority` field, registered agents, or active sessions. The new owner inherits all wallet configuration. CPI signer seeds remain stable through recovery because they use `pda_authority`, not `owner`.
 
 ### Guardian Rules
 
 - Maximum 5 guardians per wallet (`MAX_GUARDIANS = 5`)
-- Only the owner can add guardians (`AddGuardian`)
+- Only the owner can add guardians (`AddGuardian`) or remove them (`RemoveGuardian`)
+- Owner can set the recovery threshold via `SetRecoveryThreshold` (1 ≤ threshold ≤ guardian_count)
+- Recovery requires exactly `recovery_threshold` guardian co-signers on a single transaction
+- Duplicate guardian signers are rejected
 - Guardian pubkeys are stored in fixed-size slots in the SmartWallet account
-- Recovery requires guardian consensus (majority vote)
 
 ## Error Codes
 

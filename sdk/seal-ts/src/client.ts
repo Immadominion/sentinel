@@ -23,6 +23,9 @@ import {
   deregisterAgentInstruction,
   recoverWalletInstruction,
   closeWalletInstruction,
+  lockWalletInstruction,
+  removeGuardianInstruction,
+  setRecoveryThresholdInstruction,
   solToLamports,
   CreateWalletParams,
   RegisterAgentParams,
@@ -34,6 +37,9 @@ import {
   DeregisterAgentParams,
   RecoverWalletParams,
   CloseWalletParams,
+  LockWalletParams,
+  RemoveGuardianParams,
+  SetRecoveryThresholdParams,
 } from "./instructions";
 import {
   deserializeSmartWallet,
@@ -437,22 +443,22 @@ export class SealClient {
   // ══════════════════════════════════════════════════════════════
 
   /**
-   * Recover a wallet by rotating the owner (guardian-initiated).
+   * Recover a wallet by rotating the owner (guardian-initiated, m-of-n threshold).
    *
-   * ⚠️ CRITICAL: In v1, ANY single guardian can do this unilaterally.
-   * See SECURITY.md for details on the risks.
+   * Multiple guardians must co-sign to meet the wallet's recovery_threshold.
+   * All signing guardians must be unique and registered on the wallet.
    *
-   * @param guardian - Guardian keypair (must be registered on wallet)
+   * @param guardians - Array of guardian keypairs (must each be registered, count >= threshold)
    * @param walletOwner - Current wallet owner's public key
    * @param newOwner - The new owner's public key
    */
   async recoverWallet(
-    guardian: Keypair,
+    guardians: Keypair[],
     walletOwner: PublicKey,
     newOwner: PublicKey
   ): Promise<SmartWallet> {
     const params: RecoverWalletParams = {
-      guardian: guardian.publicKey,
+      guardians: guardians.map((g) => g.publicKey),
       walletOwner,
       newOwner,
       programId: this.programId,
@@ -461,10 +467,85 @@ export class SealClient {
     const ix = recoverWalletInstruction(params);
     const tx = new Transaction().add(ix);
 
-    await sendAndConfirmTransaction(this.connection, tx, [guardian]);
+    await sendAndConfirmTransaction(this.connection, tx, guardians);
 
     // Fetch updated wallet
     const [walletPda] = deriveWalletPda(walletOwner, this.programId);
+    return this.getWallet(walletPda);
+  }
+
+  /**
+   * Lock or unlock a wallet (owner-only emergency toggle).
+   * When locked, all agent operations are blocked.
+   *
+   * @param owner - Owner keypair
+   * @param lock - true to lock, false to unlock
+   */
+  async lockWallet(owner: Keypair, lock: boolean): Promise<SmartWallet> {
+    const params: LockWalletParams = {
+      owner: owner.publicKey,
+      lock,
+      programId: this.programId,
+    };
+
+    const ix = lockWalletInstruction(params);
+    const tx = new Transaction().add(ix);
+
+    await sendAndConfirmTransaction(this.connection, tx, [owner]);
+
+    const [walletPda] = deriveWalletPda(owner.publicKey, this.programId);
+    return this.getWallet(walletPda);
+  }
+
+  /**
+   * Remove a guardian from the wallet (owner-only).
+   * Recovery threshold is automatically clamped if needed.
+   *
+   * @param owner - Owner keypair
+   * @param guardian - Guardian public key to remove
+   */
+  async removeGuardian(
+    owner: Keypair,
+    guardian: PublicKey
+  ): Promise<SmartWallet> {
+    const params: RemoveGuardianParams = {
+      owner: owner.publicKey,
+      guardian,
+      programId: this.programId,
+    };
+
+    const ix = removeGuardianInstruction(params);
+    const tx = new Transaction().add(ix);
+
+    await sendAndConfirmTransaction(this.connection, tx, [owner]);
+
+    const [walletPda] = deriveWalletPda(owner.publicKey, this.programId);
+    return this.getWallet(walletPda);
+  }
+
+  /**
+   * Set the m-of-n recovery threshold (owner-only).
+   * Must be between 1 and the current guardian count.
+   *
+   * @param owner - Owner keypair
+   * @param threshold - New recovery threshold
+   */
+  async setRecoveryThreshold(
+    owner: Keypair,
+    threshold: number
+  ): Promise<SmartWallet> {
+    const params: SetRecoveryThresholdParams = {
+      owner: owner.publicKey,
+      threshold,
+      programId: this.programId,
+    };
+
+    const ix = setRecoveryThresholdInstruction(params);
+    const tx = new Transaction().add(ix);
+
+    await sendAndConfirmTransaction(this.connection, tx, [owner]);
+
+    const [walletPda] = deriveWalletPda(owner.publicKey, this.programId);
     return this.getWallet(walletPda);
   }
 

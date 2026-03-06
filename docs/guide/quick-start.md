@@ -6,13 +6,13 @@ Create a smart wallet, register an agent, and execute an autonomous transaction 
 
 - Node.js 18+
 - A funded Solana keypair on devnet (`solana airdrop 2 --url devnet`)
-- The Seal SDK (`npm install @seal-wallet/sdk`)
+- The Seal SDK (`npm install seal-wallet-sdk`)
 
 ## Full Example
 
 ```typescript
 import { Keypair, LAMPORTS_PER_SOL } from "@solana/web3.js";
-import { SealClient } from "@seal-wallet/sdk";
+import { SealClient } from "seal-wallet-sdk";
 
 // Load your owner keypair
 const owner = Keypair.fromSecretKey(
@@ -71,7 +71,7 @@ Once a session exists, the agent can execute CPI calls through the wallet:
 
 ```typescript
 import { PublicKey, TransactionInstruction } from "@solana/web3.js";
-import { executeViaSessionInstruction } from "@seal-wallet/sdk";
+import { executeViaSessionInstruction } from "seal-wallet-sdk";
 
 // Build the inner instruction (whatever your agent needs to do)
 const innerIx = new TransactionInstruction({

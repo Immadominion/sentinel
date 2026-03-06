@@ -1,24 +1,17 @@
 # Connect to VS Code
 
-Add the Seal Docs MCP server to VS Code (with GitHub Copilot or Continue) so your AI can reference Seal's full documentation inline.
+Add the Seal MCP server to VS Code so GitHub Copilot (or Continue) can manage Seal wallets directly from your editor.
 
-<McpInstallButtons 
-  title="Install Seal MCP for VS Code"
-  description="Enable GitHub Copilot and other AI assistants to access Seal documentation directly."
-  server-name="seal-docs"
-  package-name="@seal-wallet/mcp-docs"
-/>
+## Setup — GitHub Copilot Agent Mode
 
-## Option A — GitHub Copilot Agent Mode
-
-Add to your VS Code workspace settings (`.vscode/mcp.json`):
+Add to your workspace `.vscode/mcp.json`:
 
 ```json
 {
   "servers": {
-    "seal-docs": {
-      "command": "npx",
-      "args": ["-y", "@seal-wallet/mcp-docs"],
+    "seal-wallet": {
+      "command": "node",
+      "args": ["/path/to/seal/packages/mcp-server/dist/index.js"],
       "type": "stdio"
     }
   }
@@ -30,27 +23,27 @@ Or add to your global `settings.json`:
 ```json
 {
   "mcp.servers": {
-    "seal-docs": {
-      "command": "npx",
-      "args": ["-y", "@seal-wallet/mcp-docs"]
+    "seal-wallet": {
+      "command": "node",
+      "args": ["/path/to/seal/packages/mcp-server/dist/index.js"]
     }
   }
 }
 ```
 
-Restart VS Code — Seal docs will be available to GitHub Copilot Agent in chat mode.
+Restart VS Code — Seal tools will be available to GitHub Copilot in Agent chat mode.
 
-## Option B — Continue Extension
+## Setup — Continue Extension
 
-If you're using [Continue](https://continue.dev), add to your `~/.continue/config.json`:
+If you're using [Continue](https://continue.dev), add to `~/.continue/config.json`:
 
 ```json
 {
   "mcpServers": [
     {
-      "name": "seal-docs",
-      "command": "npx",
-      "args": ["-y", "@seal-wallet/mcp-docs"]
+      "name": "seal-wallet",
+      "command": "node",
+      "args": ["/path/to/seal/packages/mcp-server/dist/index.js"]
     }
   ]
 }
@@ -60,23 +53,30 @@ If you're using [Continue](https://continue.dev), add to your `~/.continue/confi
 
 | Tool | What it does |
 |------|-------------|
-| `search_seal_docs` | Find relevant documentation for your query |
-| `get_seal_page` | Get full page content (e.g., "api/typescript-sdk") |
-| `list_seal_pages` | List all pages available |
+| `create_wallet` | Create a new SmartWallet with spending limits |
+| `get_wallet` | Fetch wallet on-chain data |
+| `register_agent` | Register an agent with scoped permissions |
+| `create_session` | Create an ephemeral session key |
+| `execute_via_session` | Execute a CPI through Seal |
+| `revoke_session` | Emergency revoke a session |
+| `derive_wallet_pda` | Derive a wallet PDA address |
+| `recover_wallet` | Rotate owner via guardian recovery |
+
+See [MCP Integration](/integrations/mcp) for the full list of 16 tools.
 
 ## Example Queries
 
-Use `@seal-docs` in Copilot Chat:
+Use Copilot Agent chat:
 
 ```
-@seal-docs How do I register an agent with custom spending limits?
-@seal-docs What's the SmartWallet account structure?
-@seal-docs Show me how to implement emergency lock in TypeScript
-@seal-docs What are all available Seal instructions?
+> Create a Seal wallet with 5 SOL daily limit
+> Register an agent called "lp-bot" for Meteora DLMM
+> Show me the wallet status and spending today
+> Emergency lock wallet 8xQr...F4nK
 ```
 
-## Zero Cost, Zero Hosting
+## Zero Hosting Cost
 
-The MCP server is an **npm package that runs locally** via `npx`. No API key required. No network request to our servers. Your docs requests stay on your machine.
+The MCP server runs **locally** on your machine via stdio. No API key, no cloud service, no external network requests (beyond Solana RPC calls).
 
-Source: [github.com/immadominion/seal/tree/main/sdk/seal-mcp-docs](https://github.com/immadominion/seal)
+Source: [github.com/immadominion/seal/tree/main/packages/mcp-server](https://github.com/immadominion/seal)

@@ -27,15 +27,22 @@ Seal is an open-source smart wallet SDK with **on-chain policy enforcement** —
 
 ## Architecture
 
-```
-seal/
-├── programs/seal-wallet/    Pinocchio on-chain program (smart wallet, session keys)
-├── crates/seal-core/        Rust cryptographic core (KeyVault, Signer, Policy)
-├── sdk/
-│   ├── seal-dart/           Flutter/Dart SDK (via flutter_rust_bridge)
-│   └── seal-ts/             TypeScript SDK (via Codama renderers-js)
-├── tests/                       Integration tests (Bankrun + Rust)
-└── docs/                        Technical documentation
+```mermaid
+flowchart TD
+  P["programs/seal-wallet<br/>Pinocchio on-chain program"]
+  C["crates/seal-core<br/>Rust crypto + policy primitives"]
+  TS["sdk/seal-ts<br/>TypeScript SDK"]
+  D["sdk/seal-dart<br/>Flutter/Dart SDK"]
+  T["tests<br/>Rust + integration coverage"]
+  DOCS["docs<br/>Technical documentation + site"]
+
+  C --> TS
+  C --> D
+  P --> TS
+  P --> D
+  P --> T
+  TS --> DOCS
+  D --> DOCS
 ```
 
 ## Quick Start

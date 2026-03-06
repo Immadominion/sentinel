@@ -13,7 +13,7 @@ import {
     deriveSessionPda,
     isSessionValid,
     getSessionRemainingBudget,
-} from "@seal-wallet/sdk";
+} from "seal-wallet-sdk";
 import type { ToolName } from "./tools.js";
 
 // ══════════════════════════════════════════════════════════════
@@ -42,10 +42,12 @@ function walletToJson(w: any) {
     return {
         address: w.address.toBase58(),
         owner: w.owner.toBase58(),
+        pdaAuthority: w.pdaAuthority?.toBase58?.() ?? undefined,
         dailyLimit: formatLamports(w.dailyLimit),
         perTxLimit: formatLamports(w.perTxLimit),
         dailySpent: formatLamports(w.dailySpent),
         guardians: w.guardians.map((g: PublicKey) => g.toBase58()),
+        recoveryThreshold: w.recoveryThreshold ?? 1,
         isLocked: w.isLocked,
         agentCount: w.agentCount,
     };
@@ -378,16 +380,59 @@ const handlers: Record<ToolName, (args: any) => Promise<any>> = {
 
     // ── Recovery ──────────────────────────────────────────────
     async recover_wallet(args) {
-        const guardian = keypairFromBase58(args.guardianSecretKey);
+        const guardians = (args.guardianSecretKeys as string[]).map(
+            (k: string) => keypairFromBase58(k)
+        );
         const walletOwner = new PublicKey(args.walletOwnerPublicKey);
         const newOwner = new PublicKey(args.newOwnerPublicKey);
         const client = makeClient(args.network, args.rpcUrl);
 
-        const wallet = await client.recoverWallet(guardian, walletOwner, newOwner);
+        const wallet = await client.recoverWallet(guardians, walletOwner, newOwner);
 
         return {
             success: true,
-            message: `Wallet ownership transferred to ${newOwner.toBase58()}`,
+            message: `Wallet ownership transferred to ${newOwner.toBase58()} (${guardians.length} guardian(s) signed)`,
+            wallet: walletToJson(wallet),
+        };
+    },
+
+    // ── Wallet Management ─────────────────────────────────────
+    async lock_wallet(args) {
+        const owner = keypairFromBase58(args.ownerSecretKey);
+        const client = makeClient(args.network, args.rpcUrl);
+
+        const wallet = await client.lockWallet(owner, args.lock);
+
+        return {
+            success: true,
+            message: args.lock ? "Wallet LOCKED — all agent operations blocked" : "Wallet UNLOCKED",
+            wallet: walletToJson(wallet),
+        };
+    },
+
+    async remove_guardian(args) {
+        const owner = keypairFromBase58(args.ownerSecretKey);
+        const guardian = new PublicKey(args.guardianPublicKey);
+        const client = makeClient(args.network, args.rpcUrl);
+
+        const wallet = await client.removeGuardian(owner, guardian);
+
+        return {
+            success: true,
+            message: `Guardian ${guardian.toBase58()} removed`,
+            wallet: walletToJson(wallet),
+        };
+    },
+
+    async set_recovery_threshold(args) {
+        const owner = keypairFromBase58(args.ownerSecretKey);
+        const client = makeClient(args.network, args.rpcUrl);
+
+        const wallet = await client.setRecoveryThreshold(owner, args.threshold);
+
+        return {
+            success: true,
+            message: `Recovery threshold set to ${args.threshold}`,
             wallet: walletToJson(wallet),
         };
     },

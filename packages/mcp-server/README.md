@@ -1,4 +1,4 @@
-# @seal-wallet/mcp-server
+# seal-wallet-mcp-server
 
 Model Context Protocol (MCP) server for the **Seal smart wallet** on Solana. Exposes on-chain wallet operations as AI-agent tools — usable in VS Code (Copilot), Cursor, Claude Desktop, and any MCP-compatible client.
 
@@ -6,7 +6,7 @@ Model Context Protocol (MCP) server for the **Seal smart wallet** on Solana. Exp
 
 ```bash
 # Install and run
-npx @seal-wallet/mcp-server
+npx seal-wallet-mcp-server
 ```
 
 ### VS Code / Cursor Configuration
@@ -18,7 +18,7 @@ Add to your MCP settings (`.vscode/mcp.json` or user settings):
   "servers": {
     "seal-wallet": {
       "command": "npx",
-      "args": ["@seal-wallet/mcp-server"]
+      "args": ["seal-wallet-mcp-server"]
     }
   }
 }
@@ -33,7 +33,7 @@ Add to `claude_desktop_config.json`:
   "mcpServers": {
     "seal-wallet": {
       "command": "npx",
-      "args": ["@seal-wallet/mcp-server"]
+      "args": ["seal-wallet-mcp-server"]
     }
   }
 }
@@ -49,6 +49,8 @@ Add to `claude_desktop_config.json`:
 | `get_wallet` | Fetch wallet on-chain data (limits, guardians, status) |
 | `update_spending_limits` | Update daily and per-tx spending limits |
 | `add_guardian` | Add a guardian for social recovery |
+| `lock_wallet` | Lock or unlock delegated execution on the wallet |
+| `remove_guardian` | Remove a guardian and clamp the threshold if needed |
 | `close_wallet` | Permanently close wallet and return rent |
 
 ### Agent Operations
@@ -86,6 +88,7 @@ Add to `claude_desktop_config.json`:
 | Tool | Description |
 |------|-------------|
 | `recover_wallet` | Guardian-initiated owner rotation |
+| `set_recovery_threshold` | Configure how many guardians must co-sign recovery |
 
 ## Resources
 

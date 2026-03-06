@@ -59,11 +59,11 @@
 ### TypeScript
 
 ```bash
-npm install @seal-wallet/sdk
+npm install seal-wallet-sdk
 ```
 
 ```typescript
-import { SealClient } from "@seal-wallet/sdk";
+import { SealClient } from "seal-wallet-sdk";
 
 const client = new SealClient({ network: "devnet" });
 

@@ -21,7 +21,7 @@ A session key is an ephemeral `Keypair` that exists only in the agent's memory. 
 
 ```typescript
 import { Keypair, LAMPORTS_PER_SOL } from "@solana/web3.js";
-import { SealClient } from "@seal-wallet/sdk";
+import { SealClient } from "seal-wallet-sdk";
 
 const client = new SealClient({ network: "devnet" });
 
@@ -69,7 +69,7 @@ The program checks **all three conditions** on every `ExecuteViaSession` call. A
 ## Execution with a Session Key
 
 ```typescript
-import { executeViaSessionInstruction } from "@seal-wallet/sdk";
+import { executeViaSessionInstruction } from "seal-wallet-sdk";
 
 const execIx = executeViaSessionInstruction({
   sessionKeypair,              // The ephemeral key that signs

@@ -4,12 +4,12 @@
 function deserializeAgentConfig(address, data): AgentConfig | null;
 ```
 
-Defined in: accounts.ts:136
+Defined in: [accounts.ts:144](https://github.com/Immadominion/sentinel/blob/fd31494042e1512e4c8be3ae0572497b18170ae0/sdk/seal-ts/src/accounts.ts#L144)
 
 Deserialize an AgentConfig account from raw bytes.
 
-Layout (540 bytes total - verified from Rust):
-- [0..8]     discriminator "SentAgnt" (8)
+Layout (556 bytes total - verified from Rust):
+- [0..8]     discriminator "SealAgnt" (8)
 - [8..40]    wallet: Pubkey (32)
 - [40..72]   agent: Pubkey (32)
 - [72..104]  name: [u8; 32] (32)
@@ -25,6 +25,8 @@ Layout (540 bytes total - verified from Rust):
 - [516..524] max_session_duration: i64 (8)
 - [524..532] total_spent: u64 (8)
 - [532..540] tx_count: u64 (8)
+- [540..548] spent_today: u64 (8)
+- [548..556] day_start_timestamp: i64 (8)
 
 ## Parameters
 

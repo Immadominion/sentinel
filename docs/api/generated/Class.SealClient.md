@@ -1,6 +1,6 @@
 # Class: SealClient
 
-Defined in: client.ts:83
+Defined in: [client.ts:89](https://github.com/Immadominion/sentinel/blob/fd31494042e1512e4c8be3ae0572497b18170ae0/sdk/seal-ts/src/client.ts#L89)
 
 High-level client for interacting with the Seal smart wallet program.
 
@@ -31,7 +31,7 @@ const agent = await client.registerAgent(ownerKeypair, agentPubkey, {
 new SealClient(config?): SealClient;
 ```
 
-Defined in: client.ts:87
+Defined in: [client.ts:93](https://github.com/Immadominion/sentinel/blob/fd31494042e1512e4c8be3ae0572497b18170ae0/sdk/seal-ts/src/client.ts#L93)
 
 #### Parameters
 
@@ -47,8 +47,8 @@ Defined in: client.ts:87
 
 | Property | Modifier | Type | Defined in |
 | ------ | ------ | ------ | ------ |
-| <a id="property-connection"></a> `connection` | `readonly` | `Connection` | client.ts:84 |
-| <a id="property-programid"></a> `programId` | `readonly` | `PublicKey` | client.ts:85 |
+| <a id="property-connection"></a> `connection` | `readonly` | `Connection` | [client.ts:90](https://github.com/Immadominion/sentinel/blob/fd31494042e1512e4c8be3ae0572497b18170ae0/sdk/seal-ts/src/client.ts#L90) |
+| <a id="property-programid"></a> `programId` | `readonly` | `PublicKey` | [client.ts:91](https://github.com/Immadominion/sentinel/blob/fd31494042e1512e4c8be3ae0572497b18170ae0/sdk/seal-ts/src/client.ts#L91) |
 
 ## Methods
 
@@ -58,7 +58,7 @@ Defined in: client.ts:87
 addGuardian(owner, guardian): Promise<SmartWallet>;
 ```
 
-Defined in: client.ts:189
+Defined in: [client.ts:195](https://github.com/Immadominion/sentinel/blob/fd31494042e1512e4c8be3ae0572497b18170ae0/sdk/seal-ts/src/client.ts#L195)
 
 Add a guardian to the wallet for recovery.
 
@@ -81,7 +81,7 @@ Add a guardian to the wallet for recovery.
 closeWallet(owner): Promise<void>;
 ```
 
-Defined in: client.ts:480
+Defined in: [client.ts:561](https://github.com/Immadominion/sentinel/blob/fd31494042e1512e4c8be3ae0572497b18170ae0/sdk/seal-ts/src/client.ts#L561)
 
 Permanently close the SmartWallet and return rent to owner.
 
@@ -113,7 +113,7 @@ createSession(
 }>;
 ```
 
-Defined in: client.ts:308
+Defined in: [client.ts:314](https://github.com/Immadominion/sentinel/blob/fd31494042e1512e4c8be3ae0572497b18170ae0/sdk/seal-ts/src/client.ts#L314)
 
 Create a new session key for an agent.
 
@@ -145,7 +145,7 @@ The session keypair and created SessionKey data
 createWallet(owner, options): Promise<SmartWallet>;
 ```
 
-Defined in: client.ts:105
+Defined in: [client.ts:111](https://github.com/Immadominion/sentinel/blob/fd31494042e1512e4c8be3ae0572497b18170ae0/sdk/seal-ts/src/client.ts#L111)
 
 Create a new SmartWallet for the owner.
 
@@ -173,7 +173,7 @@ The created SmartWallet data
 deregisterAgent(owner, agent): Promise<void>;
 ```
 
-Defined in: client.ts:283
+Defined in: [client.ts:289](https://github.com/Immadominion/sentinel/blob/fd31494042e1512e4c8be3ae0572497b18170ae0/sdk/seal-ts/src/client.ts#L289)
 
 Deregister an agent (owner only).
 
@@ -203,7 +203,7 @@ executeViaSession(
 remainingAccounts): Promise<string>;
 ```
 
-Defined in: client.ts:405
+Defined in: [client.ts:411](https://github.com/Immadominion/sentinel/blob/fd31494042e1512e4c8be3ae0572497b18170ae0/sdk/seal-ts/src/client.ts#L411)
 
 Execute a transaction via a session key.
 
@@ -236,7 +236,7 @@ Transaction signature
 getAgentConfig(address): Promise<AgentConfig>;
 ```
 
-Defined in: client.ts:259
+Defined in: [client.ts:265](https://github.com/Immadominion/sentinel/blob/fd31494042e1512e4c8be3ae0572497b18170ae0/sdk/seal-ts/src/client.ts#L265)
 
 Fetch an AgentConfig by its PDA address.
 
@@ -258,7 +258,7 @@ Fetch an AgentConfig by its PDA address.
 getAgentConfigAddress(walletOwner, agent): PublicKey;
 ```
 
-Defined in: client.ts:274
+Defined in: [client.ts:280](https://github.com/Immadominion/sentinel/blob/fd31494042e1512e4c8be3ae0572497b18170ae0/sdk/seal-ts/src/client.ts#L280)
 
 Get the agent config PDA for a wallet + agent pair.
 
@@ -281,7 +281,7 @@ Get the agent config PDA for a wallet + agent pair.
 getSession(address): Promise<SessionKey>;
 ```
 
-Defined in: client.ts:351
+Defined in: [client.ts:357](https://github.com/Immadominion/sentinel/blob/fd31494042e1512e4c8be3ae0572497b18170ae0/sdk/seal-ts/src/client.ts#L357)
 
 Fetch a SessionKey by its PDA address.
 
@@ -303,7 +303,7 @@ Fetch a SessionKey by its PDA address.
 getWallet(address): Promise<SmartWallet>;
 ```
 
-Defined in: client.ts:140
+Defined in: [client.ts:146](https://github.com/Immadominion/sentinel/blob/fd31494042e1512e4c8be3ae0572497b18170ae0/sdk/seal-ts/src/client.ts#L146)
 
 Fetch a SmartWallet by its PDA address.
 
@@ -325,7 +325,7 @@ Fetch a SmartWallet by its PDA address.
 getWalletAddress(owner): PublicKey;
 ```
 
-Defined in: client.ts:155
+Defined in: [client.ts:161](https://github.com/Immadominion/sentinel/blob/fd31494042e1512e4c8be3ae0572497b18170ae0/sdk/seal-ts/src/client.ts#L161)
 
 Get the wallet PDA for an owner.
 
@@ -341,27 +341,51 @@ Get the wallet PDA for an owner.
 
 ***
 
-### recoverWallet()
+### lockWallet()
 
 ```ts
-recoverWallet(
-   guardian, 
-   walletOwner, 
-newOwner): Promise<SmartWallet>;
+lockWallet(owner, lock): Promise<SmartWallet>;
 ```
 
-Defined in: client.ts:449
+Defined in: [client.ts:484](https://github.com/Immadominion/sentinel/blob/fd31494042e1512e4c8be3ae0572497b18170ae0/sdk/seal-ts/src/client.ts#L484)
 
-Recover a wallet by rotating the owner (guardian-initiated).
-
-⚠️ CRITICAL: In v1, ANY single guardian can do this unilaterally.
-See SECURITY.md for details on the risks.
+Lock or unlock a wallet (owner-only emergency toggle).
+When locked, all agent operations are blocked.
 
 #### Parameters
 
 | Parameter | Type | Description |
 | ------ | ------ | ------ |
-| `guardian` | `Keypair` | Guardian keypair (must be registered on wallet) |
+| `owner` | `Keypair` | Owner keypair |
+| `lock` | `boolean` | true to lock, false to unlock |
+
+#### Returns
+
+`Promise`\<[`SmartWallet`](Interface.SmartWallet.md)\>
+
+***
+
+### recoverWallet()
+
+```ts
+recoverWallet(
+   guardians, 
+   walletOwner, 
+newOwner): Promise<SmartWallet>;
+```
+
+Defined in: [client.ts:455](https://github.com/Immadominion/sentinel/blob/fd31494042e1512e4c8be3ae0572497b18170ae0/sdk/seal-ts/src/client.ts#L455)
+
+Recover a wallet by rotating the owner (guardian-initiated, m-of-n threshold).
+
+Multiple guardians must co-sign to meet the wallet's recovery_threshold.
+All signing guardians must be unique and registered on the wallet.
+
+#### Parameters
+
+| Parameter | Type | Description |
+| ------ | ------ | ------ |
+| `guardians` | `Keypair`[] | Array of guardian keypairs (must each be registered, count >= threshold) |
 | `walletOwner` | `PublicKey` | Current wallet owner's public key |
 | `newOwner` | `PublicKey` | The new owner's public key |
 
@@ -380,7 +404,7 @@ registerAgent(
 options): Promise<AgentConfig>;
 ```
 
-Defined in: client.ts:217
+Defined in: [client.ts:223](https://github.com/Immadominion/sentinel/blob/fd31494042e1512e4c8be3ae0572497b18170ae0/sdk/seal-ts/src/client.ts#L223)
 
 Register a new agent on the wallet.
 
@@ -406,6 +430,30 @@ The created AgentConfig
 
 ***
 
+### removeGuardian()
+
+```ts
+removeGuardian(owner, guardian): Promise<SmartWallet>;
+```
+
+Defined in: [client.ts:507](https://github.com/Immadominion/sentinel/blob/fd31494042e1512e4c8be3ae0572497b18170ae0/sdk/seal-ts/src/client.ts#L507)
+
+Remove a guardian from the wallet (owner-only).
+Recovery threshold is automatically clamped if needed.
+
+#### Parameters
+
+| Parameter | Type | Description |
+| ------ | ------ | ------ |
+| `owner` | `Keypair` | Owner keypair |
+| `guardian` | `PublicKey` | Guardian public key to remove |
+
+#### Returns
+
+`Promise`\<[`SmartWallet`](Interface.SmartWallet.md)\>
+
+***
+
 ### revokeSession()
 
 ```ts
@@ -416,7 +464,7 @@ revokeSession(
 sessionPubkey): Promise<void>;
 ```
 
-Defined in: client.ts:366
+Defined in: [client.ts:372](https://github.com/Immadominion/sentinel/blob/fd31494042e1512e4c8be3ae0572497b18170ae0/sdk/seal-ts/src/client.ts#L372)
 
 Revoke a session (owner or agent can do this).
 
@@ -435,13 +483,37 @@ Revoke a session (owner or agent can do this).
 
 ***
 
+### setRecoveryThreshold()
+
+```ts
+setRecoveryThreshold(owner, threshold): Promise<SmartWallet>;
+```
+
+Defined in: [client.ts:533](https://github.com/Immadominion/sentinel/blob/fd31494042e1512e4c8be3ae0572497b18170ae0/sdk/seal-ts/src/client.ts#L533)
+
+Set the m-of-n recovery threshold (owner-only).
+Must be between 1 and the current guardian count.
+
+#### Parameters
+
+| Parameter | Type | Description |
+| ------ | ------ | ------ |
+| `owner` | `Keypair` | Owner keypair |
+| `threshold` | `number` | New recovery threshold |
+
+#### Returns
+
+`Promise`\<[`SmartWallet`](Interface.SmartWallet.md)\>
+
+***
+
 ### updateSpendingLimits()
 
 ```ts
 updateSpendingLimits(owner, options): Promise<SmartWallet>;
 ```
 
-Defined in: client.ts:163
+Defined in: [client.ts:169](https://github.com/Immadominion/sentinel/blob/fd31494042e1512e4c8be3ae0572497b18170ae0/sdk/seal-ts/src/client.ts#L169)
 
 Update spending limits on a wallet.
 

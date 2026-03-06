@@ -178,7 +178,7 @@ export default withMermaid(
                         },
                         {
                             text: "npm Package",
-                            link: "https://www.npmjs.com/package/@seal-wallet/sdk",
+                            link: "https://www.npmjs.com/package/seal-wallet-sdk",
                         },
                     ],
                 },

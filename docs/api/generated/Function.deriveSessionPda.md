@@ -8,7 +8,7 @@ function deriveSessionPda(
    programId?): [PublicKey, number];
 ```
 
-Defined in: pda.ts:46
+Defined in: [pda.ts:46](https://github.com/Immadominion/sentinel/blob/fd31494042e1512e4c8be3ae0572497b18170ae0/sdk/seal-ts/src/pda.ts#L46)
 
 Derive the SessionKey PDA for a wallet + agent + session pubkey.
 Seeds: ["session", wallet_pubkey, agent_pubkey, session_pubkey]

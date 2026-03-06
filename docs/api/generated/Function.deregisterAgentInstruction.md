@@ -4,7 +4,7 @@
 function deregisterAgentInstruction(params): TransactionInstruction;
 ```
 
-Defined in: instructions.ts:514
+Defined in: [instructions.ts:514](https://github.com/Immadominion/sentinel/blob/fd31494042e1512e4c8be3ae0572497b18170ae0/sdk/seal-ts/src/instructions.ts#L514)
 
 Deregister an agent from the SmartWallet (returns rent).
 

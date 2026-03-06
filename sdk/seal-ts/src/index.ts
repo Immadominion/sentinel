@@ -54,6 +54,9 @@ export {
   deregisterAgentInstruction,
   recoverWalletInstruction,
   closeWalletInstruction,
+  lockWalletInstruction,
+  removeGuardianInstruction,
+  setRecoveryThresholdInstruction,
   solToLamports,
   type CreateWalletParams,
   type RegisterAgentParams,
@@ -65,6 +68,9 @@ export {
   type DeregisterAgentParams,
   type RecoverWalletParams,
   type CloseWalletParams,
+  type LockWalletParams,
+  type RemoveGuardianParams,
+  type SetRecoveryThresholdParams,
 } from "./instructions";
 
 // Account deserialization (for advanced usage)

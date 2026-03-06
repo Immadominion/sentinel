@@ -4,7 +4,7 @@
 function createWalletInstruction(params): TransactionInstruction;
 ```
 
-Defined in: instructions.ts:77
+Defined in: [instructions.ts:77](https://github.com/Immadominion/sentinel/blob/fd31494042e1512e4c8be3ae0572497b18170ae0/sdk/seal-ts/src/instructions.ts#L77)
 
 Create a new SmartWallet PDA for the owner.
 

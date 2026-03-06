@@ -1,6 +1,6 @@
 use borsh::{BorshDeserialize, BorshSerialize};
 
-use super::{SMART_WALLET_DISCRIMINATOR, MAX_GUARDIANS};
+use super::{MAX_GUARDIANS, SMART_WALLET_DISCRIMINATOR};
 
 /// The main smart wallet account — a PDA that holds assets and enforces policies.
 ///
@@ -78,7 +78,7 @@ impl SmartWallet {
         + 8                       // spent_today_lamports
         + 8                       // day_start_timestamp
         + 1                       // is_locked
-        + 1;                      // is_closed
+        + 1; // is_closed
 
     /// Initialize a new SmartWallet with default values.
     /// `pda_authority` is set to the initial owner's pubkey and never changes.

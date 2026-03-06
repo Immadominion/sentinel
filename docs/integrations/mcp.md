@@ -1,237 +1,194 @@
 # MCP Integration
 
-Seal provides a [Model Context Protocol (MCP)](https://modelcontextprotocol.io/) server that gives AI agents direct access to **Seal's documentation**. Any MCP-compatible client — Claude Desktop, Cursor, Windsurf, VS Code Copilot — can search and retrieve Seal docs to understand the wallet system and generate correct integration code.
+Seal provides a [Model Context Protocol (MCP)](https://modelcontextprotocol.io/) server that gives AI agents direct access to **Seal wallet operations**. Any MCP-compatible client — Claude Desktop, Cursor, Windsurf, VS Code Copilot — can create wallets, register agents, manage sessions, and execute transactions through Seal.
 
 ## What is MCP?
 
-MCP is an open protocol that lets AI assistants call external tools. A **docs MCP server** exposes your project's documentation as searchable tools, so AI agents can look up API references, architecture guides, and code examples on-demand — without you copy-pasting into the chat.
+MCP is an open protocol that lets AI assistants call external tools. The Seal MCP server exposes all wallet operations as tools, so AI agents can autonomously manage smart wallets — creating sessions, executing CPI, and monitoring spending — all within on-chain enforced limits.
 
 ```mermaid
 sequenceDiagram
     participant Dev as Developer
     participant LLM as AI Agent (Claude/Cursor)
-    participant MCP as Seal Docs MCP
-    participant Docs as Documentation
+    participant MCP as Seal MCP Server
+    participant Chain as Solana (mainnet-beta)
 
-    Dev->>LLM: "How do I create a session key?"
-    LLM->>MCP: seal_search_docs("create session key")
-    MCP->>Docs: Search index
-    Docs-->>MCP: session-keys.md, instructions.md, quick-start.md
-    MCP-->>LLM: Relevant documentation snippets
-    LLM->>Dev: Here's how to create a session key, with code examples...
+    Dev->>LLM: "Create a wallet with 5 SOL daily limit"
+    LLM->>MCP: create_wallet(dailyLimitSol: 5, ...)
+    MCP->>Chain: Submit CreateWallet tx
+    Chain-->>MCP: Wallet PDA created
+    MCP-->>LLM: { walletAddress: "8xQr...", txSignature: "..." }
+    LLM->>Dev: Wallet created at 8xQr... with 5 SOL daily limit
 ```
 
-## Why a Docs MCP?
+## Why Seal MCP?
 
-| Without Docs MCP | With Docs MCP |
+| Without Seal MCP | With Seal MCP |
 |-----------------|---------------|
-| Copy-paste docs into every chat | AI agent fetches what it needs |
-| Context window fills up fast | Only relevant sections retrieved |
-| Outdated info from training data | Always reads latest docs |
-| Agent guesses at API shapes | Agent reads actual type definitions |
+| Manual wallet management | AI creates wallets, agents, sessions on command |
+| Copy-paste keypairs | MCP handles key management per-call |
+| Build custom integration code | Ready-to-use tools out of the box |
+| No spending guardrails for AI | On-chain limits enforced by Solana runtime |
 
-This is especially valuable for Seal because the on-chain program uses non-standard patterns (Pinocchio, manual account serialization, ASCII discriminators) that LLMs are unlikely to have in their training data.
+## Tools (19 operations)
 
-## Tools
-
-The Seal docs MCP server exposes these tools:
+### Wallet Operations
 
 | Tool | Description |
 |------|-------------|
-| `seal_search_docs` | Full-text search across all Seal documentation |
-| `seal_get_doc` | Retrieve a specific documentation page by path |
-| `seal_list_docs` | List all available documentation pages |
+| `create_wallet` | Create a new SmartWallet with spending limits |
+| `get_wallet` | Fetch wallet on-chain data (limits, guardians, status) |
+| `update_spending_limits` | Update daily and per-tx spending limits |
+| `add_guardian` | Add a guardian for m-of-n recovery |
+| `lock_wallet` | Lock or unlock delegated execution |
+| `remove_guardian` | Remove a guardian and clamp threshold if needed |
+| `close_wallet` | Permanently close the wallet |
 
-### Example Queries
+### Agent Operations
 
+| Tool | Description |
+|------|-------------|
+| `register_agent` | Register an AI agent with scoped permissions |
+| `get_agent_config` | Fetch agent configuration and spending stats |
+| `deregister_agent` | Remove an agent from the wallet |
+
+### Session Operations
+
+| Tool | Description |
+|------|-------------|
+| `create_session` | Create an ephemeral session key (time + budget bounded) |
+| `get_session` | Fetch session state (spent, remaining, expiry) |
+| `revoke_session` | Emergency revoke a session |
+
+### Execution
+
+| Tool | Description |
+|------|-------------|
+| `execute_via_session` | Execute a CPI through Seal with spending enforcement |
+
+### PDA Derivation (read-only)
+
+| Tool | Description |
+|------|-------------|
+| `derive_wallet_pda` | Derive wallet PDA from owner pubkey |
+| `derive_agent_pda` | Derive agent config PDA |
+| `derive_session_pda` | Derive session PDA |
+
+### Recovery
+
+| Tool | Description |
+|------|-------------|
+| `recover_wallet` | Rotate wallet owner via guardian recovery |
+| `set_recovery_threshold` | Configure how many guardians must co-sign recovery |
+
+## Quick Setup
+
+Install and run directly from npm:
+
+```bash
+npx seal-wallet-mcp-server
 ```
-seal_search_docs("session key spending limits")
-→ Returns: session-keys.md (§ Spending Limits), security-model.md (§ Three-Layer Limits)
 
-seal_search_docs("PDA derivation agent")
-→ Returns: pda-derivation.md (§ Agent Config PDA), constants.md (§ Seeds)
+### VS Code (GitHub Copilot)
 
-seal_get_doc("api/instructions")
-→ Returns: Full contents of the Instructions reference page
-
-seal_list_docs()
-→ Returns: All page paths with titles
-```
-
-## Quick Install
-
-<McpInstallButtons 
-  title="Add Seal to Your AI Assistant"
-  description="One-click install for Cursor, VS Code (Copilot), or Claude Desktop. Your AI will have instant access to all Seal documentation."
-  server-name="seal-docs"
-  package-name="@seal-wallet/mcp-docs"
-/>
-
-## Configuration
-
-Add to your MCP client configuration (e.g., Claude Desktop `claude_desktop_config.json`):
+Add to `.vscode/mcp.json` in your project:
 
 ```json
 {
-  "mcpServers": {
-    "seal-docs": {
+  "servers": {
+    "seal-wallet": {
       "command": "npx",
-      "args": ["-y", "@seal-wallet/mcp-docs"]
+      "args": ["-y", "seal-wallet-mcp-server"],
+      "type": "stdio"
     }
   }
 }
 ```
 
-For Cursor, add to `.cursor/mcp.json`:
+Restart VS Code and the Seal tools will be available in agent mode.
+
+### Cursor
+
+Add to `~/.cursor/mcp.json`:
 
 ```json
 {
   "mcpServers": {
-    "seal-docs": {
+    "seal-wallet": {
       "command": "npx",
-      "args": ["-y", "@seal-wallet/mcp-docs"]
+      "args": ["-y", "seal-wallet-mcp-server"]
     }
+  }
+}
+```
+
+### Claude Desktop
+
+Add to `claude_desktop_config.json`:
+
+```json
+{
+  "mcpServers": {
+    "seal-wallet": {
+      "command": "npx",
+      "args": ["-y", "seal-wallet-mcp-server"]
+    }
+  }
+}
+```
+
+### Local Development
+
+Clone the repo and build:
+
+```bash
+git clone https://github.com/immadominion/seal.git
+cd seal/packages/mcp-server
+npm install
+npm run build
+```
+
+Then point your MCP client at the built file:
+
+```json
+{
+  "seal-wallet": {
+    "command": "node",
+    "args": ["/path/to/seal/packages/mcp-server/dist/index.js"]
   }
 }
 ```
 
 ::: tip
-The docs MCP server is read-only — it only serves documentation. No keys, no wallet access, no security concerns.
+The MCP server defaults to **Solana devnet**. All tools accept optional `network` and `rpcUrl` parameters, so you can target a different cluster explicitly.
 :::
 
-## Implementation
+## Resources
 
-The docs MCP server indexes the VitePress documentation at build time and serves it via stdio transport:
+The MCP server also exposes read-only resources:
 
-```typescript
-import { McpServer } from "@modelcontextprotocol/sdk/server/mcp.js";
-import { StdioServerTransport } from "@modelcontextprotocol/sdk/server/stdio.js";
-import { z } from "zod";
+| Resource | URI | Content |
+|----------|-----|---------|
+| Program Info | `seal://program-info` | Program ID, features, SDK info |
+| Architecture | `seal://architecture` | Account hierarchy, spending model, discriminators |
 
-const server = new McpServer({
-  name: "seal-docs",
-  version: "0.1.0",
-});
+## Example Usage
 
-// Tool: Search documentation
-server.tool(
-  "seal_search_docs",
-  "Search Seal documentation for a topic",
-  {
-    query: z.string().describe("Search query (e.g., 'session key limits')"),
-  },
-  async ({ query }) => {
-    const results = searchIndex(query); // Full-text search over docs
-    return {
-      content: [{
-        type: "text",
-        text: results.map(r => `## ${r.title}\n\n${r.snippet}`).join("\n\n---\n\n"),
-      }],
-    };
-  }
-);
+```
+> Create a Seal wallet with 5 SOL daily limit and 1 SOL per-tx limit
 
-// Tool: Get a specific page
-server.tool(
-  "seal_get_doc",
-  "Retrieve a specific Seal documentation page",
-  {
-    path: z.string().describe("Doc path (e.g., 'api/instructions', 'concepts/session-keys')"),
-  },
-  async ({ path }) => {
-    const content = getDocPage(path);
-    return {
-      content: [{ type: "text", text: content }],
-    };
-  }
-);
+> Register an agent called "lp-bot" scoped to Meteora DLMM only,
+  with a 2 SOL daily limit
 
-// Tool: List all pages
-server.tool(
-  "seal_list_docs",
-  "List all available Seal documentation pages",
-  {},
-  async () => {
-    const pages = listAllPages();
-    return {
-      content: [{
-        type: "text",
-        text: pages.map(p => `- **${p.title}**: \`${p.path}\``).join("\n"),
-      }],
-    };
-  }
-);
+> Create a 2-hour session for the agent with 0.5 SOL budget
 
-const transport = new StdioServerTransport();
-await server.connect(transport);
+> Show me the wallet status and spending today
+
+> Emergency revoke all sessions for agent "lp-bot"
 ```
 
-## Documentation Coverage
+## Security Notes
 
-The MCP server indexes all pages from this documentation site:
-
-| Section | Pages | Content |
-|---------|-------|---------|
-| Guide | 3 | Getting started, installation, quick start |
-| Concepts | 4 | Architecture, account model, security model, session keys |
-| API Reference | 4 | TypeScript SDK, instructions, PDA derivation, constants |
-| Generated API | 50+ | Auto-generated from TypeDoc |
-| Integrations | 1 | This page |
-
----
-
-## Coming Soon: Wallet MCP Server
-
-::: info PLANNED — NOT YET IMPLEMENTED
-The wallet MCP server described below is on our roadmap. It is not available today.
-:::
-
-Beyond documentation, Seal's architecture is uniquely suited for a **wallet MCP server** — an MCP that lets AI agents actually *use* Seal wallets to execute on-chain transactions. The vision:
-
-```mermaid
-graph LR
-    A[Mobile App] -->|Create sub-wallet| B[Seal Wallet]
-    B -->|Set limits & scopes| C[Agent Config]
-    C -->|Pass via MCP| D[AI Agent]
-    D -->|Execute within bounds| E[Solana DeFi]
-    A -->|Monitor & control| B
-```
-
-### How It Will Work
-
-1. **Create a sub-wallet** from the mobile app with spending limits appropriate for the agent's task
-2. **Register the AI agent** with scoped program access (e.g., Jupiter only, 2 SOL/day)
-3. **Pass the wallet to the agent via MCP** — the agent gets tool calls like `seal_execute`, `seal_get_balance`
-4. **The agent operates autonomously** within the on-chain policy — even if the MCP server or agent is compromised, spending is bounded
-5. **Monitor everything from the app** — view sessions, spending, revoke access instantly
-
-### Why This Is Different
-
-Unlike other wallet MCPs that hand an AI agent a private key and hope for the best, Seal's on-chain enforcement means:
-
-- The agent **cannot** exceed its daily limit, even if it tries
-- The agent **cannot** call programs outside its allowlist
-- Sessions **auto-expire** — no forgotten open access
-- You **revoke from your phone** — instant kill switch
-
-### Planned Tools
-
-| Tool | Description |
-|------|-------------|
-| `seal_create_wallet` | Create a new sub-wallet with spending limits |
-| `seal_execute` | Execute a CPI through the wallet via session key |
-| `seal_get_balance` | Check wallet SOL balance |
-| `seal_get_session` | View session state (spent, remaining, expiry) |
-| `seal_revoke_session` | Emergency revoke |
-
-### Mobile App
-
-A companion mobile app (Flutter) will serve as the control plane:
-
-- **Create sub-wallets** for different agents/tasks
-- **Set and adjust spending limits** in real time
-- **View all agent activity** — per-session transaction history
-- **One-tap revoke** — kill any session or agent instantly
-- **Push notifications** — alerts when spending approaches limits
-
-This is tracked in our [Roadmap](/guide/getting-started#whats-next).
+- **Secret keys are passed per-call** — the MCP server needs keypairs to sign transactions. This is safe when running locally (stdio transport). Never expose the MCP server over a network.
+- **On-chain enforcement** — even if the MCP server is compromised, the Solana program enforces all spending limits, program allowlists, and session expiry.
+- **No persistent key storage** — the MCP server does not store keys between calls.

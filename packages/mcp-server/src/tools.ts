@@ -81,7 +81,7 @@ export const TOOL_DEFINITIONS = {
 
     add_guardian: {
         description:
-            "Add a guardian to the wallet for social recovery. Guardians can rotate the owner key if it's lost. WARNING: In v1, any single guardian can unilaterally recover — only add highly trusted keys.",
+            "Add a guardian to the wallet for social recovery. Guardians can collectively vote (m-of-n threshold) to rotate the owner key if it's lost.",
         inputSchema: z.object({
             ownerSecretKey: KeypairSchema,
             guardianPublicKey: PublicKeySchema.describe(
@@ -282,17 +282,63 @@ export const TOOL_DEFINITIONS = {
     // --- Recovery ---
     recover_wallet: {
         description:
-            "Rotate the wallet owner to a new key via guardian recovery. WARNING: This is a critical operation — the current owner loses control permanently.",
+            "Rotate the wallet owner to a new key via guardian recovery. Requires `recovery_threshold` guardian co-signers and transfers wallet control to the new owner.",
         inputSchema: z.object({
-            guardianSecretKey: KeypairSchema.describe(
-                "The guardian's secret key (must be registered on the wallet)"
-            ),
+            guardianSecretKeys: z
+                .array(KeypairSchema)
+                .min(1)
+                .describe(
+                    "Secret keys of the guardian co-signers (must meet recovery_threshold)"
+                ),
             walletOwnerPublicKey: PublicKeySchema.describe(
                 "Current wallet owner's public key"
             ),
             newOwnerPublicKey: PublicKeySchema.describe(
                 "The new owner's public key that will take control"
             ),
+            network: NetworkSchema,
+            rpcUrl: z.string().url().optional(),
+        }),
+    },
+
+    // --- Wallet Management ---
+    lock_wallet: {
+        description:
+            "Emergency lock or unlock a wallet. When locked, all agent operations via ExecuteViaSession are blocked. Only the owner can lock/unlock.",
+        inputSchema: z.object({
+            ownerSecretKey: KeypairSchema,
+            lock: z
+                .boolean()
+                .describe("true to lock, false to unlock"),
+            network: NetworkSchema,
+            rpcUrl: z.string().url().optional(),
+        }),
+    },
+
+    remove_guardian: {
+        description:
+            "Remove a guardian from the wallet. Only the owner can do this. If the recovery threshold exceeds the new guardian count, it is automatically clamped.",
+        inputSchema: z.object({
+            ownerSecretKey: KeypairSchema,
+            guardianPublicKey: PublicKeySchema.describe(
+                "Public key of the guardian to remove"
+            ),
+            network: NetworkSchema,
+            rpcUrl: z.string().url().optional(),
+        }),
+    },
+
+    set_recovery_threshold: {
+        description:
+            "Set the m-of-n threshold for guardian recovery. Determines how many guardians must co-sign a RecoverWallet call. Must be between 1 and the current guardian count.",
+        inputSchema: z.object({
+            ownerSecretKey: KeypairSchema,
+            threshold: z
+                .number()
+                .int()
+                .min(1)
+                .max(5)
+                .describe("Recovery threshold (1 ≤ threshold ≤ guardian_count)"),
             network: NetworkSchema,
             rpcUrl: z.string().url().optional(),
         }),

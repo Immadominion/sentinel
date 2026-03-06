@@ -1,4 +1,4 @@
-# @seal-wallet/sdk
+# seal-wallet-sdk
 
 TypeScript SDK for the **Seal Smart Wallet** on Solana.
 
@@ -7,13 +7,13 @@ Seal enables autonomous agent capabilities with on-chain spending limits and sco
 ## Installation
 
 ```bash
-npm install @seal-wallet/sdk @solana/web3.js
+npm install seal-wallet-sdk @solana/web3.js
 ```
 
 ## Quick Start
 
 ```typescript
-import { SealClient, solToLamports } from "@seal-wallet/sdk";
+import { SealClient, solToLamports } from "seal-wallet-sdk";
 import { Keypair } from "@solana/web3.js";
 
 // Initialize client
@@ -33,33 +33,14 @@ console.log("Wallet created:", wallet.address.toBase58());
 
 ## Architecture Overview
 
-```
-┌─────────────────────────────────────────────────────────┐
-│                    SMART WALLET (PDA)                    │
-│  - Owner (can modify limits, add guardians)              │
-│  - Daily/Per-TX spending limits                          │
-│  - Guardian list for recovery                            │
-└─────────────────────────────────────────────────────────┘
-                            │
-                            │ registers
-                            ▼
-┌─────────────────────────────────────────────────────────┐
-│                    AGENT CONFIG (PDA)                    │
-│  - Agent public key                                      │
-│  - Scoped spending limits (can be lower than wallet)     │
-│  - Allowed programs list                                 │
-│  - Transaction counter & total spent                     │
-└─────────────────────────────────────────────────────────┘
-                            │
-                            │ creates
-                            ▼
-┌─────────────────────────────────────────────────────────┐
-│                    SESSION KEY (PDA)                     │
-│  - Ephemeral keypair for signing                         │
-│  - Time-bounded (expiry timestamp)                       │
-│  - Amount-bounded (max spend limit)                      │
-│  - Revocable by owner or agent                           │
-└─────────────────────────────────────────────────────────┘
+```mermaid
+flowchart TD
+  W["SmartWallet PDA<br/>owner + pda_authority<br/>wallet spending limits<br/>guardian set + recovery threshold"]
+  A["AgentConfig PDA<br/>agent identity<br/>program allowlist<br/>agent spending limits"]
+  S["SessionKey PDA<br/>ephemeral signer<br/>expiry + budget caps<br/>revocable by owner or agent"]
+
+  W -->|registers| A
+  A -->|creates| S
 ```
 
 ## Full Workflow Example
@@ -68,7 +49,7 @@ console.log("Wallet created:", wallet.address.toBase58());
 import {
   SealClient,
   solToLamports,
-} from "@seal-wallet/sdk";
+} from "seal-wallet-sdk";
 import { Keypair, PublicKey } from "@solana/web3.js";
 
 async function main() {
@@ -252,10 +233,9 @@ const signature = await client.executeViaSession(
 ### Recovery Operations
 
 ```typescript
-// Recover wallet (guardian rotates owner)
-// ⚠️ WARNING: In v1, any single guardian can do this unilaterally
+// Recover wallet (guardian quorum rotates owner)
 const wallet = await client.recoverWallet(
-  guardian: Keypair,
+  guardians: Keypair[],
   walletOwner: PublicKey,
   newOwner: PublicKey,
 ): Promise<SmartWallet>;
@@ -278,13 +258,13 @@ import {
   recoverWalletInstruction,
   closeWalletInstruction,
   solToLamports,
-} from "@seal-wallet/sdk";
+} from "seal-wallet-sdk";
 ```
 
 ## PDA Derivation
 
 ```typescript
-import { deriveWalletPda, deriveAgentPda, deriveSessionPda } from "@seal-wallet/sdk";
+import { deriveWalletPda, deriveAgentPda, deriveSessionPda } from "seal-wallet-sdk";
 
 const [walletPda, walletBump] = deriveWalletPda(ownerPubkey);
 const [agentPda, agentBump] = deriveAgentPda(walletPda, agentPubkey);
@@ -341,11 +321,10 @@ interface SessionKey {
 
 ## Security Considerations
 
-### ⚠️ Guardian Recovery (v1 Limitation)
+### Guardian Recovery
 
-In v1, **any single registered guardian can unilaterally rotate the wallet owner**. This is a known security limitation.
-
-**Recommendation**: Do NOT add guardians for wallets holding significant value until m-of-n threshold recovery is implemented in v2.
+Seal supports guardian-based recovery with a configurable `recovery_threshold`.
+New wallets start with `recovery_threshold = 1`, so if you add multiple guardians and want multi-party approval, set the threshold explicitly after setup.
 
 See [SECURITY.md](../../SECURITY.md) for full details.
 

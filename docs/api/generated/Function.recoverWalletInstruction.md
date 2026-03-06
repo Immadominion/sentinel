@@ -4,18 +4,16 @@
 function recoverWalletInstruction(params): TransactionInstruction;
 ```
 
-Defined in: instructions.ts:564
+Defined in: [instructions.ts:562](https://github.com/Immadominion/sentinel/blob/fd31494042e1512e4c8be3ae0572497b18170ae0/sdk/seal-ts/src/instructions.ts#L562)
 
-Recover a wallet by rotating the owner key (guardian-initiated).
+Recover a wallet by rotating the owner key (guardian-initiated, m-of-n threshold).
 
-⚠️ CRITICAL SECURITY WARNING:
-In v1, ANY SINGLE registered guardian can unilaterally rotate the owner.
-This means a compromised guardian can steal the entire wallet.
-See SECURITY.md for full details.
+Multiple guardians must co-sign to reach the wallet's recovery_threshold.
+All signing guardians must be unique and registered.
 
 Accounts:
-0. `[signer]`    Guardian (must be registered on the wallet)
-1. `[writable]`  SmartWallet PDA
+0..M `[signer]`   Guardians (M must be >= recovery_threshold)
+M    `[writable]`  SmartWallet PDA
 
 Data:
 - `[0..32] new_owner: Pubkey` — the new owner public key

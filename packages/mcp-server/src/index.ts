@@ -7,15 +7,15 @@
  * as tools for AI agents in VS Code, Cursor, Claude Desktop, etc.
  *
  * Usage:
- *   npx @seal-wallet/mcp-server          # stdio transport (default)
- *   npx @seal-wallet/mcp-server --sse    # SSE transport on port 3100
+ *   npx seal-wallet-mcp-server            # stdio transport (default)
+ *   npx seal-wallet-mcp-server --sse     # SSE transport on port 3100
  *
  * Configuration (VS Code / Cursor):
  *   Add to your MCP settings:
  *   {
  *     "seal-wallet": {
  *       "command": "npx",
- *       "args": ["@seal-wallet/mcp-server"],
+ *       "args": ["seal-wallet-mcp-server"],
  *       "env": {}
  *     }
  *   }
@@ -65,10 +65,10 @@ server.resource(
                 text: JSON.stringify(
                     {
                         programId: "EV3TKRVz7pTHpAqBTjP8jmwuvoRBRCpjmVSPHhcMnXqb",
-                        network: "mainnet-beta",
+                        network: "devnet",
                         description:
                             "Seal is a Pinocchio-based smart wallet on Solana with agent-scoped permissions, ephemeral session keys, and on-chain spending limits.",
-                        docs: "https://seal-wallet.dev",
+                        docs: "https://seal.scrolls.fun",
                         features: [
                             "Smart wallet with PDA-based ownership",
                             "Agent registration with per-agent spending limits",
@@ -77,7 +77,7 @@ server.resource(
                             "Guardian-based social recovery",
                             "Default-closed allowlists for programs",
                         ],
-                        sdkPackage: "@seal-wallet/sdk",
+                        sdkPackage: "seal-wallet-sdk",
                     },
                     null,
                     2
