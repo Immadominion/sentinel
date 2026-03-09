@@ -52,21 +52,21 @@ Configuration for a registered agent — defines exactly what the agent is permi
 | 0 | 8 | `discriminator` | `[u8; 8]` | Account type identifier (`SealAgnt`) |
 | 8 | 32 | `wallet` | `Pubkey` | Parent SmartWallet PDA |
 | 40 | 32 | `agent` | `Pubkey` | The agent's identity pubkey |
-| 72 | 64 | `name` | `[u8; 64]` | Human-readable name (UTF-8, zero-padded) |
-| 136 | 1 | `bump` | `u8` | PDA bump seed |
-| 137 | 1 | `is_active` | `bool` | Whether the agent is currently active |
-| 138 | 320 | `allowed_programs` | `[Pubkey; 10]` | Program IDs the agent can CPI into |
-| 458 | 1 | `allowed_programs_count` | `u8` | Number of allowed programs (max 10) |
-| 459 | 40 | `allowed_instructions` | `[[u8; 8]; 5]` | Instruction discriminators (first 8 bytes) |
-| 499 | 1 | `allowed_instructions_count` | `u8` | Number of allowed instruction discriminators (max 5) |
-| 500 | 8 | `daily_limit` | `u64` | Max lamports this agent can spend per day |
-| 508 | 8 | `per_tx_limit` | `u64` | Max lamports per transaction for this agent |
-| 516 | 8 | `default_session_duration` | `i64` | Default session duration in seconds |
-| 524 | 8 | `max_session_duration` | `i64` | Maximum session duration in seconds |
-| 532 | 8 | `total_spent` | `u64` | Cumulative lamports spent (all-time) |
-| 540 | 8 | `tx_count` | `u64` | Cumulative transaction count |
-| 548 | 8 | `spent_today` | `u64` | Rolling daily spend counter for this agent |
-| 556 | 8 | `day_start_timestamp` | `i64` | Unix timestamp of current spending day |
+| 72 | 32 | `name` | `[u8; 32]` | Human-readable name (UTF-8, zero-padded) |
+| 104 | 1 | `bump` | `u8` | PDA bump seed |
+| 105 | 1 | `is_active` | `bool` | Whether the agent is currently active |
+| 106 | 1 | `allowed_programs_count` | `u8` | Number of allowed programs (max 8) |
+| 107 | 256 | `allowed_programs` | `[Pubkey; 8]` | Program IDs the agent can CPI into |
+| 363 | 1 | `allowed_instructions_count` | `u8` | Number of allowed instruction discriminators (max 16) |
+| 364 | 128 | `allowed_instructions` | `[[u8; 8]; 16]` | Instruction discriminators (first 8 bytes) |
+| 492 | 8 | `daily_limit` | `u64` | Max lamports this agent can spend per day |
+| 500 | 8 | `per_tx_limit` | `u64` | Max lamports per transaction for this agent |
+| 508 | 8 | `default_session_duration` | `i64` | Default session duration in seconds |
+| 516 | 8 | `max_session_duration` | `i64` | Maximum session duration in seconds |
+| 524 | 8 | `total_spent` | `u64` | Cumulative lamports spent (all-time) |
+| 532 | 8 | `tx_count` | `u64` | Cumulative transaction count |
+| 540 | 8 | `spent_today` | `u64` | Rolling daily spend counter for this agent |
+| 548 | 8 | `day_start_timestamp` | `i64` | Unix timestamp of current spending day |
 
 ### Program & Instruction Filtering
 
@@ -98,7 +98,7 @@ An ephemeral key with time and amount bounds for autonomous agent operation.
 
 | Offset | Size | Field | Type | Description |
 |--------|------|-------|------|-------------|
-| 0 | 8 | `discriminator` | `[u8; 8]` | Account type identifier (`SentSess`) |
+| 0 | 8 | `discriminator` | `[u8; 8]` | Account type identifier (`SealSess`) |
 | 8 | 32 | `wallet` | `Pubkey` | Parent SmartWallet PDA |
 | 40 | 32 | `agent` | `Pubkey` | Parent agent pubkey |
 | 72 | 32 | `session_pubkey` | `Pubkey` | The ephemeral session key (signs transactions) |

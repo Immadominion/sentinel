@@ -2,8 +2,6 @@
   <img src="banner.png" alt="Seal" width="600" />
 </p>
 
-<h1 align="center">Seal</h1>
-
 <p align="center">
   <strong>On-chain autonomous wallet infrastructure for Solana.</strong>
 </p>
@@ -23,7 +21,7 @@ Seal is an open-source smart wallet SDK with **on-chain policy enforcement** —
 | Wallet providers are vendor-locked | Phantom KMS, Crossmint API, Privy MPC — keys in their servers | Self-custodial, keys encrypted locally, program is open-source |
 | Policy enforcement is server-side | Turnkey/Crossmint policies run on their servers — bypassable | On-chain enforcement by Solana runtime — impossible to bypass |
 | No Flutter SDK for autonomous wallets | None of them have Flutter support | Native Dart SDK via `flutter_rust_bridge` + Codama |
-| Signing costs money | Privy $0.01/sig, Crossmint $0.05/MAW | Zero per-signature cost |
+| Signing costs money | Custodial providers charge per-signature or per-wallet fees | Zero per-signature cost |
 
 ## Architecture
 

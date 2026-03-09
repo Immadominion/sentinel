@@ -46,14 +46,25 @@ class SiwsConfig {
     required this.statement,
     required this.uri,
     this.version = 1,
-    this.chainId = 'devnet',
+    this.chainId = 'mainnet',
     this.appName = 'App',
     this.appIconPath = 'favicon.ico',
-    this.cluster = 'devnet',
+    this.cluster = 'mainnet-beta',
   });
 
-  /// Sage default configuration.
+  /// Sage default configuration (mainnet).
   static const sage = SiwsConfig(
+    domain: 'sage.app',
+    statement: 'Sign in to Sage — your autonomous LP trading agent.',
+    uri: 'https://sage.app',
+    chainId: 'mainnet',
+    appName: 'Sage',
+    appIconPath: 'favicon.ico',
+    cluster: 'mainnet-beta',
+  );
+
+  /// Sage devnet configuration (for development / testing).
+  static const sageDev = SiwsConfig(
     domain: 'sage.app',
     statement: 'Sign in to Sage — your autonomous LP trading agent.',
     uri: 'https://sage.app',

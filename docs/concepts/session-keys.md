@@ -10,7 +10,7 @@ The fundamental challenge: an AI agent needs to sign transactions, but you don't
 |----------|---------|
 | Share the owner key | Total control. One bug drains everything. |
 | Server-side relay | Centralized, must be trusted, adds latency. |
-| MPC key sharding | Expensive per-signature ($0.01+), complex setup. |
+| MPC key sharding | Complex setup, adds per-signature overhead. |
 | **Session keys** | **Time-bounded, amount-capped, revocable, zero per-sig cost.** |
 
 Session keys are the best trade-off for high-frequency autonomous agents.

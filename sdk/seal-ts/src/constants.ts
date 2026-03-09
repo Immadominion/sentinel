@@ -39,9 +39,9 @@ export enum InstructionDiscriminant {
 
 // Limits
 export const MAX_GUARDIANS = 5;
-export const MAX_ALLOWED_PROGRAMS = 10;
-export const MAX_ALLOWED_INSTRUCTIONS = 5;
-export const MAX_AGENT_NAME_LENGTH = 64;
+export const MAX_ALLOWED_PROGRAMS = 8;
+export const MAX_ALLOWED_INSTRUCTIONS = 16;
+export const MAX_AGENT_NAME_LENGTH = 32;
 
 // Default values
 export const DEFAULT_SESSION_DURATION_SECS = BigInt(24 * 60 * 60); // 24 hours

@@ -90,22 +90,24 @@ dependencies:
 
 ## MCP Integration
 
-### Documentation MCP (Available)
+### Wallet MCP (Available)
 
-Seal provides docs as an MCP server, so AI agents can search and retrieve Seal documentation to generate correct integration code:
+Seal provides a wallet operations MCP server (`seal-wallet-mcp-server`) that lets AI agents in code editors manage smart wallets via tool calls — all spending limits enforced on-chain:
+
+- `create_wallet` — Create a SmartWallet with spending limits
+- `register_agent` — Register an AI agent with scoped permissions
+- `create_session` — Create a time-bounded, budget-capped session key
+- `execute_via_session` — Execute a CPI through the wallet via session key
+- `revoke_session` — Emergency session revoke
+- Plus 14 more tools for wallet management, recovery, and PDA derivation
+
+### Documentation MCP (Planned)
+
+A docs-search MCP server is on our roadmap — following the Mintlify pattern, it will let AI agents search and retrieve Seal documentation to generate correct integration code:
 
 - `seal_search_docs` — Full-text search across all Seal documentation
 - `seal_get_doc` — Retrieve a specific documentation page
 - `seal_list_docs` — List all available documentation pages
-
-### Wallet MCP (Planned)
-
-A wallet MCP server is on our roadmap — it will let AI agents operate Seal wallets via tool calls, with all spending limits enforced on-chain:
-
-- `seal_create_wallet` — Create a sub-wallet with spending limits
-- `seal_execute` — Execute a CPI through the wallet via session key
-- `seal_get_balance` — Check wallet SOL balance
-- `seal_revoke_session` — Emergency session revoke
 
 Combined with the upcoming mobile app, users will create sub-wallets from their phone, pass them to AI agents via MCP, and maintain full control over spending limits and program access — all enforced on-chain.
 

@@ -13,7 +13,7 @@ Every wallet solution for autonomous agents today picks one of two bad trade-off
 | **Share the private key** | Agent has full control. One bug drains everything. |
 | **Server-side relay** | Centralized chokepoint. Goes down, agents stop. You're trusting the relay. |
 | **Custodial wallets** | Not your keys, not your crypto. Provider can freeze funds. |
-| **Per-signature billing** | $0.01–$0.05/sig adds up fast for high-frequency agents. |
+| **Per-signature billing** | Pay-per-sig adds up fast for high-frequency agents. |
 
 Seal takes a different path: the **Solana program itself** is the enforcer. No server, no relay, no trust assumptions beyond the blockchain.
 
@@ -59,7 +59,7 @@ Spending limits, program allowlists, and session expiry are validated **inside t
 
 ### Zero Per-Signature Cost
 
-Unlike Privy ($0.01/sig) or Crossmint ($0.05/MAW), Seal charges **nothing** per signature. Once the session key is created, the agent signs directly — no relay, no paywall. You only pay standard Solana transaction fees (~$0.00025).
+Unlike custodial wallet providers that charge per-signature or per-active-wallet fees, Seal charges **nothing** per signature. Once the session key is created, the agent signs directly — no relay, no paywall. You only pay standard Solana transaction fees (~$0.00025).
 
 ### Multi-Agent Isolation
 

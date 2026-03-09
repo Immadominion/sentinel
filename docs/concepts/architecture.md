@@ -134,7 +134,7 @@ graph LR
 | Feature | Seal | Squads v4 | Privy | Crossmint |
 |---------|----------|-----------|-------|-----------|
 | Enforcement | On-chain program | On-chain multisig | Server-side | Server-side |
-| Per-sig cost | $0 (tx fee only) | $0 (tx fee only) | $0.01/sig | $0.05/MAW |
+| Per-sig cost | $0 (tx fee only) | $0 (tx fee only) | Per-sig billing | Per-wallet billing |
 | Session keys | ☑ Time + amount bounded | ☒ | ☒ (MPC based) | ☒ |
 | Agent isolation | ☑ Per-agent PDA | ☒ | ☒ | ☒ |
 | Self-custodial | ☑ PDA from owner key | ☑ | ☒ | ☒ |
