@@ -148,13 +148,19 @@ npm install
 npm run build
 ```
 
-Then point your MCP client at the built file:
+Then run the built server directly:
+
+```bash
+node dist/index.js
+```
+
+Or point your MCP client at it:
 
 ```json
 {
   "seal-wallet": {
     "command": "node",
-    "args": ["/path/to/seal/packages/mcp-server/dist/index.js"]
+    "args": ["./seal/packages/mcp-server/dist/index.js"]
   }
 }
 ```
