@@ -436,4 +436,97 @@ const handlers: Record<ToolName, (args: any) => Promise<any>> = {
             wallet: walletToJson(wallet),
         };
     },
+
+    // ── Sigil (Pairing Token) Operations ──────────────────────
+    async sigil_request_session(args) {
+        const apiUrl = args.sigilApiUrl ?? "http://localhost:3003";
+        const response = await fetch(`${apiUrl}/api/agent/session/request`, {
+            method: "POST",
+            headers: {
+                "Content-Type": "application/json",
+                Authorization: `Bearer ${args.pairingToken}`,
+            },
+            body: JSON.stringify({
+                durationSecs: args.durationSecs,
+                maxAmountSol: args.maxAmountSol,
+                maxPerTxSol: args.maxPerTxSol,
+            }),
+        });
+
+        if (response.status === 202) {
+            const data = await response.json();
+            return {
+                success: false,
+                status: "pending_approval",
+                message: "Session request is pending manual approval in the Sigil app.",
+                approvalId: data.approvalId,
+            };
+        }
+
+        if (!response.ok) {
+            const error = await response.json().catch(() => ({ error: "Unknown" }));
+            throw new Error(error.error ?? `Session request failed: ${response.statusText}`);
+        }
+
+        const session = await response.json();
+        return {
+            success: true,
+            sessionPubkey: session.sessionPubkey,
+            sessionSecretKey: session.sessionSecretKey,
+            sessionPda: session.sessionPda,
+            walletPda: session.walletPda,
+            agentConfigPda: session.agentConfigPda,
+            agentPubkey: session.agentPubkey,
+            expiresAt: session.expiresAt,
+            maxAmountLamports: session.maxAmountLamports,
+            maxPerTxLamports: session.maxPerTxLamports,
+            txSignature: session.txSignature,
+            hint: "Store the sessionSecretKey securely. Use it with execute_via_session to execute transactions.",
+        };
+    },
+
+    async sigil_heartbeat(args) {
+        const apiUrl = args.sigilApiUrl ?? "http://localhost:3003";
+        const response = await fetch(`${apiUrl}/api/agent/session/heartbeat`, {
+            method: "POST",
+            headers: {
+                "Content-Type": "application/json",
+                Authorization: `Bearer ${args.pairingToken}`,
+            },
+            body: JSON.stringify({
+                sessionPda: args.sessionPda,
+                status: args.status ?? "active",
+            }),
+        });
+
+        if (!response.ok) {
+            const error = await response.json().catch(() => ({ error: "Unknown" }));
+            throw new Error(error.error ?? `Heartbeat failed: ${response.statusText}`);
+        }
+
+        return {
+            success: true,
+            message: `Heartbeat sent (status: ${args.status ?? "active"})`,
+        };
+    },
+
+    async sigil_session_info(args) {
+        const apiUrl = args.sigilApiUrl ?? "http://localhost:3003";
+        const response = await fetch(`${apiUrl}/api/agent/session/info`, {
+            headers: {
+                Authorization: `Bearer ${args.pairingToken}`,
+            },
+        });
+
+        if (!response.ok) {
+            const error = await response.json().catch(() => ({ error: "Unknown" }));
+            throw new Error(error.error ?? `Session info failed: ${response.statusText}`);
+        }
+
+        const sessions = await response.json();
+        return {
+            sessions,
+            count: sessions.length,
+        };
+    },
 };

@@ -1,5 +1,5 @@
 {
-  "name": "@seal-wallet/agent-sdk",
+  "name": "seal-wallet-agent-sdk",
   "version": "0.1.0",
   "description": "Lightweight SDK for AI agents to authenticate with Seal smart wallets on Solana via Sigil pairing tokens",
   "type": "module",

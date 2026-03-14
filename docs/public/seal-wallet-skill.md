@@ -30,7 +30,7 @@ Before using this skill, the workspace needs the SDK installed:
 
 ```bash
 cd ~/.openclaw/workspace
-npm install @seal-wallet/agent-sdk @solana/web3.js
+npm install seal-wallet-agent-sdk @solana/web3.js
 ```
 
 ## Core Operations
@@ -40,7 +40,7 @@ npm install @seal-wallet/agent-sdk @solana/web3.js
 To check the Seal wallet's SOL balance, run this script:
 
 ```typescript
-import { SigilAgent } from "@seal-wallet/agent-sdk";
+import { SigilAgent } from "seal-wallet-agent-sdk";
 import { Connection, LAMPORTS_PER_SOL } from "@solana/web3.js";
 
 const agent = new SigilAgent({
@@ -63,7 +63,7 @@ Save as a temp file and run with `npx tsx <file>`.
 To send SOL from the Seal wallet to a recipient:
 
 ```typescript
-import { SigilAgent } from "@seal-wallet/agent-sdk";
+import { SigilAgent } from "seal-wallet-agent-sdk";
 import {
   Connection, Transaction, SystemProgram,
   LAMPORTS_PER_SOL, PublicKey,
@@ -111,7 +111,7 @@ await agent.heartbeat("active", { action: "transfer", amount: AMOUNT_SOL, recipi
 To open a liquidity position on a Meteora DLMM pool:
 
 ```typescript
-import { SigilAgent } from "@seal-wallet/agent-sdk";
+import { SigilAgent } from "seal-wallet-agent-sdk";
 import { Connection, Transaction, Keypair, PublicKey } from "@solana/web3.js";
 import DLMM, { StrategyType } from "@meteora-ag/dlmm";
 import BN from "bn.js";

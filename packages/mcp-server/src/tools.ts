@@ -343,6 +343,64 @@ export const TOOL_DEFINITIONS = {
             rpcUrl: z.string().url().optional(),
         }),
     },
+
+    // ── Sigil (Pairing Token) Operations ──────────────────────
+    sigil_request_session: {
+        description:
+            "Request a new session via a Sigil pairing token. This is the recommended way for AI agents to get sessions — no raw secret keys needed. The pairing token (sgil_xxx) is obtained from the Sigil mobile app or dashboard. Returns session credentials including the session keypair, wallet PDA, and expiry.",
+        inputSchema: z.object({
+            pairingToken: z
+                .string()
+                .startsWith("sgil_")
+                .describe("Sigil pairing token (format: sgil_xxx). Obtain this from the Sigil app."),
+            durationSecs: z
+                .number()
+                .int()
+                .positive()
+                .optional()
+                .describe("Session duration in seconds (default: 24h, max: 7 days)"),
+            maxAmountSol: SolAmountSchema.optional().describe(
+                "Total SOL budget for the session (default: 5 SOL, capped at agent limits)"
+            ),
+            maxPerTxSol: SolAmountSchema.optional().describe(
+                "Per-transaction limit (default: 1 SOL, capped at agent limits)"
+            ),
+            sigilApiUrl: z
+                .string()
+                .url()
+                .optional()
+                .describe("Sigil backend URL (default: http://localhost:3003)"),
+        }),
+    },
+
+    sigil_heartbeat: {
+        description:
+            "Send a heartbeat to the Sigil backend to report agent status. This helps the wallet owner monitor agent activity in real-time.",
+        inputSchema: z.object({
+            pairingToken: z
+                .string()
+                .startsWith("sgil_")
+                .describe("Sigil pairing token"),
+            sessionPda: PublicKeySchema.describe("The active session PDA"),
+            status: z
+                .enum(["active", "idle", "trading"])
+                .optional()
+                .describe("Current agent status (default: active)"),
+            sigilApiUrl: z.string().url().optional(),
+        }),
+    },
+
+    sigil_session_info: {
+        description:
+            "Get information about active sessions for this agent via its pairing token. Returns session PDAs, expiry times, and budget limits.",
+        inputSchema: z.object({
+            pairingToken: z
+                .string()
+                .startsWith("sgil_")
+                .describe("Sigil pairing token"),
+            sigilApiUrl: z.string().url().optional(),
+        }),
+    },
 } as const;
 
 export type ToolName = keyof typeof TOOL_DEFINITIONS;

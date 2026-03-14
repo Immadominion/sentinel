@@ -1,13 +1,13 @@
-pub mod smart_wallet;
-pub mod session_key;
 pub mod agent_config;
+pub mod session_key;
+pub mod smart_wallet;
 
 #[cfg(test)]
 mod tests;
 
-pub use smart_wallet::*;
-pub use session_key::*;
 pub use agent_config::*;
+pub use session_key::*;
+pub use smart_wallet::*;
 
 // ──────────────────────────────────────────────────────────────
 // Account discriminators — first 8 bytes of each account
@@ -51,3 +51,7 @@ pub const MAX_ALLOWED_PROGRAMS: usize = 8;
 
 /// Maximum number of allowed instruction discriminators per agent.
 pub const MAX_ALLOWED_INSTRUCTIONS: usize = 16;
+
+/// Minimum session duration in seconds (1 minute).
+/// Prevents creation of impractically short sessions that waste account rent.
+pub const MIN_SESSION_DURATION: i64 = 60;

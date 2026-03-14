@@ -71,10 +71,14 @@ pub fn process(
     }
 
     // ── Update ──────────────────────────────────────────────
+    // NOTE: Existing agent configs may hold higher limits than the new
+    // wallet limits. This is safe because wallet limits are enforced at
+    // execution time (ExecuteViaSession) and session creation time.
+    // However, the owner should review and update agent limits separately.
     wallet_state.daily_limit_lamports = new_daily_limit;
     wallet_state.per_tx_limit_lamports = new_per_tx_limit;
     utils::save_account(&wallet_state, wallet_account)?;
 
-    log!("UpdateSpendingLimit: limits updated");
+    log!("UpdateSpendingLimit: limits updated — review agent configs if reduced");
     Ok(())
 }

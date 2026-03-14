@@ -75,7 +75,7 @@ Message OpenClaw from any connected channel:
 - *"Transfer 0.1 SOL to `GkXn6...`"*
 - *"Open an LP position on SOL-USDC"*
 
-OpenClaw reads the skill instructions, writes a TypeScript script using `@seal-wallet/agent-sdk`, executes it, and reports back.
+OpenClaw reads the skill instructions, writes a TypeScript script using `seal-wallet-agent-sdk`, executes it, and reports back.
 
 ## What the Skill Teaches
 
@@ -104,5 +104,5 @@ All spending limits are enforced **on-chain** by the Seal program. The agent phy
 
 - OpenClaw running (`openclaw gateway`)
 - Sigil backend accessible (not localhost — deploy to Railway/Render/Fly.io)
-- `@seal-wallet/agent-sdk` + `@solana/web3.js` installed in OpenClaw workspace
+- `seal-wallet-agent-sdk` + `@solana/web3.js` installed in OpenClaw workspace
 - A pairing token from the Sigil mobile app

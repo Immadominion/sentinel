@@ -7,7 +7,7 @@ use solana_program_log::log;
 
 use crate::error::SealError;
 use crate::state::{
-    AgentConfig, SessionKey, SmartWallet, AGENT_CONFIG_DISCRIMINATOR,
+    AgentConfig, SessionKey, SmartWallet, AGENT_CONFIG_DISCRIMINATOR, MIN_SESSION_DURATION,
     SESSION_KEY_DISCRIMINATOR, SESSION_SEED, SMART_WALLET_DISCRIMINATOR,
 };
 use crate::utils;
@@ -27,11 +27,7 @@ use crate::utils;
 /// - `duration: i64` (LE) — session duration in seconds
 /// - `max_amount: u64` (LE) — session spending cap
 /// - `max_per_tx: u64` (LE)
-pub fn process(
-    program_id: &Address,
-    accounts: &[AccountView],
-    data: &[u8],
-) -> ProgramResult {
+pub fn process(program_id: &Address, accounts: &[AccountView], data: &[u8]) -> ProgramResult {
     // ── Parse accounts ──────────────────────────────────────
     if accounts.len() < 5 {
         log!("CreateSession: expected 5 accounts");
@@ -110,8 +106,11 @@ pub fn process(
     let max_per_tx = utils::read_u64_le(data, 49)?;
 
     // Validate parameters against agent policy.
-    if duration <= 0 {
-        log!("CreateSession: duration must be > 0");
+    if duration < MIN_SESSION_DURATION {
+        log!(
+            "CreateSession: duration must be >= {} seconds",
+            MIN_SESSION_DURATION
+        );
         return Err(ProgramError::InvalidInstructionData);
     }
     if duration > agent_config.max_session_duration {

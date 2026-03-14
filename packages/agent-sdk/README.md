@@ -1,4 +1,4 @@
-# @seal-wallet/agent-sdk
+# seal-wallet-agent-sdk
 
 Lightweight SDK for AI agents and bots to authenticate with [Seal](https://github.com/seal-wallet) smart wallets on Solana via the Sigil pairing token flow.
 
@@ -32,13 +32,13 @@ sequenceDiagram
 ## Installation
 
 ```bash
-npm install @seal-wallet/agent-sdk @solana/web3.js
+npm install seal-wallet-agent-sdk @solana/web3.js
 ```
 
 ## Quick Start
 
 ```typescript
-import { SigilAgent } from "@seal-wallet/agent-sdk";
+import { SigilAgent } from "seal-wallet-agent-sdk";
 import { Connection, Transaction, SystemProgram, LAMPORTS_PER_SOL } from "@solana/web3.js";
 
 // 1. Initialize with pairing token from Sigil app
@@ -147,7 +147,7 @@ The primary use case is autonomous LP trading on Meteora DLMM pools:
 
 ```typescript
 import DLMM from "@meteora-ag/dlmm";
-import { SigilAgent } from "@seal-wallet/agent-sdk";
+import { SigilAgent } from "seal-wallet-agent-sdk";
 import { Connection, Keypair, Transaction } from "@solana/web3.js";
 import BN from "bn.js";
 

@@ -89,6 +89,8 @@ pub fn process(
 
     // Clamp recovery_threshold so it doesn't exceed the new guardian count.
     if wallet_state.recovery_threshold > wallet_state.guardian_count {
+        log!("RemoveGuardian: clamping recovery_threshold from {} to {}",
+            wallet_state.recovery_threshold, wallet_state.guardian_count);
         wallet_state.recovery_threshold = wallet_state.guardian_count;
     }
 

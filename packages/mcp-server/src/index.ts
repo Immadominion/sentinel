@@ -119,6 +119,14 @@ Owner (EOA)
 4. Seal validates limits, checks allowlist, then CPIs to target program
 5. Session auto-expires or can be revoked by owner/agent
 
+## Sigil Pairing Token Flow (Recommended)
+1. Owner uses Sigil app to create wallet and register agent
+2. Owner generates a pairing token (sgil_xxx) in the Sigil app
+3. Agent uses \`sigil_request_session\` with the pairing token — no raw keys needed
+4. Sigil backend creates session on-chain and returns credentials
+5. Agent uses session credentials with \`execute_via_session\` as before
+6. Agent sends heartbeats via \`sigil_heartbeat\` for monitoring
+
 ## Key Discriminators (8 bytes each)
 - SmartWallet: \`SealWalt\`
 - AgentConfig: \`SealAgnt\`
@@ -142,18 +150,26 @@ server.prompt(
                 role: "user",
                 content: {
                     type: "text",
-                    text: `Help me set up an autonomous trading agent using Seal smart wallet. Here's the process:
+                    text: `Help me set up an autonomous trading agent using Seal smart wallet. There are two approaches:
 
-1. First, create a Seal smart wallet with appropriate daily and per-tx spending limits
-2. Generate or provide an agent keypair
-3. Register the agent on the wallet with:
-   - A descriptive name
-   - Agent-specific spending limits (should be <= wallet limits)
-   - Allowed programs (e.g., Meteora DLMM: LBUZKhRxPF3XUpBCjp4YzTKgLccjZhTSDM9YuVaPwxo)
-4. Create a session key for the agent with time and budget constraints
-5. The agent can now execute transactions via the session key
+**Option A: Via Sigil (Recommended — no raw keys needed)**
+1. Install the Sigil app and connect your Solana wallet
+2. Create a Seal smart wallet from the Sigil dashboard
+3. Register an agent with spending limits and allowed programs
+4. Generate a pairing token (sgil_xxx) in the Sigil app
+5. Use \`sigil_request_session\` with the pairing token to get a session
+6. Use \`execute_via_session\` with the session credentials to trade
+7. Send heartbeats with \`sigil_heartbeat\` so the owner can monitor
 
-Use the Seal MCP tools to perform each step. Ask me for the required keypairs and configuration values.`,
+**Option B: Direct (requires raw keypairs)**
+1. Create a Seal smart wallet with \`create_wallet\`
+2. Register the agent with \`register_agent\`
+3. Create a session with \`create_session\`
+4. Execute transactions with \`execute_via_session\`
+
+Allowed programs example: Meteora DLMM: LBUZKhRxPF3XUpBCjp4YzTKgLccjZhTSDM9YuVaPwxo
+
+Use the Seal MCP tools to perform each step.`,
                 },
             },
         ],

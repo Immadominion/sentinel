@@ -1,5 +1,5 @@
 /**
- * @seal-wallet/agent-sdk E2E Demo
+ * seal-wallet-agent-sdk E2E Demo
  *
  * This script demonstrates the full lifecycle of an agent using a Seal wallet
  * via the Sigil pairing token flow:
@@ -52,7 +52,7 @@ async function main() {
   const connection = new Connection(RPC_URL, "confirmed");
 
   console.log("═══════════════════════════════════════════════════");
-  console.log("  @seal-wallet/agent-sdk — E2E Demo");
+  console.log("  seal-wallet-agent-sdk — E2E Demo");
   console.log("═══════════════════════════════════════════════════");
   console.log(`  Backend:  ${API_URL}`);
   console.log(`  RPC:      ${RPC_URL}`);
