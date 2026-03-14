@@ -71,11 +71,12 @@ impl AgentConfig {
 
     /// Check if this agent is allowed to call a specific program.
     ///
-    /// **Default-closed**: if no programs are registered, nothing is allowed.
-    /// This prevents accidentally granting unrestricted access.
+    /// **Default-open**: if no programs are registered, all programs are allowed.
+    /// Security is enforced at the session/spending-limit level.
+    /// Use the allowlist for fine-grained restriction on specific agents.
     pub fn is_program_allowed(&self, program_id: &[u8; 32]) -> bool {
         if self.allowed_programs_count == 0 {
-            return false; // default-closed: no programs = no access
+            return true; // default-open: no restrictions = all programs allowed
         }
         for i in 0..self.allowed_programs_count as usize {
             if self.allowed_programs[i] == *program_id {
@@ -87,9 +88,8 @@ impl AgentConfig {
 
     /// Check if this agent is allowed to execute a specific instruction.
     ///
-    /// **Default-open for instructions**: if no instruction restrictions are set,
+    /// **Default-open**: if no instruction restrictions are set,
     /// all instructions on an allowed program are permitted.
-    /// Programs are default-closed, which provides the primary security gate.
     /// Use instruction restrictions for fine-grained control on sensitive programs
     /// (e.g., restricting Token Program to Transfer only).
     pub fn is_instruction_allowed(&self, discriminator: &[u8; 8]) -> bool {
