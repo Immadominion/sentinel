@@ -21,7 +21,7 @@ sequenceDiagram
     SB->>SC: CreateSession TX (on-chain)
     SC-->>SB: Session PDA created
     SB-->>OC: Session credentials (keypair + limits)
-    OC->>OC: Build transfer IX → wrapInstruction()
+    OC->>OC: Build transfer IX → buildTransferSol()
     OC->>SC: Submit signed TX
     SC-->>OC: TX confirmed
     OC-->>U: "Done! TX: 3xK9m..."
@@ -85,7 +85,7 @@ The [skill file](/seal-wallet-skill.md) instructs the agent to:
 |-----------|--------|
 | Initialize | `new SigilAgent({ pairingToken })` |
 | Get session | `agent.getSession({ maxAmountSol, maxPerTxSol })` |
-| Transfer SOL | `SystemProgram.transfer()` → `agent.wrapInstruction()` |
+| Transfer SOL | `agent.buildTransferSol(destination, amount)` |
 | DLMM LP | `DLMM.initializePositionAndAddLiquidityByStrategy()` → `agent.wrapInstruction()` |
 | Heartbeat | `agent.heartbeat("trading", { action: "..." })` |
 

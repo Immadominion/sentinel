@@ -60,12 +60,12 @@ Save as a temp file and run with `npx tsx <file>`.
 
 ### 2. Transfer SOL
 
-To send SOL from the Seal wallet to a recipient:
+To send SOL from the Seal wallet to a recipient, use `buildTransferSol()` — do **not** use `SystemProgram.transfer` because the wallet PDA carries on-chain data and the System Program rejects transfers from data-bearing accounts:
 
 ```typescript
 import { SigilAgent } from "seal-wallet-agent-sdk";
 import {
-  Connection, Transaction, SystemProgram,
+  Connection, Transaction,
   LAMPORTS_PER_SOL, PublicKey,
 } from "@solana/web3.js";
 
@@ -84,18 +84,12 @@ const connection = new Connection(process.env.SOLANA_RPC_URL || "https://api.dev
 const RECIPIENT = new PublicKey("RECIPIENT_ADDRESS_HERE"); // Replace with actual address
 const AMOUNT_SOL = 0.1; // Replace with actual amount
 
-const transferIx = SystemProgram.transfer({
-  fromPubkey: session.walletPda,
-  toPubkey: RECIPIENT,
-  lamports: AMOUNT_SOL * LAMPORTS_PER_SOL,
-});
-
-const wrappedIx = agent.wrapInstruction(
-  transferIx,
+const transferIx = agent.buildTransferSol(
+  RECIPIENT,
   BigInt(Math.round(AMOUNT_SOL * LAMPORTS_PER_SOL))
 );
 
-const tx = new Transaction().add(wrappedIx);
+const tx = new Transaction().add(transferIx);
 tx.feePayer = session.sessionKeypair.publicKey;
 tx.recentBlockhash = (await connection.getLatestBlockhash()).blockhash;
 
@@ -167,9 +161,9 @@ await agent.heartbeat("idle", { action: "waiting", note: "No profitable opportun
 
 ## Important Rules
 
-1. **Always wrap instructions** — Never submit raw Solana instructions. Always use `agent.wrapInstruction(ix, amountLamports)` to route through Seal's session authorization.
+1. **Use `buildTransferSol()` for SOL transfers** — Do NOT use `SystemProgram.transfer` wrapped in `wrapInstruction`. The wallet PDA carries on-chain data, and SystemProgram rejects transfers from data-bearing accounts. Always use `agent.buildTransferSol(destination, amountLamports)` instead.
 
-2. **Respect spending limits** — The on-chain program enforces `maxPerTxSol` and daily `maxAmountSol`. If you try to exceed them, the transaction will fail. Plan your amounts accordingly.
+2. **Use `wrapInstruction()` for DeFi operations** — For DLMM, swaps, and other program interactions, wrap the instruction with `agent.wrapInstruction(ix, amountLamports)` to route through Seal's session authorization.
 
 3. **Use session.walletPda as authority** — When building instructions (transfers, DLMM, etc.), the source/authority is always `session.walletPda`, NOT the session keypair's public key.
 

@@ -39,7 +39,7 @@ npm install seal-wallet-agent-sdk @solana/web3.js
 
 ```typescript
 import { SigilAgent } from "seal-wallet-agent-sdk";
-import { Connection, Transaction, SystemProgram, LAMPORTS_PER_SOL } from "@solana/web3.js";
+import { Connection, Transaction, LAMPORTS_PER_SOL } from "@solana/web3.js";
 
 // 1. Initialize with pairing token from Sigil app
 const agent = new SigilAgent({
@@ -54,18 +54,16 @@ const session = await agent.getSession({
   maxPerTxSol: 1.0,      // 1 SOL per transaction limit
 });
 
-// 3. Build your instruction (e.g., SOL transfer, DLMM addLiquidity)
-const transferIx = SystemProgram.transfer({
-  fromPubkey: session.walletPda,        // Seal wallet PDA is the authority
-  toPubkey: recipientAddress,
-  lamports: 0.1 * LAMPORTS_PER_SOL,
-});
+// 3. Build a SOL transfer using Seal's native TransferLamports instruction
+//    (Do NOT use SystemProgram.transfer — the wallet PDA carries data and
+//     SystemProgram rejects transfers from accounts with data.)
+const transferIx = agent.buildTransferSol(
+  recipientAddress,
+  BigInt(0.1 * LAMPORTS_PER_SOL),
+);
 
-// 4. Wrap it through Seal's ExecuteViaSession
-const wrappedIx = agent.wrapInstruction(transferIx, BigInt(0.1 * LAMPORTS_PER_SOL));
-
-// 5. Sign with session keypair and submit
-const tx = new Transaction().add(wrappedIx);
+// 4. Sign with session keypair and submit
+const tx = new Transaction().add(transferIx);
 tx.feePayer = session.sessionKeypair.publicKey;
 const connection = new Connection("https://api.devnet.solana.com");
 await connection.sendTransaction(tx, [session.sessionKeypair]);
@@ -108,12 +106,21 @@ Requests or returns a cached ephemeral session. If the current session is within
 - `Error("Session request pending manual approval...")` if the agent's `autoApprove` is `false` — the wallet owner must approve in the Sigil app.
 - `Error("Session request failed: ...")` on backend/network errors (automatically retried up to 3 times with exponential backoff).
 
+### `agent.buildTransferSol(destination, amountLamports)`
+
+Builds a `TransferLamports` instruction (disc 13) to move SOL from the Seal wallet PDA to a destination. This is the correct way to transfer SOL — do **not** use `SystemProgram.transfer` because the wallet PDA carries on-chain data, and the System Program rejects transfers from accounts with data.
+
+| Parameter | Type | Description |
+|-----------|------|-------------|
+| `destination` | `PublicKey` | Recipient address |
+| `amountLamports` | `bigint` | Amount of lamports to transfer |
+
 ### `agent.wrapInstruction(innerIx, amountLamports?)`
 
-Wraps a `TransactionInstruction` inside Seal's `ExecuteViaSession` CPI envelope. The Seal program verifies:
+Wraps a `TransactionInstruction` inside Seal's `ExecuteViaSession` CPI envelope. Use this for DeFi interactions (DLMM, swap programs, etc.) — **not** for SOL transfers (use `buildTransferSol` instead). The Seal program verifies:
 - Session key is valid and not expired
 - Amount is within per-TX and daily limits
-- Target program is in the agent's `allowed_programs` list
+- Target program is in the agent's `allowed_programs` list (default: all allowed)
 
 | Parameter | Type | Default | Description |
 |-----------|------|---------|-------------|
