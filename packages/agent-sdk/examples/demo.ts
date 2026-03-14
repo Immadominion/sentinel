@@ -6,7 +6,7 @@
  *
  *   1. Initialize agent with pairing token
  *   2. Request an ephemeral session (auto-approved or pending approval)
- *   3. Build & wrap a SOL transfer instruction via ExecuteViaSession
+ *   3. Build a TransferLamports instruction for SOL transfer
  *   4. Send a heartbeat
  *   5. Verify session validity
  *
@@ -25,7 +25,6 @@
 
 import {
   Connection,
-  SystemProgram,
   Transaction,
   LAMPORTS_PER_SOL,
   sendAndConfirmTransaction,
@@ -100,24 +99,23 @@ async function main() {
   console.log(`     Explorer:       https://explorer.solana.com/tx/${session.credentials.txSignature}?cluster=devnet\n`);
 
   // ─── Step 3: Build Wrapped Instruction ───────────────────
-  console.log("Step 3: Building wrapped SOL transfer instruction...");
+  console.log("Step 3: Building TransferLamports instruction...");
 
-  // Build a SOL transfer from the Seal wallet PDA to... itself (safe demo transfer)
-  const transferIx = SystemProgram.transfer({
-    fromPubkey: session.walletPda,
-    toPubkey: session.walletPda, // send to self — no net change
-    lamports: 1000, // 0.000001 SOL — minimal test amount
-  });
+  // Transfer SOL from the Seal wallet PDA to itself (safe demo — no net change)
+  // Uses TransferLamports (disc 13) which directly debits/credits the wallet PDA
+  // without program allowlist checks (unlike ExecuteViaSession wrapping SystemProgram).
+  const transferIx = agent.buildTransferSol(
+    session.walletPda, // send to self — safe demo
+    1000n              // 0.000001 SOL — minimal test amount
+  );
 
-  const wrappedIx = agent.wrapInstruction(transferIx, 1000n);
-
-  console.log("  ✅ Instruction wrapped for ExecuteViaSession");
-  console.log(`     Program:      ${wrappedIx.programId.toBase58()}`);
-  console.log(`     Accounts:     ${wrappedIx.keys.length}`);
-  console.log(`     Data length:  ${wrappedIx.data.length} bytes`);
+  console.log("  ✅ TransferLamports instruction built");
+  console.log(`     Program:      ${transferIx.programId.toBase58()}`);
+  console.log(`     Accounts:     ${transferIx.keys.length}`);
+  console.log(`     Data length:  ${transferIx.data.length} bytes`);
 
   // Build transaction (NOT sending in demo mode unless --send flag is passed)
-  const tx = new Transaction().add(wrappedIx);
+  const tx = new Transaction().add(transferIx);
   tx.feePayer = session.sessionKeypair.publicKey;
 
   const shouldSend = process.argv.includes("--send");

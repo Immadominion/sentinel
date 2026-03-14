@@ -147,6 +147,46 @@ export class SigilAgent {
   }
 
   /**
+   * Build a TransferLamports instruction (disc 13) to transfer SOL from
+   * the Seal wallet PDA to a destination. Unlike wrapInstruction() which
+   * goes through ExecuteViaSession and checks allowed_programs, this uses
+   * the native Seal TransferLamports instruction which directly debits/credits
+   * lamports on the wallet PDA without program allowlist checks.
+   */
+  buildTransferSol(
+    destination: PublicKey,
+    amountLamports: bigint
+  ): TransactionInstruction {
+    if (!this.credentials || !this.sessionKeypair) {
+      throw new Error("No active session. Call getSession() first.");
+    }
+
+    const walletPda = new PublicKey(this.credentials.walletPda);
+    const agentPda = new PublicKey(this.credentials.agentConfigPda);
+    const sessionPda = new PublicKey(this.credentials.sessionPda);
+    const sealProgramId = new PublicKey(
+      "EV3TKRVz7pTHpAqBTjP8jmwuvoRBRCpjmVSPHhcMnXqb"
+    );
+
+    // Instruction data: [disc(1)] + [amount(8)]
+    const data = Buffer.alloc(9);
+    data[0] = 13; // TransferLamports discriminant
+    data.writeBigUInt64LE(amountLamports, 1);
+
+    return new TransactionInstruction({
+      programId: sealProgramId,
+      keys: [
+        { pubkey: this.sessionKeypair.publicKey, isSigner: true, isWritable: false },
+        { pubkey: walletPda, isSigner: false, isWritable: true },
+        { pubkey: agentPda, isSigner: false, isWritable: true },
+        { pubkey: sessionPda, isSigner: false, isWritable: true },
+        { pubkey: destination, isSigner: false, isWritable: true },
+      ],
+      data,
+    });
+  }
+
+  /**
    * Send a heartbeat to the Sigil backend.
    */
   async heartbeat(
