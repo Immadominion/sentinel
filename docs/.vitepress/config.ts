@@ -34,6 +34,7 @@ const sharedSidebar = [
         text: "Integrations",
         items: [
             { text: "MCP Integration", link: "/integrations/mcp" },
+            { text: "OpenClaw", link: "/integrations/openclaw" },
             { text: "Connect to Cursor", link: "/integrations/cursor" },
             { text: "Connect to VS Code", link: "/integrations/vscode" },
         ],

@@ -1,0 +1,42 @@
+{
+  "name": "@seal-wallet/agent-sdk",
+  "version": "0.1.0",
+  "description": "Lightweight SDK for AI agents to authenticate with Seal smart wallets on Solana via Sigil pairing tokens",
+  "type": "module",
+  "main": "dist/index.js",
+  "types": "dist/index.d.ts",
+  "files": ["dist", "README.md"],
+  "scripts": {
+    "build": "tsc",
+    "dev": "tsc --watch",
+    "prepublishOnly": "npm run build"
+  },
+  "dependencies": {
+    "@solana/web3.js": "^1.98.0"
+  },
+  "peerDependencies": {
+    "@solana/web3.js": "^1.90.0"
+  },
+  "peerDependenciesMeta": {
+    "@solana/web3.js": {
+      "optional": false
+    }
+  },
+  "devDependencies": {
+    "@types/node": "^22.0.0",
+    "typescript": "^5.7.0"
+  },
+  "keywords": ["solana", "seal", "agent", "wallet", "sigil", "dlmm", "meteora", "smart-wallet", "session-key", "autonomous"],
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/seal-wallet/agent-sdk"
+  },
+  "homepage": "https://github.com/seal-wallet/agent-sdk#readme",
+  "bugs": {
+    "url": "https://github.com/seal-wallet/agent-sdk/issues"
+  },
+  "engines": {
+    "node": ">=18"
+  }
+}
