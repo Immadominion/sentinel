@@ -19,6 +19,7 @@
 //! | 8           | DeregisterAgent      | Owner         |
 //! | 9           | CloseWallet          | Owner         |
 //! | 10          | LockWallet           | Owner         |
+//! | 13          | TransferLamports     | Session Key   |
 
 #[cfg(not(feature = "no-entrypoint"))]
 mod entrypoint;

@@ -772,3 +772,76 @@ export function setRecoveryThresholdInstruction(
 export function solToLamports(sol: number): bigint {
   return BigInt(Math.floor(sol * LAMPORTS_PER_SOL));
 }
+
+// ════════════════════════════════════════════════════════════════
+// TransferLamports (Session-authorized wallet PDA → destination)
+// ════════════════════════════════════════════════════════════════
+
+export interface TransferLamportsParams {
+  /** The session key (ephemeral keypair that signs the transaction) */
+  sessionKey: PublicKey;
+  /** The wallet owner's public key (to derive wallet PDA) */
+  walletOwner: PublicKey;
+  /** The agent's public key */
+  agent: PublicKey;
+  /** The session's ephemeral public key */
+  sessionPubkey: PublicKey;
+  /** Destination account to receive lamports */
+  destination: PublicKey;
+  /** Amount to transfer (in lamports) */
+  amountLamports: bigint;
+  /** Program ID (defaults to SEAL_PROGRAM_ID) */
+  programId?: PublicKey;
+}
+
+/**
+ * Transfer lamports from the Seal wallet PDA to a destination account.
+ *
+ * This solves the PDA ownership problem: since the wallet PDA is owned
+ * by the Seal program (not SystemProgram), it cannot be used as a payer
+ * in SystemProgram::Transfer. This instruction directly debits/credits
+ * lamports, enforcing all spending limits.
+ *
+ * Use this to pre-fund a session signer before opening DLMM positions,
+ * or to withdraw funds from the wallet PDA.
+ *
+ * Accounts:
+ * 0. `[signer]`    Session Key
+ * 1. `[writable]`  SmartWallet PDA (source)
+ * 2. `[writable]`  AgentConfig PDA
+ * 3. `[writable]`  SessionKey PDA
+ * 4. `[writable]`  Destination
+ *
+ * Data:
+ * - `[0..8] amount_lamports: u64` (LE)
+ */
+export function transferLamportsInstruction(
+  params: TransferLamportsParams
+): TransactionInstruction {
+  const programId = params.programId ?? SEAL_PROGRAM_ID;
+  const [walletPda] = deriveWalletPda(params.walletOwner, programId);
+  const [agentPda] = deriveAgentPda(walletPda, params.agent, programId);
+  const [sessionPda] = deriveSessionPda(
+    walletPda,
+    params.agent,
+    params.sessionPubkey,
+    programId
+  );
+
+  const data = Buffer.concat([
+    Buffer.from([InstructionDiscriminant.TransferLamports]),
+    encodeU64(params.amountLamports),
+  ]);
+
+  return new TransactionInstruction({
+    programId,
+    keys: [
+      { pubkey: params.sessionKey, isSigner: true, isWritable: false },
+      { pubkey: walletPda, isSigner: false, isWritable: true },
+      { pubkey: agentPda, isSigner: false, isWritable: true },
+      { pubkey: sessionPda, isSigner: false, isWritable: true },
+      { pubkey: params.destination, isSigner: false, isWritable: true },
+    ],
+    data,
+  });
+}

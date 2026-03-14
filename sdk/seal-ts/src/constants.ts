@@ -35,6 +35,7 @@ export enum InstructionDiscriminant {
     LockWallet = 10,
     RemoveGuardian = 11,
     SetRecoveryThreshold = 12,
+    TransferLamports = 13,
 }
 
 // Limits

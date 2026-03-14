@@ -11,3 +11,4 @@ pub mod close_wallet;
 pub mod lock_wallet;
 pub mod remove_guardian;
 pub mod set_recovery_threshold;
+pub mod transfer_lamports;

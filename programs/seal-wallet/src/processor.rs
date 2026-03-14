@@ -20,6 +20,7 @@ pub enum SealInstruction {
     LockWallet = 10,
     RemoveGuardian = 11,
     SetRecoveryThreshold = 12,
+    TransferLamports = 13,
 }
 
 impl TryFrom<u8> for SealInstruction {
@@ -40,6 +41,7 @@ impl TryFrom<u8> for SealInstruction {
             10 => Ok(Self::LockWallet),
             11 => Ok(Self::RemoveGuardian),
             12 => Ok(Self::SetRecoveryThreshold),
+            13 => Ok(Self::TransferLamports),
             _ => Err(SealError::InvalidInstruction),
         }
     }
@@ -112,6 +114,10 @@ pub fn process_instruction(
         SealInstruction::SetRecoveryThreshold => {
             log!("Instruction: SetRecoveryThreshold");
             instructions::set_recovery_threshold::process(program_id, accounts, data)
+        }
+        SealInstruction::TransferLamports => {
+            log!("Instruction: TransferLamports");
+            instructions::transfer_lamports::process(program_id, accounts, data)
         }
     }
 }
