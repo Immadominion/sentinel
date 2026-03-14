@@ -5,7 +5,10 @@
   "type": "module",
   "main": "dist/index.js",
   "types": "dist/index.d.ts",
-  "files": ["dist", "README.md"],
+  "files": [
+    "dist",
+    "README.md"
+  ],
   "scripts": {
     "build": "tsc",
     "dev": "tsc --watch",
@@ -26,7 +29,18 @@
     "@types/node": "^22.0.0",
     "typescript": "^5.7.0"
   },
-  "keywords": ["solana", "seal", "agent", "wallet", "sigil", "dlmm", "meteora", "smart-wallet", "session-key", "autonomous"],
+  "keywords": [
+    "solana",
+    "seal",
+    "agent",
+    "wallet",
+    "sigil",
+    "dlmm",
+    "meteora",
+    "smart-wallet",
+    "session-key",
+    "autonomous"
+  ],
   "license": "MIT",
   "repository": {
     "type": "git",

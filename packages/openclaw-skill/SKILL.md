@@ -21,7 +21,7 @@ You have access to a **Seal smart wallet** on Solana via the Sigil pairing syste
 | Variable | Required | Description |
 |----------|----------|-------------|
 | `SEAL_PAIRING_TOKEN` | Yes | The pairing token from Sigil app (`sgil_xxx` format) |
-| `SIGIL_API_URL` | No | Sigil backend URL (default: `http://localhost:3003`) |
+| `SIGIL_API_URL` | No | Sigil backend URL (default: `https://sigil-backend-production-fd3d.up.railway.app`) |
 | `SOLANA_RPC_URL` | No | Solana RPC endpoint (default: `https://api.devnet.solana.com`) |
 
 ## Setup (one-time)
@@ -45,7 +45,7 @@ import { Connection, LAMPORTS_PER_SOL } from "@solana/web3.js";
 
 const agent = new SigilAgent({
   pairingToken: process.env.SEAL_PAIRING_TOKEN!,
-  apiUrl: process.env.SIGIL_API_URL || "http://localhost:3003",
+  apiUrl: process.env.SIGIL_API_URL || "https://sigil-backend-production-fd3d.up.railway.app",
 });
 
 const session = await agent.getSession();
@@ -71,7 +71,7 @@ import {
 
 const agent = new SigilAgent({
   pairingToken: process.env.SEAL_PAIRING_TOKEN!,
-  apiUrl: process.env.SIGIL_API_URL || "http://localhost:3003",
+  apiUrl: process.env.SIGIL_API_URL || "https://sigil-backend-production-fd3d.up.railway.app",
 });
 
 const session = await agent.getSession({
@@ -118,7 +118,7 @@ import BN from "bn.js";
 
 const agent = new SigilAgent({
   pairingToken: process.env.SEAL_PAIRING_TOKEN!,
-  apiUrl: process.env.SIGIL_API_URL || "http://localhost:3003",
+  apiUrl: process.env.SIGIL_API_URL || "https://sigil-backend-production-fd3d.up.railway.app",
 });
 
 const session = await agent.getSession({ maxAmountSol: 2.0, maxPerTxSol: 1.0 });

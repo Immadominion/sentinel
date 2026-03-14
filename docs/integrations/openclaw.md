@@ -33,14 +33,14 @@ sequenceDiagram
 
 Tell OpenClaw to read the skill from your Seal docs site:
 
-> "Read the Seal wallet skill at `https://seal-wallet.vercel.app/seal-wallet-skill.md` and use it to control my wallet."
+> "Read the Seal wallet skill at `https://seal.scrolls.fun/seal-wallet-skill.md` and use it to control my wallet."
 
 Or install it locally:
 
 ```bash
 mkdir -p ~/.openclaw/skills/seal-wallet
 curl -o ~/.openclaw/skills/seal-wallet/SKILL.md \
-  https://seal-wallet.vercel.app/seal-wallet-skill.md
+  https://seal.scrolls.fun/seal-wallet-skill.md
 ```
 
 ### 2. Provide the Pairing Token

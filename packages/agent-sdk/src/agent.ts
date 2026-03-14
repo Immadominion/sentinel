@@ -10,7 +10,7 @@ import type {
   SessionRequestOptions,
 } from "./types.js";
 
-const DEFAULT_API_URL = "http://localhost:3003";
+const DEFAULT_API_URL = "https://sigil-backend-production-fd3d.up.railway.app";
 const DEFAULT_REFRESH_THRESHOLD = 300; // 5 minutes
 const MAX_RETRIES = 3;
 const INITIAL_BACKOFF_MS = 1000;
