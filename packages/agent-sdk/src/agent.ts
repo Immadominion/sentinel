@@ -3,6 +3,10 @@ import {
   PublicKey,
   TransactionInstruction,
   Connection,
+  Transaction,
+  sendAndConfirmTransaction,
+  clusterApiUrl,
+  LAMPORTS_PER_SOL,
 } from "@solana/web3.js";
 import type {
   SigilAgentConfig,
@@ -31,11 +35,13 @@ const INITIAL_BACKOFF_MS = 1000;
 export class SigilAgent {
   private readonly pairingToken: string;
   private readonly apiUrl: string;
+  private readonly rpcUrl: string;
   private readonly autoRefresh: boolean;
   private readonly refreshThresholdSecs: number;
 
   private credentials: SessionCredentials | null = null;
   private sessionKeypair: Keypair | null = null;
+  private _connection: Connection | null = null;
 
   constructor(config: SigilAgentConfig) {
     if (!config.pairingToken.startsWith("sgil_")) {
@@ -44,9 +50,20 @@ export class SigilAgent {
 
     this.pairingToken = config.pairingToken;
     this.apiUrl = config.apiUrl ?? DEFAULT_API_URL;
+    this.rpcUrl = config.rpcUrl ?? clusterApiUrl("devnet");
     this.autoRefresh = config.autoRefresh ?? true;
     this.refreshThresholdSecs =
       config.refreshThresholdSecs ?? DEFAULT_REFRESH_THRESHOLD;
+  }
+
+  /**
+   * Get a Solana Connection (lazily created, reused).
+   */
+  getConnection(): Connection {
+    if (!this._connection) {
+      this._connection = new Connection(this.rpcUrl, "confirmed");
+    }
+    return this._connection;
   }
 
   /**
@@ -203,6 +220,78 @@ export class SigilAgent {
         metadata,
       }),
     });
+  }
+
+  // ═══════════════════════════════════════════════════════════
+  // High-level convenience methods
+  // ═══════════════════════════════════════════════════════════
+
+  /**
+   * Transfer SOL from the Seal wallet to a destination address.
+   *
+   * This is the recommended high-level method for sending SOL.
+   * It handles session management, TX building, signing, and submission.
+   *
+   * @param destination  Recipient public key (or base58 string)
+   * @param amountSol    Amount in SOL (e.g. 0.5 for half a SOL)
+   * @returns Transaction signature
+   */
+  async sendTransferSol(
+    destination: PublicKey | string,
+    amountSol: number
+  ): Promise<string> {
+    const destPubkey =
+      typeof destination === "string"
+        ? new PublicKey(destination)
+        : destination;
+
+    const amountLamports = BigInt(Math.round(amountSol * LAMPORTS_PER_SOL));
+    if (amountLamports <= 0n) {
+      throw new Error("Amount must be greater than 0");
+    }
+
+    // Ensure we have an active session
+    const { sessionKeypair } = await this.getSession();
+    const connection = this.getConnection();
+
+    // Build the TransferLamports instruction
+    const ix = this.buildTransferSol(destPubkey, amountLamports);
+
+    // Build, sign, and send the transaction
+    const tx = new Transaction().add(ix);
+    tx.feePayer = sessionKeypair.publicKey;
+
+    return sendAndConfirmTransaction(connection, tx, [sessionKeypair]);
+  }
+
+  /**
+   * Get the SOL balance of the Seal wallet PDA.
+   *
+   * @returns Balance in SOL
+   */
+  async getWalletBalance(): Promise<number> {
+    // Ensure we have credentials (need walletPda)
+    if (!this.credentials) {
+      await this.getSession();
+    }
+    const walletPda = new PublicKey(this.credentials!.walletPda);
+    const connection = this.getConnection();
+    const lamports = await connection.getBalance(walletPda);
+    return lamports / LAMPORTS_PER_SOL;
+  }
+
+  /**
+   * Get the SOL balance of the session keypair (for fees).
+   *
+   * @returns Balance in SOL
+   */
+  async getSessionBalance(): Promise<number> {
+    if (!this.sessionKeypair) {
+      await this.getSession();
+    }
+    const connection = this.getConnection();
+    const lamports = await connection.getBalance(this.sessionKeypair!.publicKey);
+    return lamports / LAMPORTS_PER_SOL;
   }
 
   /**

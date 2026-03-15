@@ -33,11 +33,7 @@ use crate::utils;
 ///
 /// ## Data (8 bytes)
 /// - `[0..8] amount_lamports: u64` (LE) — amount to transfer
-pub fn process(
-    program_id: &Address,
-    accounts: &[AccountView],
-    data: &[u8],
-) -> ProgramResult {
+pub fn process(program_id: &Address, accounts: &[AccountView], data: &[u8]) -> ProgramResult {
     // ── Parse accounts ──────────────────────────────────────
     if accounts.len() < 5 {
         log!("TransferLamports: expected at least 5 accounts");

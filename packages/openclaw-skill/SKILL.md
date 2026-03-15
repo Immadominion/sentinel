@@ -41,18 +41,18 @@ To check the Seal wallet's SOL balance, run this script:
 
 ```typescript
 import { SigilAgent } from "seal-wallet-agent-sdk";
-import { Connection, LAMPORTS_PER_SOL } from "@solana/web3.js";
 
 const agent = new SigilAgent({
   pairingToken: process.env.SEAL_PAIRING_TOKEN!,
-  apiUrl: process.env.SIGIL_API_URL || "https://sigil-backend-production-fd3d.up.railway.app",
 });
 
+const balance = await agent.getWalletBalance();
+const sessionBalance = await agent.getSessionBalance();
 const session = await agent.getSession();
-const connection = new Connection(process.env.SOLANA_RPC_URL || "https://api.devnet.solana.com");
-const balance = await connection.getBalance(session.walletPda);
+
 console.log(`Wallet: ${session.walletPda.toBase58()}`);
-console.log(`Balance: ${balance / LAMPORTS_PER_SOL} SOL`);
+console.log(`Wallet balance: ${balance} SOL`);
+console.log(`Session fee balance: ${sessionBalance} SOL`);
 console.log(`Session expires: ${session.credentials.expiresAt}`);
 ```
 
@@ -60,44 +60,23 @@ Save as a temp file and run with `npx tsx <file>`.
 
 ### 2. Transfer SOL
 
-To send SOL from the Seal wallet to a recipient, use `buildTransferSol()` — do **not** use `SystemProgram.transfer` because the wallet PDA carries on-chain data and the System Program rejects transfers from data-bearing accounts:
+To send SOL from the Seal wallet to a recipient, use `sendTransferSol()` — the simplest approach. Do **not** use `SystemProgram.transfer` because the wallet PDA carries on-chain data and the System Program rejects transfers from data-bearing accounts:
 
 ```typescript
 import { SigilAgent } from "seal-wallet-agent-sdk";
-import {
-  Connection, Transaction,
-  LAMPORTS_PER_SOL, PublicKey,
-} from "@solana/web3.js";
 
 const agent = new SigilAgent({
   pairingToken: process.env.SEAL_PAIRING_TOKEN!,
-  apiUrl: process.env.SIGIL_API_URL || "https://sigil-backend-production-fd3d.up.railway.app",
 });
 
-const session = await agent.getSession({
-  durationSecs: 3600,   // 1 hour session
-  maxAmountSol: 5.0,    // up to 5 SOL total
-  maxPerTxSol: 1.0,     // up to 1 SOL per tx
-});
-
-const connection = new Connection(process.env.SOLANA_RPC_URL || "https://api.devnet.solana.com");
-const RECIPIENT = new PublicKey("RECIPIENT_ADDRESS_HERE"); // Replace with actual address
+const RECIPIENT = "RECIPIENT_ADDRESS_HERE"; // Replace with actual address
 const AMOUNT_SOL = 0.1; // Replace with actual amount
 
-const transferIx = agent.buildTransferSol(
-  RECIPIENT,
-  BigInt(Math.round(AMOUNT_SOL * LAMPORTS_PER_SOL))
-);
-
-const tx = new Transaction().add(transferIx);
-tx.feePayer = session.sessionKeypair.publicKey;
-tx.recentBlockhash = (await connection.getLatestBlockhash()).blockhash;
-
-const sig = await connection.sendTransaction(tx, [session.sessionKeypair]);
+const sig = await agent.sendTransferSol(RECIPIENT, AMOUNT_SOL);
 console.log(`Transfer sent! Signature: ${sig}`);
 console.log(`Explorer: https://explorer.solana.com/tx/${sig}?cluster=devnet`);
 
-await agent.heartbeat("active", { action: "transfer", amount: AMOUNT_SOL, recipient: RECIPIENT.toBase58() });
+await agent.heartbeat("active", { action: "transfer", amount: AMOUNT_SOL, recipient: RECIPIENT });
 ```
 
 ### 3. Meteora DLMM — Open LP Position
@@ -161,7 +140,7 @@ await agent.heartbeat("idle", { action: "waiting", note: "No profitable opportun
 
 ## Important Rules
 
-1. **Use `buildTransferSol()` for SOL transfers** — Do NOT use `SystemProgram.transfer` wrapped in `wrapInstruction`. The wallet PDA carries on-chain data, and SystemProgram rejects transfers from data-bearing accounts. Always use `agent.buildTransferSol(destination, amountLamports)` instead.
+1. **Use `sendTransferSol()` for SOL transfers** — This is the simplest and safest way: `await agent.sendTransferSol(recipient, amountSol)`. Do NOT use `SystemProgram.transfer` — the wallet PDA carries on-chain data, and SystemProgram rejects transfers from data-bearing accounts. For low-level control, use `agent.buildTransferSol(destination, amountLamports)` to build the instruction manually.
 
 2. **Use `wrapInstruction()` for DeFi operations** — For DLMM, swaps, and other program interactions, wrap the instruction with `agent.wrapInstruction(ix, amountLamports)` to route through Seal's session authorization.
 

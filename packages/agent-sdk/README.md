@@ -7,6 +7,7 @@ Lightweight SDK for AI agents and bots to authenticate with [Seal](https://githu
 Seal wallets are on-chain smart wallets with **session-based authorization**, **spending limits**, and **allowed-program enforcement**. The Sigil system provides a secure pairing flow where wallet owners grant agents ephemeral sessions via **pairing tokens**.
 
 This SDK handles the entire agent-side flow:
+
 - **Authenticate** with a pairing token (no private keys needed)
 - **Obtain ephemeral sessions** with on-chain spending limits
 - **Wrap instructions** through Seal's `ExecuteViaSession` CPI
@@ -39,34 +40,20 @@ npm install seal-wallet-agent-sdk @solana/web3.js
 
 ```typescript
 import { SigilAgent } from "seal-wallet-agent-sdk";
-import { Connection, Transaction, LAMPORTS_PER_SOL } from "@solana/web3.js";
 
 // 1. Initialize with pairing token from Sigil app
 const agent = new SigilAgent({
   pairingToken: process.env.PAIRING_TOKEN!, // sgil_xxx format
-  apiUrl: "http://localhost:3003",           // Sigil backend URL
+  // rpcUrl defaults to devnet, apiUrl defaults to production backend
 });
 
-// 2. Get a session (auto-creates on-chain session key)
-const session = await agent.getSession({
-  durationSecs: 3600,    // 1 hour
-  maxAmountSol: 5.0,     // 5 SOL daily limit
-  maxPerTxSol: 1.0,      // 1 SOL per transaction limit
-});
+// 2. Transfer SOL — one line, handles everything
+const sig = await agent.sendTransferSol("RecipientAddressHere", 0.1); // 0.1 SOL
+console.log(`Transfer sent: ${sig}`);
 
-// 3. Build a SOL transfer using Seal's native TransferLamports instruction
-//    (Do NOT use SystemProgram.transfer — the wallet PDA carries data and
-//     SystemProgram rejects transfers from accounts with data.)
-const transferIx = agent.buildTransferSol(
-  recipientAddress,
-  BigInt(0.1 * LAMPORTS_PER_SOL),
-);
-
-// 4. Sign with session keypair and submit
-const tx = new Transaction().add(transferIx);
-tx.feePayer = session.sessionKeypair.publicKey;
-const connection = new Connection("https://api.devnet.solana.com");
-await connection.sendTransaction(tx, [session.sessionKeypair]);
+// 3. Check wallet balance
+const balance = await agent.getWalletBalance();
+console.log(`Wallet has ${balance} SOL`);
 ```
 
 ## API Reference
@@ -76,7 +63,8 @@ await connection.sendTransaction(tx, [session.sessionKeypair]);
 | Parameter | Type | Default | Description |
 |-----------|------|---------|-------------|
 | `pairingToken` | `string` | *required* | Pairing token from Sigil app (`sgil_xxx` format) |
-| `apiUrl` | `string` | `http://localhost:3003` | Sigil backend URL |
+| `apiUrl` | `string` | `https://sigil-backend-production-fd3d.up.railway.app` | Sigil backend URL |
+| `rpcUrl` | `string` | `https://api.devnet.solana.com` | Solana RPC URL for on-chain operations |
 | `autoRefresh` | `boolean` | `true` | Auto-renew session before expiry |
 | `refreshThresholdSecs` | `number` | `300` | Seconds before expiry to trigger renewal |
 
@@ -93,6 +81,7 @@ Requests or returns a cached ephemeral session. If the current session is within
 | `maxPerTxSol` | `number` | `1.0` | Max SOL per single transaction |
 
 **Returns:**
+
 ```typescript
 {
   credentials: SessionCredentials; // Full session metadata
@@ -103,21 +92,50 @@ Requests or returns a cached ephemeral session. If the current session is within
 ```
 
 **Throws:**
+
 - `Error("Session request pending manual approval...")` if the agent's `autoApprove` is `false` — the wallet owner must approve in the Sigil app.
 - `Error("Session request failed: ...")` on backend/network errors (automatically retried up to 3 times with exponential backoff).
 
 ### `agent.buildTransferSol(destination, amountLamports)`
 
-Builds a `TransferLamports` instruction (disc 13) to move SOL from the Seal wallet PDA to a destination. This is the correct way to transfer SOL — do **not** use `SystemProgram.transfer` because the wallet PDA carries on-chain data, and the System Program rejects transfers from accounts with data.
+Builds a `TransferLamports` instruction (disc 13) to move SOL from the Seal wallet PDA to a destination. This is the low-level method — prefer `sendTransferSol()` for simple transfers. Do **not** use `SystemProgram.transfer` because the wallet PDA carries on-chain data, and the System Program rejects transfers from accounts with data.
 
 | Parameter | Type | Description |
 |-----------|------|-------------|
 | `destination` | `PublicKey` | Recipient address |
 | `amountLamports` | `bigint` | Amount of lamports to transfer |
 
+### `agent.sendTransferSol(destination, amountSol)` ⭐ Recommended
+
+**High-level convenience method.** Transfers SOL from the Seal wallet to a destination. Handles session management, TX building, signing, and submission automatically.
+
+| Parameter | Type | Description |
+|-----------|------|-------------|
+| `destination` | `PublicKey \| string` | Recipient address (PublicKey or base58 string) |
+| `amountSol` | `number` | Amount in SOL (e.g. `0.5` for half a SOL) |
+
+**Returns:** `Promise<string>` — Transaction signature.
+
+### `agent.getWalletBalance()`
+
+Returns the SOL balance of the Seal wallet PDA.
+
+**Returns:** `Promise<number>` — Balance in SOL.
+
+### `agent.getSessionBalance()`
+
+Returns the SOL balance of the session keypair (used for TX fees).
+
+**Returns:** `Promise<number>` — Balance in SOL.
+
+### `agent.getConnection()`
+
+Returns the Solana `Connection` instance (lazily created). Useful when you need to submit custom transactions or query on-chain data.
+
 ### `agent.wrapInstruction(innerIx, amountLamports?)`
 
 Wraps a `TransactionInstruction` inside Seal's `ExecuteViaSession` CPI envelope. Use this for DeFi interactions (DLMM, swap programs, etc.) — **not** for SOL transfers (use `buildTransferSol` instead). The Seal program verifies:
+
 - Session key is valid and not expired
 - Amount is within per-TX and daily limits
 - Target program is in the agent's `allowed_programs` list (default: all allowed)
@@ -215,6 +233,7 @@ const s2 = await agent.getSession(); // same session (if still valid)
 ## Error Handling & Retry
 
 The SDK includes built-in retry with exponential backoff for transient failures:
+
 - **Network errors**: Retried up to 3 times (1s → 2s → 4s backoff)
 - **5xx server errors**: Retried with backoff
 - **4xx client errors**: NOT retried (invalid token, locked wallet, etc.)
@@ -248,6 +267,7 @@ try {
 ## Examples
 
 See the [examples/](./examples/) directory:
+
 - [`demo.ts`](./examples/demo.ts) — Full SDK lifecycle demo
 - [`meteora-integration.ts`](./examples/meteora-integration.ts) — Meteora DLMM integration pattern
 

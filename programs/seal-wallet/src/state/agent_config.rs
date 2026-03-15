@@ -1,6 +1,6 @@
 use borsh::{BorshDeserialize, BorshSerialize};
 
-use super::{MAX_ALLOWED_PROGRAMS, MAX_ALLOWED_INSTRUCTIONS};
+use super::{MAX_ALLOWED_INSTRUCTIONS, MAX_ALLOWED_PROGRAMS};
 
 /// Configuration for a registered agent — defines what the agent is allowed to do.
 ///
@@ -67,7 +67,7 @@ impl AgentConfig {
         + 8                       // total_spent
         + 8                       // tx_count
         + 8                       // spent_today
-        + 8;                      // day_start_timestamp
+        + 8; // day_start_timestamp
 
     /// Check if this agent is allowed to call a specific program.
     ///
