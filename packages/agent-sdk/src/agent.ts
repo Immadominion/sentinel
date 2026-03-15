@@ -50,7 +50,7 @@ export class SigilAgent {
 
     this.pairingToken = config.pairingToken;
     this.apiUrl = config.apiUrl ?? DEFAULT_API_URL;
-    this.rpcUrl = config.rpcUrl ?? clusterApiUrl("devnet");
+    this.rpcUrl = config.rpcUrl ?? clusterApiUrl("mainnet-beta");
     this.autoRefresh = config.autoRefresh ?? true;
     this.refreshThresholdSecs =
       config.refreshThresholdSecs ?? DEFAULT_REFRESH_THRESHOLD;

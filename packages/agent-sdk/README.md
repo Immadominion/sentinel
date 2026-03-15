@@ -44,7 +44,7 @@ import { SigilAgent } from "seal-wallet-agent-sdk";
 // 1. Initialize with pairing token from Sigil app
 const agent = new SigilAgent({
   pairingToken: process.env.PAIRING_TOKEN!, // sgil_xxx format
-  // rpcUrl defaults to devnet, apiUrl defaults to production backend
+  // rpcUrl defaults to mainnet-beta, apiUrl defaults to production backend
 });
 
 // 2. Transfer SOL — one line, handles everything
@@ -64,7 +64,7 @@ console.log(`Wallet has ${balance} SOL`);
 |-----------|------|---------|-------------|
 | `pairingToken` | `string` | *required* | Pairing token from Sigil app (`sgil_xxx` format) |
 | `apiUrl` | `string` | `https://sigil-backend-production-fd3d.up.railway.app` | Sigil backend URL |
-| `rpcUrl` | `string` | `https://api.devnet.solana.com` | Solana RPC URL for on-chain operations |
+| `rpcUrl` | `string` | `https://api.mainnet-beta.solana.com` | Solana RPC URL (mainnet-beta default; pass devnet URL for testing) |
 | `autoRefresh` | `boolean` | `true` | Auto-renew session before expiry |
 | `refreshThresholdSecs` | `number` | `300` | Seconds before expiry to trigger renewal |
 
@@ -178,7 +178,7 @@ import BN from "bn.js";
 
 const agent = new SigilAgent({ pairingToken: process.env.PAIRING_TOKEN! });
 const session = await agent.getSession({ maxAmountSol: 2.0 });
-const connection = new Connection("https://api.devnet.solana.com");
+const connection = new Connection("https://api.mainnet-beta.solana.com");
 
 // Load DLMM pool
 const poolAddress = new PublicKey("POOL_ADDRESS_HERE");

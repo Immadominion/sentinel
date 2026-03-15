@@ -5,7 +5,7 @@ export interface SigilAgentConfig {
   pairingToken: string;
   /** Sigil backend URL (default: http://localhost:3003) */
   apiUrl?: string;
-  /** Solana RPC URL for on-chain operations (default: devnet) */
+  /** Solana RPC URL for on-chain operations (default: mainnet-beta) */
   rpcUrl?: string;
   /** Auto-refresh session before expiry (default: true) */
   autoRefresh?: boolean;
