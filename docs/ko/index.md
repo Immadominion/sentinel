@@ -11,7 +11,7 @@ hero:
   actions:
     - theme: brand
       text: 시작하기 →
-      link: /ko/guide/getting-started
+      link: /guide/getting-started
     - theme: alt
       text: GitHub 보기
       link: https://github.com/immadominion/seal

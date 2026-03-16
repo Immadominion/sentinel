@@ -61,8 +61,8 @@ export default withMermaid(
                 description: "Infraestructura de billetera inteligente en cadena para agentes AI autónomos en Solana",
                 themeConfig: {
                     nav: [
-                        { text: "Guía", link: "/es/guide/getting-started" },
-                        { text: "Conceptos", link: "/es/concepts/architecture" },
+                        { text: "Guía", link: "/guide/getting-started" },
+                        { text: "Conceptos", link: "/concepts/architecture" },
                         { text: "API", link: "/api/typescript-sdk" },
                     ],
                 },
@@ -75,8 +75,8 @@ export default withMermaid(
                 description: "为 Solana 上自主 AI 代理打造的链上智能钱包基础设施",
                 themeConfig: {
                     nav: [
-                        { text: "指南", link: "/zh-CN/guide/getting-started" },
-                        { text: "概念", link: "/zh-CN/concepts/architecture" },
+                        { text: "指南", link: "/guide/getting-started" },
+                        { text: "概念", link: "/concepts/architecture" },
                         { text: "API", link: "/api/typescript-sdk" },
                     ],
                 },
@@ -89,8 +89,8 @@ export default withMermaid(
                 description: "Infraestrutura de carteira inteligente on-chain para agentes AI autônomos na Solana",
                 themeConfig: {
                     nav: [
-                        { text: "Guia", link: "/pt-BR/guide/getting-started" },
-                        { text: "Conceitos", link: "/pt-BR/concepts/architecture" },
+                        { text: "Guia", link: "/guide/getting-started" },
+                        { text: "Conceitos", link: "/concepts/architecture" },
                         { text: "API", link: "/api/typescript-sdk" },
                     ],
                 },
@@ -103,8 +103,8 @@ export default withMermaid(
                 description: "Solana上の自律型AIエージェントのためのオンチェーンスマートウォレットインフラ",
                 themeConfig: {
                     nav: [
-                        { text: "ガイド", link: "/ja/guide/getting-started" },
-                        { text: "コンセプト", link: "/ja/concepts/architecture" },
+                        { text: "ガイド", link: "/guide/getting-started" },
+                        { text: "コンセプト", link: "/concepts/architecture" },
                         { text: "API", link: "/api/typescript-sdk" },
                     ],
                 },

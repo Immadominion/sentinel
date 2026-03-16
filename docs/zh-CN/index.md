@@ -11,7 +11,7 @@ hero:
   actions:
     - theme: brand
       text: 开始使用 →
-      link: /zh-CN/guide/getting-started
+      link: /guide/getting-started
     - theme: alt
       text: 查看 GitHub
       link: https://github.com/immadominion/seal

@@ -11,7 +11,7 @@ hero:
   actions:
     - theme: brand
       text: Commencer →
-      link: /fr/guide/getting-started
+      link: /guide/getting-started
     - theme: alt
       text: Voir sur GitHub
       link: https://github.com/immadominion/seal
