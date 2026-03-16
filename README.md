@@ -13,6 +13,31 @@
 
 Seal is an open-source smart wallet SDK with **on-chain policy enforcement** — session keys, spending limits, scoped agent delegation, and guardian recovery — built with [Pinocchio](https://github.com/anza-xyz/pinocchio) for minimal deploy cost and maximum compute efficiency.
 
+## Demo
+
+[![Sigil Demo — Agentic Wallet in Action](https://img.youtube.com/vi/bgC_f6LuOlc/maxresdefault.jpg)](https://youtu.be/bgC_f6LuOlc)
+
+> **Watch**: An AI agent (via OpenClaw) transfers SOL from a Seal wallet, authorized by a session key created in Sigil. No seed phrases, no raw keypairs — just a pairing token.
+
+## Sigil — Agent Wallet Management App
+
+**[sigil.scrolls.fun](https://sigil.scrolls.fun)**
+
+Seal gives you the on-chain program. But how does the agent actually get a wallet?
+
+**Sigil** is the companion mobile app that makes it as easy as creating a Telegram bot:
+
+1. Open Sigil, connect your wallet
+2. Tap "New Agent" — set daily limit, per-tx cap, allowed programs
+3. Get a **pairing token** (`sgil_xxx`)
+4. Hand the token to your AI agent — done
+
+The agent calls `new SigilAgent({ pairingToken })` and it has full wallet access, scoped by the limits you set. You see every transaction in your activity feed. You can lock the wallet, revoke sessions, or withdraw funds from your phone at any time.
+
+```
+Skill file ➩ Pairing token ➩ Agent gets full wallet control from anywhere
+```
+
 ## Why Seal?
 
 | Problem | Existing Solutions | Seal |

@@ -22,7 +22,7 @@ You have access to a **Seal smart wallet** on Solana via the Sigil pairing syste
 |----------|----------|-------------|
 | `SEAL_PAIRING_TOKEN` | Yes | The pairing token from Sigil app (`sgil_xxx` format) |
 | `SIGIL_API_URL` | No | Sigil backend URL (default: `https://sigil-backend-production-fd3d.up.railway.app`) |
-| `SOLANA_RPC_URL` | No | Solana RPC endpoint (default: mainnet-beta; set to devnet URL for testing) |
+| `SOLANA_RPC_URL` | No | Solana RPC endpoint (default: devnet) |
 
 ## Setup (one-time)
 
@@ -74,7 +74,7 @@ const AMOUNT_SOL = 0.1; // Replace with actual amount
 
 const sig = await agent.sendTransferSol(RECIPIENT, AMOUNT_SOL);
 console.log(`Transfer sent! Signature: ${sig}`);
-console.log(`Explorer: https://explorer.solana.com/tx/${sig}`);
+console.log(`Explorer: https://explorer.solana.com/tx/${sig}?cluster=devnet`);
 
 await agent.heartbeat("active", { action: "transfer", amount: AMOUNT_SOL, recipient: RECIPIENT });
 ```
@@ -95,7 +95,7 @@ const agent = new SigilAgent({
 });
 
 const session = await agent.getSession({ maxAmountSol: 2.0, maxPerTxSol: 1.0 });
-const connection = new Connection(process.env.SOLANA_RPC_URL || "https://api.mainnet-beta.solana.com");
+const connection = new Connection(process.env.SOLANA_RPC_URL || "https://api.devnet.solana.com");
 
 const POOL_ADDRESS = new PublicKey("POOL_ADDRESS_HERE"); // Replace
 const dlmm = await DLMM.create(connection, POOL_ADDRESS);
@@ -154,7 +154,7 @@ await agent.heartbeat("idle", { action: "waiting", note: "No profitable opportun
 
 7. **Send heartbeats** — After each significant action, send a heartbeat so the wallet owner sees activity in their Sigil app dashboard.
 
-8. **Mainnet + Devnet** — The Seal program is deployed on both Solana mainnet-beta and devnet. The SDK defaults to mainnet. Set `SOLANA_RPC_URL` to a devnet endpoint for testing.
+8. **Devnet by default** — The SDK defaults to Solana devnet. The Seal program is deployed on devnet. For mainnet usage, set `SOLANA_RPC_URL` to a mainnet-beta endpoint.
 
 ## Error Handling
 
@@ -176,6 +176,6 @@ try {
 
 ## Seal Program ID
 
-The Seal on-chain program address (mainnet + devnet): `EV3TKRVz7pTHpAqBTjP8jmwuvoRBRCpjmVSPHhcMnXqb`
+The Seal on-chain program address (devnet): `EV3TKRVz7pTHpAqBTjP8jmwuvoRBRCpjmVSPHhcMnXqb`
 
 Do not hardcode this — it's already embedded in the SDK's `wrapInstruction()` method.

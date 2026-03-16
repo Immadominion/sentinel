@@ -33,6 +33,7 @@ const sharedSidebar = [
     {
         text: "Integrations",
         items: [
+            { text: "Sigil (Mobile App)", link: "/integrations/sigil" },
             { text: "MCP Integration", link: "/integrations/mcp" },
             { text: "OpenClaw", link: "/integrations/openclaw" },
             { text: "Connect to Cursor", link: "/integrations/cursor" },
@@ -179,7 +180,7 @@ export default withMermaid(
                         },
                         {
                             text: "npm Package",
-                            link: "https://www.npmjs.com/package/seal-wallet-sdk",
+                            link: "https://www.npmjs.com/package/seal-wallet-agent-sdk",
                         },
                     ],
                 },

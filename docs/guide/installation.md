@@ -1,8 +1,25 @@
 # Installation
 
-## TypeScript SDK
+## Agent SDK (Recommended for AI agents)
 
-Install the Seal TypeScript SDK from npm:
+If you're building an AI agent that needs to use a Seal wallet via Sigil pairing:
+
+```bash
+npm install seal-wallet-agent-sdk @solana/web3.js
+```
+
+```typescript
+import { SigilAgent } from "seal-wallet-agent-sdk";
+
+const agent = new SigilAgent({ pairingToken: "sgil_xxx" });
+const sig = await agent.sendTransferSol("RecipientAddress", 0.1);
+```
+
+See the [Sigil integration guide](/integrations/sigil) for the full flow.
+
+## TypeScript SDK (Low-level)
+
+For direct on-chain interactions (wallet creation, agent registration, session management):
 
 ::: code-group
 

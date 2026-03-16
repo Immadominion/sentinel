@@ -56,7 +56,29 @@
 
 ## SDK
 
-### TypeScript
+### Agent SDK (via Sigil pairing)
+
+The easiest way for an AI agent to use a Seal wallet — no keypair management needed:
+
+```bash
+npm install seal-wallet-agent-sdk
+```
+
+```typescript
+import { SigilAgent } from "seal-wallet-agent-sdk";
+
+const agent = new SigilAgent({ pairingToken: "sgil_xxx" });
+
+// Transfer SOL — handles session management, TX building, signing automatically
+const sig = await agent.sendTransferSol("RecipientAddress", 0.1);
+
+// Check balance
+const balance = await agent.getWalletBalance();
+```
+
+### Low-level TypeScript SDK
+
+For direct on-chain interactions (wallet creation, agent registration):
 
 ```bash
 npm install seal-wallet-sdk
@@ -67,7 +89,6 @@ import { SealClient } from "seal-wallet-sdk";
 
 const client = new SealClient({ network: "devnet" });
 
-// Create wallet → Register agent → Create session → Execute
 const wallet = await client.createWallet(owner, { dailyLimitSol: 10, perTxLimitSol: 1 });
 const agent = await client.registerAgent(owner, agentKey, { name: "bot", dailyLimitSol: 2, perTxLimitSol: 0.5 });
 const session = await client.createSession(agentKey, owner.publicKey, { ... });
@@ -79,6 +100,14 @@ const session = await client.createSession(agentKey, owner.publicKey, { ... });
 dependencies:
   seal_dart: ^0.1.0
 ```
+
+## Sigil — Agent Wallet Management App
+
+**[sigil.scrolls.fun](https://sigil.scrolls.fun)**
+
+Sigil is the companion mobile app that makes giving an agent a wallet as easy as creating a Telegram bot. Create an agent, set spending limits, get a pairing token, hand it to the agent — done.
+
+**Demo video**: [https://youtu.be/bgC_f6LuOlc](https://youtu.be/bgC_f6LuOlc)
 
 ## Security Model
 
@@ -122,4 +151,6 @@ Combined with the upcoming mobile app, users will create sub-wallets from their 
 
 ## Documentation
 
-Full docs: <https://github.com/immadominion/seal/tree/main/docs>
+Full docs: <https://seal.scrolls.fun>
+Sigil app: <https://sigil.scrolls.fun>
+Demo video: <https://youtu.be/bgC_f6LuOlc>

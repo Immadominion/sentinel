@@ -2,6 +2,20 @@
 
 Seal is an **on-chain smart wallet program** deployed on Solana that lets AI agents transact autonomously — without ever holding your private key.
 
+## See It in Action
+
+<div style="position: relative; padding-bottom: 56.25%; height: 0; overflow: hidden; max-width: 100%; border-radius: 8px; margin: 1.5rem 0;">
+  <iframe
+    src="https://www.youtube.com/embed/bgC_f6LuOlc"
+    style="position: absolute; top: 0; left: 0; width: 100%; height: 100%; border: 0;"
+    allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+    allowfullscreen
+    title="Sigil Demo — Agentic Wallet in Action"
+  ></iframe>
+</div>
+
+> An AI agent transfers SOL from a Seal wallet using nothing but a pairing token from Sigil. No seed phrases, no raw keypairs.
+
 It solves a fundamental problem: AI agents need to sign transactions, but you should never hand them your secret key. Seal introduces a PDA-based delegation layer where agents operate under **cryptographically enforced spending limits**, **time-bounded sessions**, and **program-scoped permissions** — all validated by the Solana runtime itself.
 
 ## The Problem

@@ -6,6 +6,18 @@ outline: deep
 
 Connect [OpenClaw](https://openclaw.ai) (self-hosted AI gateway) to your Seal smart wallet. This lets you control your wallet from **WhatsApp, Telegram, Discord, Slack** — any channel OpenClaw supports.
 
+## Demo
+
+<div style="position: relative; padding-bottom: 56.25%; height: 0; overflow: hidden; max-width: 100%; border-radius: 8px; margin: 1.5rem 0;">
+  <iframe
+    src="https://www.youtube.com/embed/bgC_f6LuOlc"
+    style="position: absolute; top: 0; left: 0; width: 100%; height: 100%; border: 0;"
+    allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+    allowfullscreen
+    title="Sigil + OpenClaw Demo"
+  ></iframe>
+</div>
+
 ## How It Works
 
 ```mermaid
@@ -85,7 +97,8 @@ The [skill file](/seal-wallet-skill.md) instructs the agent to:
 |-----------|--------|
 | Initialize | `new SigilAgent({ pairingToken })` |
 | Get session | `agent.getSession({ maxAmountSol, maxPerTxSol })` |
-| Transfer SOL | `agent.buildTransferSol(destination, amount)` |
+| Transfer SOL | `agent.sendTransferSol(destination, amountSol)` |
+| Transfer SOL (low-level) | `agent.buildTransferSol(destination, amountLamports)` |
 | DLMM LP | `DLMM.initializePositionAndAddLiquidityByStrategy()` → `agent.wrapInstruction()` |
 | Heartbeat | `agent.heartbeat("trading", { action: "..." })` |
 
