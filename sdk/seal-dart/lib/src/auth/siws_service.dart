@@ -160,14 +160,22 @@ class SiwsService {
 
     // ── Phase 1: Fetch nonce (app in foreground) ──────────────
     debugPrint('[SIWS] Phase 1: Fetching nonce from server...');
-    final String nonce;
+    late final String nonce;
     try {
       nonce = await fetchNonce();
     } catch (e) {
-      throw SiwsException(
-        'Failed to fetch nonce: $e',
-        reason: SiwsFailureReason.networkError,
-      );
+      // Retry once after a brief delay — first attempt may fail if
+      // network was recently restored or DNS is slow.
+      debugPrint('[SIWS] Nonce fetch failed ($e), retrying in 500ms...');
+      await Future<void>.delayed(const Duration(milliseconds: 500));
+      try {
+        nonce = await fetchNonce();
+      } catch (e2) {
+        throw SiwsException(
+          'Failed to fetch nonce: $e2',
+          reason: SiwsFailureReason.networkError,
+        );
+      }
     }
     debugPrint('[SIWS] Got nonce: ${nonce.substring(0, 8)}...');
 
@@ -237,7 +245,16 @@ class SiwsService {
     }
 
     // ── Phase 3: Verify signature (app back in foreground) ────
+    //
+    // After MWA closes, the OS may still consider this process
+    // "background" for a brief window. Network calls made in that
+    // window can fail with SocketException / connection timeout.
+    // Wait a beat for the foreground transition to complete, then
+    // retry with exponential backoff.
+    debugPrint('[SIWS] Phase 3: Waiting for foreground restoration...');
+    await Future<void>.delayed(const Duration(milliseconds: 500));
     debugPrint('[SIWS] Phase 3: Verifying signature with server...');
+
     final payload = SiwsVerifyPayload(
       walletAddress: walletAddress,
       signatureBytes: signature,
@@ -245,15 +262,26 @@ class SiwsService {
       nonce: nonce,
     );
 
-    final T serverData;
-    try {
-      serverData = await verify(payload);
-    } catch (e) {
-      if (e is SiwsException) rethrow;
-      throw SiwsException(
-        'Verification failed: $e',
-        reason: SiwsFailureReason.verificationFailed,
-      );
+    late final T serverData;
+    const maxRetries = 3;
+    for (var attempt = 1; attempt <= maxRetries; attempt++) {
+      try {
+        serverData = await verify(payload);
+        break;
+      } catch (e) {
+        if (e is SiwsException) rethrow;
+        if (attempt == maxRetries) {
+          throw SiwsException(
+            'Verification failed after $maxRetries attempts: $e',
+            reason: SiwsFailureReason.verificationFailed,
+          );
+        }
+        debugPrint(
+          '[SIWS] Verify attempt $attempt failed ($e), '
+          'retrying in ${attempt * 500}ms...',
+        );
+        await Future<void>.delayed(Duration(milliseconds: attempt * 500));
+      }
     }
 
     // Cache wallet state.
